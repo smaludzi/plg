@@ -1,0 +1,10 @@
+parent(X, Y) <= X = slawek, Y = maks
+parent(X, Y) <= X = slawek, Y = kuba
+parent(X, Y) <= X = boguslaw, Y = slawek
+parent(X, Y) <= X = boguslaw, Y = beata
+
+grandparent(X,Y) <= parent(X, Z), parent(Z, Y)
+
+<= parent(beata, maks)
+<= parent(boguslaw, beata)
+<= grandparent(X, Y)
