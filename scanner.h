@@ -23,12 +23,23 @@
 #include "parser.h"
 #include "list.h"
 #include "term.h"
+#include "goal.h"
+#include "clause.h"
+#include "query.h"
+#include "program.h"
 
 typedef union token_value {
     char char_val;
     char * string_val;
     term * term_val;
     List * terms_val;
+    goal * goal_val;
+    List * goals_val;
+    clause * clause_val;
+    List * clauses_val;
+    query * query_val;
+    List * queries_val;
+    program * program_val;
 } token_value;
 
 typedef struct token {

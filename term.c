@@ -21,12 +21,12 @@
 #include <stdio.h>
 #include "term.h"
 
-term * term_new(int type, char * name)
+term * term_new(term_type type, char * name)
 {
 	return term_new_list(type, name, NULL);
 }
 
-term * term_new_list(int type, char * name, List * terms)
+term * term_new_list(term_type type, char * name, List * terms)
 {
 	term * t;
 	

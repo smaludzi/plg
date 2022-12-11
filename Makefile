@@ -22,7 +22,16 @@ LEX = flex
 BISON = bison
 CFLAGS = -Wall -Wextra -Wno-unused-parameter -g
 
-OBJECTS = plg.o term.o list.o hash.o unify.o unify_term.o
+OBJECTS = plg.o \
+          term.o \
+		  goal.o \
+		  clause.o \
+		  query.o \
+		  program.o \
+          list.o \
+		  hash.o \
+		  unify.o \
+		  unify_term.o
 SCAN_PAR = scanner.o parser.o
 
 #TEST_HASH = hash.o test_hash.o

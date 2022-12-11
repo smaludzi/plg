@@ -1,7 +1,5 @@
 /*
- * term.h
- *
- * Copyright (C) 2007 Slawomir Maludzinski
+ * Copyright (C) 2023 Slawomir Maludzinski
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +15,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef __TERM_H__
-#define __TERM_H__ 1
+#ifndef __CLAUSE_H__
+#define __CLAUSE_H__
 
 #include "list.h"
 
-typedef enum term_type {
-    TERM_ATOM = 1,
-    TERM_VAR = 2,
-    TERM_TERM = 3
-} term_type;
-
-typedef struct term {
-    term_type type;
+typedef struct clause {
     char * name;
-    List * terms;   
-} term;
+    List * terms;
+    List * goals;
+} clause;
 
-term * term_new(term_type type, char * name);
-term * term_new_list(term_type type, char * name, List * terms);
-void term_delete(term * t);
+clause * clause_new(char * name, List * terms, List * goals);
+void clause_delete(clause * value);
+void clause_deallocator(void * value);
 
-void term_deallocator(void * data);
-
-void term_print(term * t);
-void term_list_print(List * l);
-
-/* private */
-void term_print_rec(term * t);
-void term_list_print_rec(List * l);
-
-#endif /* __TERM_H__ */
-
+#endif /* __CLAUSE_H__ */

@@ -35,7 +35,7 @@ int yylex(token * tokp)
 }
 
 %}
-%pure_parser
+%define api.pure
 
 %token <val.string_val> TOK_ARR
 %token <val.string_val> TOK_ATOM
@@ -45,19 +45,39 @@ int yylex(token * tokp)
 
 %type <val.term_val> term
 %type <val.terms_val> terms
+%type <val.goal_val> goal
+%type <val.goals_val> goals;
+%type <val.clause_val> clause;
+%type <val.clauses_val> clauses;
+%type <val.query_val> query;
+%type <val.queries_val> queries;
+%type <val.program_val> program;
+
+%destructor { if ($$) free($$); } TOK_ATOM
+%destructor { if ($$) free($$); } TOK_VAR
+%destructor { if ($$) term_delete($$); } term
+%destructor { if ($$) list_delete($$); } terms
+%destructor { if ($$) goal_delete($$); } goal
+%destructor { if ($$) list_delete($$); } goals
+%destructor { if ($$) clause_delete($$); } clause
+%destructor { if ($$) list_delete($$); } clauses
+%destructor { if ($$) query_delete($$); } query
+%destructor { if ($$) list_delete($$); } queries
+%destructor { } program
 
 %start program
 
 %%
 
-term: TOK_ATOM
-      {
-          $$ = term_new(TERM_ATOM, $1);
-      }
-    | TOK_VAR
+term: TOK_VAR
       {
           $$ = term_new(TERM_VAR, $1);
       }
+    |
+      TOK_ATOM
+      {
+          $$ = term_new(TERM_ATOM, $1);
+      }      
     | TOK_ATOM '(' ')'
       {
       	  $$ = term_new(TERM_TERM, $1);
@@ -69,34 +89,87 @@ term: TOK_ATOM
 ;
 
 terms: term
+      {
+      	    $$ = list_new();
+      	    list_add_beg_deallocator($$, $1, term_deallocator);
+      }
     | terms ',' term
+      {
+            list_add_beg_deallocator($1, $3, term_deallocator);
+            $$ = $1;
+      }
 ;
 
-goal: TOK_ATOM '(' ')' 
+goal: TOK_ATOM '(' ')'
+      {
+          $$ = goal_new_literal($1, NULL);
+      }
     | TOK_ATOM '(' terms ')'
+      {
+          $$ = goal_new_literal($1, $3);
+      }
     | TOK_VAR '=' term
+      {
+          $$ = goal_new_unification($1, $3);
+      }
 ;
 
 goals: goal
+      {
+      	  $$ = list_new();
+      	  list_add_beg_deallocator($$, $1, goal_deallocator);
+      }
     | goals ',' goal
+      {
+      	  list_add_beg_deallocator($1, $3, goal_deallocator);
+          $$ = $1;
+      }
 ;
 
 clause: TOK_ATOM '(' ')' TOK_ARR goals
+      {
+          $$ = clause_new($1, NULL, $5);
+      }
     | TOK_ATOM '(' terms ')' TOK_ARR goals
+      {
+          $$ = clause_new($1, $3, $6);
+      }
 ;
 
 clauses: clause
+      {
+      	  $$ = list_new();
+      	  list_add_beg_deallocator($$, $1, clause_deallocator);
+      }
     | clauses clause
+      {
+      	  list_add_beg_deallocator($1, $2, clause_deallocator);
+          $$ = $1;
+      }
 ;
 
 query: TOK_ARR goals
+      {
+         $$ = query_new($2);
+      }
 ;
 
 queries: query
+      {
+          $$ = list_new();
+          list_add_beg_deallocator($$, $1, query_deallocator);
+      }
      | queries query
+     {
+        list_add_beg_deallocator($1, $2, query_deallocator);
+        $$ = $1;
+     }
 ;
 
 program: clauses queries
+      {
+         $$ = program_new($1, $2);
+      }
 ;
 
 %%
