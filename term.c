@@ -98,7 +98,7 @@ void term_list_print_rec(List * l)
 {
 	char first = 1;
 
-	ListIterator iter = list_iterator_last(l);
+	ListIterator iter = list_iterator_first(l);
 	while (!list_iterator_is_last(iter))
 	{
 		if (first == 0)
@@ -110,7 +110,7 @@ void term_list_print_rec(List * l)
 
 		first = 0;
 		
-		list_iterator_previous(&iter);
+		list_iterator_next(&iter);
 	}
 }
 

@@ -22,6 +22,7 @@
 #include "scanner.h"
 #include "unify_term.h"
 #include "program.h"
+#include "term.h"
 
 int yyerror(program ** plg, char * str)
 {
@@ -97,13 +98,13 @@ term: TOK_VAR
 
 terms: term
       {
-      	    $$ = list_new();
-      	    list_add_beg_deallocator($$, $1, term_deallocator);
+          $$ = list_new();
+          list_add_end_deallocator($$, $1, term_deallocator);
       }
     | terms ',' term
       {
-            list_add_beg_deallocator($1, $3, term_deallocator);
-            $$ = $1;
+          list_add_end_deallocator($1, $3, term_deallocator);
+          $$ = $1;
       }
 ;
 
@@ -123,12 +124,12 @@ goal: TOK_ATOM '(' ')'
 
 goals: goal
       {
-      	  $$ = list_new();
-      	  list_add_beg_deallocator($$, $1, goal_deallocator);
+          $$ = list_new();
+          list_add_end_deallocator($$, $1, goal_deallocator);
       }
     | goals ',' goal
       {
-      	  list_add_beg_deallocator($1, $3, goal_deallocator);
+          list_add_end_deallocator($1, $3, goal_deallocator);
           $$ = $1;
       }
 ;
@@ -145,12 +146,12 @@ clause: TOK_ATOM '(' ')' TOK_ARR goals
 
 clauses: clause
       {
-      	  $$ = list_new();
-      	  list_add_beg_deallocator($$, $1, clause_deallocator);
+          $$ = list_new();
+          list_add_end_deallocator($$, $1, clause_deallocator);
       }
     | clauses clause
       {
-      	  list_add_beg_deallocator($1, $2, clause_deallocator);
+          list_add_end_deallocator($1, $2, clause_deallocator);
           $$ = $1;
       }
 ;
@@ -164,11 +165,11 @@ query: TOK_ARR goals
 queries: query
       {
           $$ = list_new();
-          list_add_beg_deallocator($$, $1, query_deallocator);
+          list_add_end_deallocator($$, $1, query_deallocator);
       }
      | queries query
      {
-        list_add_beg_deallocator($1, $2, query_deallocator);
+        list_add_end_deallocator($1, $2, query_deallocator);
         $$ = $1;
      }
 ;

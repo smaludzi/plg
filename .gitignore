@@ -21,7 +21,7 @@
 *.dylib
 
 # Executables
-mm-unify
+plg
 *.exe
 *.out
 *.app
