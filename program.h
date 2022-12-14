@@ -19,14 +19,17 @@
 #define __PROGRAM_H__
 
 #include "list.h"
+#include "query.h"
 
 typedef struct program {
     List * clausies;
-    List * queries;
+    query * query_value;
 } program;
 
-program * program_new(List * clausies, List * queries);
+program * program_new(List * clausies, query * query_value);
 void program_delete(program * value);
+
+void program_print(program * value);
 
 #endif /* __PROGRAM_H__ */
 

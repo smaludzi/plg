@@ -46,4 +46,7 @@ goal * goal_new_unification(char * variable, term * term_value);
 void goal_delete(goal * value);
 void goal_deallocator(void * value);
 
+void goal_print(goal * value);
+void goal_list_print(List * goals);
+
 #endif /* __GOAL_H__ */

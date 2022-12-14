@@ -21,11 +21,11 @@
 #include <stdio.h>
 #include "scanner.h"
 #include "unify_term.h"
+#include "program.h"
 
-int yyerror(char * str)
+int yyerror(program ** plg, char * str)
 {
 	fprintf(stderr, "%s\n", str);
-	
 	return 0;
 }
 
@@ -35,7 +35,14 @@ int yylex(token * tokp)
 }
 
 %}
+
+%code requires
+{
+#include "program.h"
+}
+
 %define api.pure
+%parse-param { program ** plg }
 
 %token <val.string_val> TOK_ARR
 %token <val.string_val> TOK_ATOM
@@ -166,11 +173,10 @@ queries: query
      }
 ;
 
-program: clauses queries
+program: clauses query
       {
-         $$ = program_new($1, $2);
+         $$ = *plg = program_new($1, $2);
       }
 ;
 
 %%
-

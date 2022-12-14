@@ -20,8 +20,9 @@
 #include <stdio.h>
 #include "scanner.h"
 #include "parser.h"
+#include "program.h"
 
-extern int yyparse();
+extern int yyparse(program ** program_value);
 
 void scan()
 {
@@ -66,8 +67,13 @@ int main(int argc, char * argv[])
 		yyin = stdin;
 	}
 	
+	program * program_value = NULL;
+
 	/* scan(); */
-	yyparse();
+	yyparse(&program_value);
+
+	program_print(program_value);
+	program_delete(program_value);
 
 	fclose(yyin);
 

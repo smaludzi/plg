@@ -1,10 +1,10 @@
-plg.o: plg.c scanner.h parser.h list.h term.h goal.h clause.h query.h \
- program.h
+plg.o: plg.c scanner.h parser.h program.h list.h query.h term.h goal.h \
+ clause.h
 term.o: term.c term.h list.h
 goal.o: goal.c goal.h list.h term.h
-clause.o: clause.c clause.h list.h
-query.o: query.c query.h list.h
-program.o: program.c program.h list.h
+clause.o: clause.c clause.h list.h term.h goal.h
+query.o: query.c goal.h list.h term.h query.h
+program.o: program.c program.h list.h query.h clause.h
 list.o: list.c list.h
 hash.o: hash.c hash.h
 unify.o: unify.c unify.h

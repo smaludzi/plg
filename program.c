@@ -17,13 +17,14 @@
  */
 #include <stdlib.h>
 #include "program.h"
+#include "clause.h"
 
-program * program_new(List * clausies, List * queries)
+program * program_new(List * clausies, query * query_value)
 {
     program * value = malloc(sizeof(program));
 
     value->clausies = clausies;
-    value->queries = queries;
+    value->query_value = query_value;
 
     return value;
 }
@@ -35,7 +36,17 @@ void program_delete(program * value)
         return;
     }
     list_delete(value->clausies);
-    list_delete(value->queries);
+    query_delete(value->query_value);
     free(value);
+}
+
+void program_print(program * value)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+    clause_list_print(value->clausies);
+    query_print(value->query_value);
 }
 

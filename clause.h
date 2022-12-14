@@ -30,4 +30,7 @@ clause * clause_new(char * name, List * terms, List * goals);
 void clause_delete(clause * value);
 void clause_deallocator(void * value);
 
+void clause_print(clause * value);
+void clause_list_print(List * list);
+
 #endif /* __CLAUSE_H__ */

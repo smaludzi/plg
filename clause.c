@@ -16,7 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <stdlib.h>
+#include <stdio.h>
 #include "clause.h"
+#include "term.h"
+#include "goal.h"
 
 clause * clause_new(char * name, List * terms, List * goals)
 {
@@ -44,4 +47,25 @@ void clause_delete(clause * value)
 void clause_deallocator(void * data)
 {
     clause_delete((clause *)data);
+}
+
+void clause_print(clause * value)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+    printf("%s", value->name);
+    term_list_print(value->terms);
+    goal_list_print(value->goals);
+}
+
+void clause_list_print(List * list)
+{
+    ListIterator iter = list_iterator_first(list);
+    while (!list_iterator_is_last(iter))
+    {
+        clause_print((clause *)list_iterator_data(iter));
+        list_iterator_next(&iter);
+    }    
 }

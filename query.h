@@ -28,4 +28,6 @@ query * query_new(List * goals);
 void query_delete(query * value);
 void query_deallocator(void * value);
 
+void query_print(query * value);
+
 #endif /* __QUERY_H__ */

@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 #include "goal.h"
 
@@ -69,4 +70,39 @@ void goal_delete(goal * value)
 void goal_deallocator(void * value)
 {
     goal_delete((goal *)value);
+}
+
+void goal_print(goal * value)
+{
+    if (value == NULL)
+    {
+        return;
+    }
+
+    switch (value->type)
+    {
+        case GOAL_TYPE_LITERAL:
+            printf("%s ", value->literal.name);
+            term_list_print(value->literal.terms);
+            printf("\n");
+        break;
+        case GOAL_TYPE_UNIFICATION:
+            printf("%s = ", value->unification.variable);
+            term_print(value->unification.term_value);
+            printf("\n");
+        break;
+        case GOAL_TYPE_UNKNOW:
+            assert(0);
+        break;
+    }
+}
+
+void goal_list_print(List * goals)
+{
+    ListIterator iter = list_iterator_first(goals);
+    while (!list_iterator_is_last(iter))
+    {
+        goal_print((goal *)list_iterator_data(iter));
+        list_iterator_next(&iter);
+    }
 }

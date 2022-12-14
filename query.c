@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <stdlib.h>
+#include "goal.h"
 #include "query.h"
 
 query * query_new(List * goals)
@@ -38,4 +39,9 @@ void query_delete(query * value)
 void query_deallocator(void * value)
 {
     query_delete((query *)value);
+}
+
+void query_print(query * value)
+{
+    goal_list_print(value->goals);
 }

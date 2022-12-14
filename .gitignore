@@ -32,6 +32,7 @@ mm-unify
 # Debug files
 *.dSYM/
 *.su
+core.*
 
 # Favourity editor tmp files
 *~

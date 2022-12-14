@@ -43,6 +43,12 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 40 "parser.y"
+
+#include "program.h"
+
+#line 52 "parser.h"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -61,6 +67,6 @@ extern int yydebug;
 
 
 
-int yyparse (void);
+int yyparse (program ** plg);
 
 #endif /* !YY_YY_PARSER_H_INCLUDED  */

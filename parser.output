@@ -1,7 +1,18 @@
+Nonterminals useless in grammar
+
+    queries
+
+
 Terminals unused in grammar
 
     TOK_IMPL
     TOK_QUERY
+
+
+Rules useless in grammar
+
+   18 queries: query
+   19        | queries query
 
 
 Grammar
@@ -31,10 +42,7 @@ Grammar
 
    16 query: TOK_ARR goals
 
-   17 queries: query
-   18        | queries query
-
-   19 program: clauses queries
+   17 program: clauses query
 
 
 Terminals, with rules where they appear
@@ -73,15 +81,12 @@ Nonterminals, with rules where they appear
         on right: 14 15
     clauses <val.clauses_val> (18)
         on left: 14 15
-        on right: 15 19
+        on right: 15 17
     query <val.query_val> (19)
         on left: 16
-        on right: 17 18
-    queries <val.queries_val> (20)
-        on left: 17 18
-        on right: 18 19
-    program <val.program_val> (21)
-        on left: 19
+        on right: 17
+    program <val.program_val> (20)
+        on left: 17
         on right: 0
 
 
@@ -114,21 +119,20 @@ State 2
 State 3
 
    15 clauses: clauses . clause
-   19 program: clauses . queries
+   17 program: clauses . query
 
     TOK_ARR   shift, and go to state 6
     TOK_ATOM  shift, and go to state 1
 
-    clause   go to state 7
-    query    go to state 8
-    queries  go to state 9
+    clause  go to state 7
+    query   go to state 8
 
 
 State 4
 
     0 $accept: program . $end
 
-    $end  shift, and go to state 10
+    $end  shift, and go to state 9
 
 
 State 5
@@ -136,23 +140,23 @@ State 5
    12 clause: TOK_ATOM '(' . ')' TOK_ARR goals
    13       | TOK_ATOM '(' . terms ')' TOK_ARR goals
 
-    TOK_ATOM  shift, and go to state 11
-    TOK_VAR   shift, and go to state 12
-    ')'       shift, and go to state 13
+    TOK_ATOM  shift, and go to state 10
+    TOK_VAR   shift, and go to state 11
+    ')'       shift, and go to state 12
 
-    term   go to state 14
-    terms  go to state 15
+    term   go to state 13
+    terms  go to state 14
 
 
 State 6
 
    16 query: TOK_ARR . goals
 
-    TOK_ATOM  shift, and go to state 16
-    TOK_VAR   shift, and go to state 17
+    TOK_ATOM  shift, and go to state 15
+    TOK_VAR   shift, and go to state 16
 
-    goal   go to state 18
-    goals  go to state 19
+    goal   go to state 17
+    goals  go to state 18
 
 
 State 7
@@ -164,276 +168,257 @@ State 7
 
 State 8
 
-   17 queries: query .
+   17 program: clauses query .
 
-    $default  reduce using rule 17 (queries)
+    $default  reduce using rule 17 (program)
 
 
 State 9
-
-   18 queries: queries . query
-   19 program: clauses queries .
-
-    TOK_ARR  shift, and go to state 6
-
-    $default  reduce using rule 19 (program)
-
-    query  go to state 20
-
-
-State 10
 
     0 $accept: program $end .
 
     $default  accept
 
 
-State 11
+State 10
 
     2 term: TOK_ATOM .
     3     | TOK_ATOM . '(' ')'
     4     | TOK_ATOM . '(' terms ')'
 
-    '('  shift, and go to state 21
+    '('  shift, and go to state 19
 
     $default  reduce using rule 2 (term)
 
 
-State 12
+State 11
 
     1 term: TOK_VAR .
 
     $default  reduce using rule 1 (term)
 
 
-State 13
+State 12
 
    12 clause: TOK_ATOM '(' ')' . TOK_ARR goals
 
-    TOK_ARR  shift, and go to state 22
+    TOK_ARR  shift, and go to state 20
 
 
-State 14
+State 13
 
     5 terms: term .
 
     $default  reduce using rule 5 (terms)
 
 
-State 15
+State 14
 
     6 terms: terms . ',' term
    13 clause: TOK_ATOM '(' terms . ')' TOK_ARR goals
 
-    ')'  shift, and go to state 23
-    ','  shift, and go to state 24
+    ')'  shift, and go to state 21
+    ','  shift, and go to state 22
 
 
-State 16
+State 15
 
     7 goal: TOK_ATOM . '(' ')'
     8     | TOK_ATOM . '(' terms ')'
 
-    '('  shift, and go to state 25
+    '('  shift, and go to state 23
 
 
-State 17
+State 16
 
     9 goal: TOK_VAR . '=' term
 
-    '='  shift, and go to state 26
+    '='  shift, and go to state 24
 
 
-State 18
+State 17
 
    10 goals: goal .
 
     $default  reduce using rule 10 (goals)
 
 
-State 19
+State 18
 
    11 goals: goals . ',' goal
    16 query: TOK_ARR goals .
 
-    ','  shift, and go to state 27
+    ','  shift, and go to state 25
 
     $default  reduce using rule 16 (query)
 
 
-State 20
-
-   18 queries: queries query .
-
-    $default  reduce using rule 18 (queries)
-
-
-State 21
+State 19
 
     3 term: TOK_ATOM '(' . ')'
     4     | TOK_ATOM '(' . terms ')'
 
-    TOK_ATOM  shift, and go to state 11
-    TOK_VAR   shift, and go to state 12
-    ')'       shift, and go to state 28
+    TOK_ATOM  shift, and go to state 10
+    TOK_VAR   shift, and go to state 11
+    ')'       shift, and go to state 26
 
-    term   go to state 14
-    terms  go to state 29
+    term   go to state 13
+    terms  go to state 27
+
+
+State 20
+
+   12 clause: TOK_ATOM '(' ')' TOK_ARR . goals
+
+    TOK_ATOM  shift, and go to state 15
+    TOK_VAR   shift, and go to state 16
+
+    goal   go to state 17
+    goals  go to state 28
+
+
+State 21
+
+   13 clause: TOK_ATOM '(' terms ')' . TOK_ARR goals
+
+    TOK_ARR  shift, and go to state 29
 
 
 State 22
 
-   12 clause: TOK_ATOM '(' ')' TOK_ARR . goals
+    6 terms: terms ',' . term
 
-    TOK_ATOM  shift, and go to state 16
-    TOK_VAR   shift, and go to state 17
+    TOK_ATOM  shift, and go to state 10
+    TOK_VAR   shift, and go to state 11
 
-    goal   go to state 18
-    goals  go to state 30
+    term  go to state 30
 
 
 State 23
 
-   13 clause: TOK_ATOM '(' terms ')' . TOK_ARR goals
+    7 goal: TOK_ATOM '(' . ')'
+    8     | TOK_ATOM '(' . terms ')'
 
-    TOK_ARR  shift, and go to state 31
+    TOK_ATOM  shift, and go to state 10
+    TOK_VAR   shift, and go to state 11
+    ')'       shift, and go to state 31
+
+    term   go to state 13
+    terms  go to state 32
 
 
 State 24
 
-    6 terms: terms ',' . term
+    9 goal: TOK_VAR '=' . term
 
-    TOK_ATOM  shift, and go to state 11
-    TOK_VAR   shift, and go to state 12
+    TOK_ATOM  shift, and go to state 10
+    TOK_VAR   shift, and go to state 11
 
-    term  go to state 32
+    term  go to state 33
 
 
 State 25
 
-    7 goal: TOK_ATOM '(' . ')'
-    8     | TOK_ATOM '(' . terms ')'
+   11 goals: goals ',' . goal
 
-    TOK_ATOM  shift, and go to state 11
-    TOK_VAR   shift, and go to state 12
-    ')'       shift, and go to state 33
+    TOK_ATOM  shift, and go to state 15
+    TOK_VAR   shift, and go to state 16
 
-    term   go to state 14
-    terms  go to state 34
+    goal  go to state 34
 
 
 State 26
-
-    9 goal: TOK_VAR '=' . term
-
-    TOK_ATOM  shift, and go to state 11
-    TOK_VAR   shift, and go to state 12
-
-    term  go to state 35
-
-
-State 27
-
-   11 goals: goals ',' . goal
-
-    TOK_ATOM  shift, and go to state 16
-    TOK_VAR   shift, and go to state 17
-
-    goal  go to state 36
-
-
-State 28
 
     3 term: TOK_ATOM '(' ')' .
 
     $default  reduce using rule 3 (term)
 
 
-State 29
+State 27
 
     4 term: TOK_ATOM '(' terms . ')'
     6 terms: terms . ',' term
 
-    ')'  shift, and go to state 37
-    ','  shift, and go to state 24
+    ')'  shift, and go to state 35
+    ','  shift, and go to state 22
 
 
-State 30
+State 28
 
    11 goals: goals . ',' goal
    12 clause: TOK_ATOM '(' ')' TOK_ARR goals .
 
-    ','  shift, and go to state 27
+    ','  shift, and go to state 25
 
     $default  reduce using rule 12 (clause)
 
 
-State 31
+State 29
 
    13 clause: TOK_ATOM '(' terms ')' TOK_ARR . goals
 
-    TOK_ATOM  shift, and go to state 16
-    TOK_VAR   shift, and go to state 17
+    TOK_ATOM  shift, and go to state 15
+    TOK_VAR   shift, and go to state 16
 
-    goal   go to state 18
-    goals  go to state 38
+    goal   go to state 17
+    goals  go to state 36
 
 
-State 32
+State 30
 
     6 terms: terms ',' term .
 
     $default  reduce using rule 6 (terms)
 
 
-State 33
+State 31
 
     7 goal: TOK_ATOM '(' ')' .
 
     $default  reduce using rule 7 (goal)
 
 
-State 34
+State 32
 
     6 terms: terms . ',' term
     8 goal: TOK_ATOM '(' terms . ')'
 
-    ')'  shift, and go to state 39
-    ','  shift, and go to state 24
+    ')'  shift, and go to state 37
+    ','  shift, and go to state 22
 
 
-State 35
+State 33
 
     9 goal: TOK_VAR '=' term .
 
     $default  reduce using rule 9 (goal)
 
 
-State 36
+State 34
 
    11 goals: goals ',' goal .
 
     $default  reduce using rule 11 (goals)
 
 
-State 37
+State 35
 
     4 term: TOK_ATOM '(' terms ')' .
 
     $default  reduce using rule 4 (term)
 
 
-State 38
+State 36
 
    11 goals: goals . ',' goal
    13 clause: TOK_ATOM '(' terms ')' TOK_ARR goals .
 
-    ','  shift, and go to state 27
+    ','  shift, and go to state 25
 
     $default  reduce using rule 13 (clause)
 
 
-State 39
+State 37
 
     8 goal: TOK_ATOM '(' terms ')' .
 
