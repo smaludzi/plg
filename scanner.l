@@ -43,6 +43,12 @@ SPECIAL   [.,()=]
         line_no++;
     }
     
+	"_" {
+		tokp->line_no = line_no;
+		tokp->val.string_val = (char *)yytext;
+		return TOK_ANON;
+	}
+
     "<=" {
 		tokp->line_no = line_no;
 		tokp->val.string_val = (char *)yytext;

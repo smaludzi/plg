@@ -57,9 +57,10 @@ extern int yydebug;
   {
     TOK_ARR = 258,
     TOK_ATOM = 259,
-    TOK_VAR = 260,
-    TOK_IMPL = 261,
-    TOK_QUERY = 262
+    TOK_ANON = 260,
+    TOK_VAR = 261,
+    TOK_IMPL = 262,
+    TOK_QUERY = 263
   };
 #endif
 

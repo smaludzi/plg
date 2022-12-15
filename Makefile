@@ -30,6 +30,7 @@ OBJECTS = plg.o \
 		  program.o \
           list.o \
 		  hash.o \
+		  semcheck.o \
 		  unify.o \
 		  unify_term.o
 SCAN_PAR = scanner.o parser.o

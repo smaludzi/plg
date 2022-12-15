@@ -38,7 +38,6 @@ typedef union token_value {
     clause * clause_val;
     List * clauses_val;
     query * query_val;
-    List * queries_val;
     program * program_val;
 } token_value;
 

@@ -24,6 +24,7 @@ typedef struct clause {
     char * name;
     List * terms;
     List * goals;
+    unsigned int line_no;
 } clause;
 
 clause * clause_new(char * name, List * terms, List * goals);

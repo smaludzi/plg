@@ -27,18 +27,23 @@ typedef enum goal_type {
     GOAL_TYPE_UNIFICATION
 } goal_type;
 
+typedef struct goal_literal {
+    char * name;
+    List * terms;
+} goal_literal;
+
+typedef struct goal_unification {
+    char * variable;
+    term * term_value;
+} goal_unification;
+
 typedef struct goal {
     goal_type type;
     union {
-        struct {
-            char * name;
-            List * terms;
-        } literal;
-        struct {
-            char * variable;
-            term * term_value;
-        } unification;
+        goal_literal literal;
+        goal_unification unification;
     };
+    unsigned int line_no;
 } goal;
 
 goal * goal_new_literal(char * name, List * terms);

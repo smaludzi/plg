@@ -22,6 +22,7 @@
 
 # Executables
 plg
+parser.output
 *.exe
 *.out
 *.app

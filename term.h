@@ -23,15 +23,17 @@
 #include "list.h"
 
 typedef enum term_type {
-    TERM_ATOM = 1,
-    TERM_VAR = 2,
-    TERM_TERM = 3
+    TERM_ANON = 1,
+    TERM_ATOM = 2,
+    TERM_VAR = 3,
+    TERM_TERM = 4
 } term_type;
 
 typedef struct term {
     term_type type;
     char * name;
-    List * terms;   
+    List * terms;
+    unsigned int line_no;
 } term;
 
 term * term_new(term_type type, char * name);
@@ -42,6 +44,8 @@ void term_deallocator(void * data);
 
 void term_print(term * t);
 void term_list_print(List * l);
+
+char * term_type_to_str(term_type value);
 
 /* private */
 void term_print_rec(term * t);

@@ -18,9 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <stdio.h>
+
 #include "scanner.h"
 #include "parser.h"
 #include "program.h"
+#include "semcheck.h"
 
 extern int yyparse(program ** program_value);
 
@@ -73,6 +75,10 @@ int main(int argc, char * argv[])
 	yyparse(&program_value);
 
 	program_print(program_value);
+	{
+		semcheck_result sem_res = SEMCHECK_SUCCESS;
+		program_semcheck(program_value, &sem_res);
+	}
 	program_delete(program_value);
 
 	fclose(yyin);

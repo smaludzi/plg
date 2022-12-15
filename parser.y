@@ -47,6 +47,7 @@ int yylex(token * tokp)
 
 %token <val.string_val> TOK_ARR
 %token <val.string_val> TOK_ATOM
+%token <val.string_val> TOK_ANON
 %token <val.string_val> TOK_VAR
 %token <val.string_val> TOK_IMPL
 %token <val.string_val> TOK_QUERY
@@ -58,7 +59,6 @@ int yylex(token * tokp)
 %type <val.clause_val> clause;
 %type <val.clauses_val> clauses;
 %type <val.query_val> query;
-%type <val.queries_val> queries;
 %type <val.program_val> program;
 
 %destructor { if ($$) free($$); } TOK_ATOM
@@ -70,7 +70,6 @@ int yylex(token * tokp)
 %destructor { if ($$) clause_delete($$); } clause
 %destructor { if ($$) list_delete($$); } clauses
 %destructor { if ($$) query_delete($$); } query
-%destructor { if ($$) list_delete($$); } queries
 %destructor { } program
 
 %start program
@@ -80,19 +79,27 @@ int yylex(token * tokp)
 term: TOK_VAR
       {
           $$ = term_new(TERM_VAR, $1);
+          $$->line_no = $<line_no>1;
       }
-    |
-      TOK_ATOM
+    | TOK_ATOM
       {
           $$ = term_new(TERM_ATOM, $1);
-      }      
+          $$->line_no = $<line_no>1;
+      }
+    | TOK_ANON
+      {
+          $$ = term_new(TOK_ANON, $1);
+          $$->line_no = $<line_no>1;
+      }
     | TOK_ATOM '(' ')'
       {
       	  $$ = term_new(TERM_TERM, $1);
+          $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' terms ')'
       {
-      	  $$ = term_new_list(TERM_TERM, $1, $3); 
+      	  $$ = term_new_list(TERM_TERM, $1, $3);
+          $$->line_no = $<line_no>1;
       }
 ;
 
@@ -111,14 +118,17 @@ terms: term
 goal: TOK_ATOM '(' ')'
       {
           $$ = goal_new_literal($1, NULL);
+          $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' terms ')'
       {
           $$ = goal_new_literal($1, $3);
+          $$->line_no = $<line_no>1;
       }
     | TOK_VAR '=' term
       {
           $$ = goal_new_unification($1, $3);
+          $$->line_no = $<line_no>1;
       }
 ;
 
@@ -137,10 +147,12 @@ goals: goal
 clause: TOK_ATOM '(' ')' TOK_ARR goals
       {
           $$ = clause_new($1, NULL, $5);
+          $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' terms ')' TOK_ARR goals
       {
           $$ = clause_new($1, $3, $6);
+          $$->line_no = $<line_no>1;
       }
 ;
 
@@ -159,19 +171,8 @@ clauses: clause
 query: TOK_ARR goals
       {
          $$ = query_new($2);
+         $$->line_no = $<line_no>1;
       }
-;
-
-queries: query
-      {
-          $$ = list_new();
-          list_add_end_deallocator($$, $1, query_deallocator);
-      }
-     | queries query
-     {
-        list_add_end_deallocator($1, $2, query_deallocator);
-        $$ = $1;
-     }
 ;
 
 program: clauses query

@@ -22,6 +22,7 @@
 
 typedef struct query {
     List * goals;
+    unsigned int line_no;
 } query;
 
 query * query_new(List * goals);
