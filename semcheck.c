@@ -20,6 +20,27 @@
 #include <stdio.h>
 #include <assert.h>
 
+void var_semcheck(var * value, semcheck_result * result)
+{
+    var_print(value);
+}
+
+void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * result)
+{
+    symtab_entry * entry = NULL;
+
+    entry = symtab_lookup(stab, value->name, SYMTAB_LOOKUP_LOCAL);
+    if (entry != NULL)
+    {
+        *result = SEMCHECK_FAILURE;
+        fprintf(stderr, "%u: var '%s' duplicated\n", value->line_no, value->name);
+    }
+    else
+    {
+        symtab_add_var(stab, value);
+    }
+}
+
 void term_semcheck(term * value, semcheck_result * result)
 {
     printf("term %s\n", value->name);
@@ -39,12 +60,12 @@ void term_is_variable_semcheck(term * value, semcheck_result * result)
     }
 }
 
-void term_list_is_variable_semcheck(List * list, semcheck_result * result)
+void var_list_add_symtab_semcheck(symtab * stab, List * list, semcheck_result * result)
 {
     ListIterator iter = list_iterator_first(list);
     while (!list_iterator_is_last(iter))
     {
-        term_is_variable_semcheck((term *)list_iterator_data(iter), result);
+        var_add_symtab_semcheck(stab, (var *)list_iterator_data(iter), result);
         list_iterator_next(&iter);
     }    
 }
@@ -67,7 +88,7 @@ void goal_literal_semcheck(goal_literal value, semcheck_result * result)
 
 void goal_unification_semcheck(goal_unification value, semcheck_result * result)
 {
-    printf("var %s\n", value.variable);
+    var_semcheck(value.variable, result);
     term_semcheck(value.term_value, result);
 }
 
@@ -104,7 +125,11 @@ void goal_list_semcheck(List * list, semcheck_result * result)
 
 void clause_semcheck(clause * value, semcheck_result * result)
 {
-    term_list_is_variable_semcheck(value->terms, result);
+    if (value->stab == NULL)
+    {
+        value->stab = symtab_new(10, NULL);
+    }
+    var_list_add_symtab_semcheck(value->stab, value->terms, result);
     goal_list_semcheck(value->goals, result);
 }
 

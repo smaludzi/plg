@@ -23,6 +23,7 @@ BISON = bison
 CFLAGS = -Wall -Wextra -Wno-unused-parameter -g
 
 OBJECTS = plg.o \
+          var.o \
           term.o \
 		  goal.o \
 		  clause.o \
@@ -30,6 +31,7 @@ OBJECTS = plg.o \
 		  program.o \
           list.o \
 		  hash.o \
+		  symtab.o \
 		  semcheck.o \
 		  unify.o \
 		  unify_term.o

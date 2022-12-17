@@ -31,7 +31,7 @@ goal * goal_new_literal(char * name, List * terms)
     return value;
 }
 
-goal * goal_new_unification(char * variable, term * term_value)
+goal * goal_new_unification(var * variable, term * term_value)
 {
     goal * value = malloc(sizeof(goal));
 
@@ -56,7 +56,7 @@ void goal_delete(goal * value)
             list_delete(value->literal.terms);
         break;
         case GOAL_TYPE_UNIFICATION:
-            free(value->unification.variable);
+            var_delete(value->unification.variable);
             term_delete(value->unification.term_value);
         break;
         case GOAL_TYPE_UNKNOW:
@@ -87,7 +87,7 @@ void goal_print(goal * value)
             printf("\n");
         break;
         case GOAL_TYPE_UNIFICATION:
-            printf("%s = ", value->unification.variable);
+            var_print(value->unification.variable);
             term_print(value->unification.term_value);
             printf("\n");
         break;

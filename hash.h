@@ -49,8 +49,9 @@ void * hash_search(hash * h, const char * key);
 char hash_contains(hash * h, const char * key);
 void hash_remove(hash * h, const char * key);
 
-/** private **/
 unsigned long hash_str(const char * str);
+
+/** private **/
 int hash_inc_size(hash * h);
 void hash_resize(hash * h);
 void hash_print(hash * h);

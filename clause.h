@@ -19,11 +19,13 @@
 #define __CLAUSE_H__
 
 #include "list.h"
+#include "symtab.h"
 
 typedef struct clause {
     char * name;
     List * terms;
     List * goals;
+    symtab * stab;
     unsigned int line_no;
 } clause;
 

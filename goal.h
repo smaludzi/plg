@@ -19,6 +19,7 @@
 #define __GOAL_H__
 
 #include "list.h"
+#include "var.h"
 #include "term.h"
 
 typedef enum goal_type { 
@@ -33,7 +34,7 @@ typedef struct goal_literal {
 } goal_literal;
 
 typedef struct goal_unification {
-    char * variable;
+    var * variable;
     term * term_value;
 } goal_unification;
 
@@ -47,7 +48,7 @@ typedef struct goal {
 } goal;
 
 goal * goal_new_literal(char * name, List * terms);
-goal * goal_new_unification(char * variable, term * term_value);
+goal * goal_new_unification(var * variable, term * term_value);
 void goal_delete(goal * value);
 void goal_deallocator(void * value);
 

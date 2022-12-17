@@ -24,11 +24,17 @@
 #include "clause.h"
 #include "query.h"
 #include "program.h"
+#include "symtab.h"
 
 typedef enum semcheck_result {
     SEMCHECK_SUCCESS = 0,
     SEMCHECK_FAILURE = 1
 } semcheck_result;
+
+void var_semcheck(var * value, semcheck_result * result);
+
+void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * result);
+void var_list_add_symtab_semcheck(symtab * stab, List * list, semcheck_result * result);
 
 void term_semcheck(term * value, semcheck_result * result);
 void term_is_variable_semcheck(term * value, semcheck_result * result);

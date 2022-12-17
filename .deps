@@ -1,5 +1,6 @@
-plg.o: plg.c scanner.h parser.h program.h list.h query.h term.h goal.h \
- clause.h semcheck.h
+plg.o: plg.c scanner.h parser.h program.h list.h query.h var.h term.h \
+ goal.h clause.h semcheck.h
+var.o: var.c var.h
 term.o: term.c term.h list.h
 goal.o: goal.c goal.h list.h term.h
 clause.o: clause.c clause.h list.h term.h goal.h

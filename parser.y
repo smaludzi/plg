@@ -52,6 +52,8 @@ int yylex(token * tokp)
 %token <val.string_val> TOK_IMPL
 %token <val.string_val> TOK_QUERY
 
+%type <val.var_val> var
+%type <val.vars_val> vars
 %type <val.term_val> term
 %type <val.terms_val> terms
 %type <val.goal_val> goal
@@ -75,6 +77,25 @@ int yylex(token * tokp)
 %start program
 
 %%
+
+var: TOK_VAR
+     {
+         $$ = var_new($1);
+         $$->line_no = $<line_no>1;
+     }
+;
+
+vars: var
+     {
+          $$ = list_new();
+          list_add_end_deallocator($$, $1, var_deallocator);
+     }
+     | vars ',' var
+     {
+          list_add_end_deallocator($1, $3, var_deallocator);
+          $$ = $1;
+     }
+;
 
 term: TOK_VAR
       {
@@ -125,7 +146,7 @@ goal: TOK_ATOM '(' ')'
           $$ = goal_new_literal($1, $3);
           $$->line_no = $<line_no>1;
       }
-    | TOK_VAR '=' term
+    | var '=' term
       {
           $$ = goal_new_unification($1, $3);
           $$->line_no = $<line_no>1;
@@ -149,7 +170,7 @@ clause: TOK_ATOM '(' ')' TOK_ARR goals
           $$ = clause_new($1, NULL, $5);
           $$->line_no = $<line_no>1;
       }
-    | TOK_ATOM '(' terms ')' TOK_ARR goals
+    | TOK_ATOM '(' vars ')' TOK_ARR goals
       {
           $$ = clause_new($1, $3, $6);
           $$->line_no = $<line_no>1;
