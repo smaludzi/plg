@@ -21,12 +21,12 @@
 #include "term.h"
 #include "goal.h"
 
-clause * clause_new(char * name, List * terms, List * goals)
+clause * clause_new(char * name, List * vars, List * goals)
 {
     clause * value = malloc(sizeof(clause));
 
     value->name = name;
-    value->terms = terms;
+    value->vars = vars;
     value->goals = goals;
     value->stab = NULL;
 
@@ -40,7 +40,7 @@ void clause_delete(clause * value)
         return;
     }
     free(value->name);
-    list_delete(value->terms);
+    list_delete(value->vars);
     list_delete(value->goals);
     symtab_delete(value->stab);
     free(value);
@@ -58,7 +58,7 @@ void clause_print(clause * value)
         return;
     }
     printf("%s", value->name);
-    var_list_print(value->terms);
+    var_list_print(value->vars);
     goal_list_print(value->goals);
 }
 

@@ -24,10 +24,11 @@
 #include "var.h"
 
 typedef enum term_type {
-    TERM_ANON = 1,
-    TERM_ATOM = 2,
-    TERM_VAR = 3,
-    TERM_TERM = 4
+    TERM_TYPE_UNKNOWN = 0,
+    TERM_TYPE_ANON = 1,
+    TERM_TYPE_ATOM = 2,
+    TERM_TYPE_VAR = 3,
+    TERM_TYPE_TERM = 4
 } term_type;
 
 typedef struct term {

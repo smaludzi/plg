@@ -7,7 +7,11 @@ var * var_new(char * name)
 {
     var * value = (var *)malloc(sizeof(var));
 
+    value->type = VAR_TYPE_UNKNOWN;
     value->name = name;
+    value->bound_to = NULL;
+    value->index = 0;
+    value->line_no = 0;
 
     return value;
 }
@@ -24,6 +28,11 @@ void var_delete(var * value)
 void var_deallocator(void * value)
 {
     var_delete((var *)value);
+}
+
+void var_null_deallocator(void * value)
+{
+    return;
 }
 
 void var_print(var * value)

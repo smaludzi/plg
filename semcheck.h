@@ -31,21 +31,23 @@ typedef enum semcheck_result {
     SEMCHECK_FAILURE = 1
 } semcheck_result;
 
-void var_semcheck(var * value, semcheck_result * result);
+void var_is_bound_semcheck(symtab * stab, var * value, semcheck_result * result);
+void var_semcheck(symtab * stab, List * freevars, var * value, semcheck_result * result);
 
 void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * result);
 void var_list_add_symtab_semcheck(symtab * stab, List * list, semcheck_result * result);
 
-void term_semcheck(term * value, semcheck_result * result);
+void term_semcheck(symtab * stab, List * freevars, term * value, semcheck_result * result);
 void term_is_variable_semcheck(term * value, semcheck_result * result);
-void term_list_is_variable_semcheck(List * list, semcheck_result * result);
-void term_list_semcheck(List * list, semcheck_result * result);
+void term_list_add_to_symtab(symtab * stab, List * freevars, semcheck_result * result);
+void term_list_semcheck(symtab * stab, List * freevars, List * list, semcheck_result * result);
 
-void goal_literal_semcheck(goal_literal value, semcheck_result * result);
-void goal_unification_semcheck(goal_unification value, semcheck_result * result);
-void goal_semcheck(goal * value, semcheck_result * result);
-void goal_list_semcheck(List * list, semcheck_result * result);
+void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * result);
+void goal_unification_semcheck(symtab * stab, goal_unification value, semcheck_result * result);
+void goal_semcheck(symtab * stab, goal * value, semcheck_result * result);
+void goal_list_semcheck(symtab * stab, List * list, semcheck_result * result);
 
+void clause_enumerate_vars(symtab * stab);
 void clause_semcheck(clause * value, semcheck_result * result);
 void clause_list_semcheck(List * list, semcheck_result * result);
 

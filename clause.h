@@ -23,7 +23,7 @@
 
 typedef struct clause {
     char * name;
-    List * terms;
+    List * vars;
     List * goals;
     symtab * stab;
     unsigned int line_no;

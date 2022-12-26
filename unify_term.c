@@ -38,7 +38,7 @@ char terms_consistent(term * term1, term * term2)
 		return 0;
 	}
 	
-	if (term1->type == TERM_ATOM && term2->type == TERM_ATOM)
+	if (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_ATOM)
 	{
 		if (strcmp(term1->name, term2->name) != 0)
 		{
@@ -49,15 +49,15 @@ char terms_consistent(term * term1, term * term2)
 			return 1;
 		}	
 	}
-	else if ((term1->type == TERM_VAR  && term2->type == TERM_VAR)  ||
-	         (term1->type == TERM_ATOM && term2->type == TERM_VAR)  ||
-	         (term1->type == TERM_VAR  && term2->type == TERM_ATOM) ||
-	         (term1->type == TERM_TERM && term2->type == TERM_VAR)  ||
-	         (term1->type == TERM_VAR  && term2->type == TERM_TERM))
+	else if ((term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_VAR)  ||
+	         (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_VAR)  ||
+	         (term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_ATOM) ||
+	         (term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_VAR)  ||
+	         (term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_TERM))
 	{
 		return 1;
 	}
-	else if (term1->type == TERM_TERM && term2->type == TERM_TERM)
+	else if (term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_TERM)
 	{	
 			if (strcmp(term1->name, term2->name) != 0)
 			{
@@ -169,11 +169,11 @@ multi_equation * create_multi_equation(term * term1, term * term2, hash * symbol
 	multi_equation * multi;
 	multi_term * mult;
 	
-	if ((term1->type == TERM_VAR && term2->type == TERM_VAR) ||
-	    (term1->type == TERM_VAR && term2->type == TERM_TERM) ||
-	    (term1->type == TERM_TERM && term2->type == TERM_VAR) ||
-	    (term1->type == TERM_VAR && term2->type == TERM_ATOM) ||
-	    (term1->type == TERM_ATOM && term2->type == TERM_VAR))
+	if ((term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_VAR) ||
+	    (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_TERM) ||
+	    (term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_VAR) ||
+	    (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_ATOM) ||
+	    (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_VAR))
 	{
 		temp_mult_eq * multt;
 		
@@ -211,9 +211,9 @@ multi_term * create_multi_term(term * term1, term * term2, hash * symbol_table)
 	ListIterator iter1;
 	ListIterator iter2;
 
-	if (!(term1->type == TERM_TERM ||
-	      term1->type == TERM_ATOM ||
-	      term2->type == TERM_ATOM))
+	if (!(term1->type == TERM_TYPE_TERM ||
+	      term1->type == TERM_TYPE_ATOM ||
+	      term2->type == TERM_TYPE_ATOM))
 	{
 		return NULL;
 	}
@@ -244,7 +244,7 @@ multi_term * create_multi_term_single(term * term1, hash * symbol_table)
 	multi_term * multi;
 	ListIterator iter1;
 
-	if (term1->type != TERM_TERM && term1->type != TERM_ATOM)
+	if (term1->type != TERM_TYPE_TERM && term1->type != TERM_TYPE_ATOM)
 	{
 		return NULL;
 	}
@@ -273,7 +273,7 @@ temp_mult_eq * create_temp_mult_eq(term * term1, term * term2, hash * symbol_tab
 	variable_queue * S = NULL;
 	multi_term * M = NULL;
 	
-	if (term1->type == TERM_VAR && term2->type == TERM_VAR)
+	if (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_VAR)
 	{
 		S = variable_queue_new();
 		
@@ -301,8 +301,8 @@ temp_mult_eq * create_temp_mult_eq(term * term1, term * term2, hash * symbol_tab
 			variable_queue_add_var(S, var);
 		}
 	}
-	else if ((term1->type == TERM_VAR && term2->type == TERM_TERM) ||
-	         (term1->type == TERM_VAR && term2->type == TERM_ATOM))
+	else if ((term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_TERM) ||
+	         (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_ATOM))
 	{
 		variable * var;		
 		S = variable_queue_new();
@@ -314,8 +314,8 @@ temp_mult_eq * create_temp_mult_eq(term * term1, term * term2, hash * symbol_tab
 		
 		M = create_multi_term_single(term2, symbol_table);
 	}
-	else if ((term1->type == TERM_TERM && term2->type == TERM_VAR) ||
-	         (term1->type == TERM_ATOM && term2->type == TERM_VAR))
+	else if ((term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_VAR) ||
+	         (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_VAR))
 	{
 		variable * var;
 		S = variable_queue_new();
@@ -327,8 +327,8 @@ temp_mult_eq * create_temp_mult_eq(term * term1, term * term2, hash * symbol_tab
 		
 		M = create_multi_term_single(term1, symbol_table);
 	}
-	else if ((term1->type == TERM_TERM && term2->type == TERM_TERM) ||
-	         (term1->type == TERM_ATOM && term2->type == TERM_ATOM))
+	else if ((term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_TERM) ||
+	         (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_ATOM))
 	{
 		M = create_multi_term(term1, term2, symbol_table);
 	}
@@ -344,7 +344,7 @@ temp_mult_eq * create_temp_mult_eq_single(term * term1, hash * symbol_table)
 	variable_queue * S = NULL;
 	multi_term * M = NULL;
 	
-	if (term1->type == TERM_VAR)
+	if (term1->type == TERM_TYPE_VAR)
 	{
 		variable * var;
 		S = variable_queue_new();
@@ -354,8 +354,8 @@ temp_mult_eq * create_temp_mult_eq_single(term * term1, hash * symbol_table)
 		
 		variable_queue_add_var(S, var);
 	}
-	else if (term1->type == TERM_TERM ||
-	         term1->type == TERM_ATOM)
+	else if (term1->type == TERM_TYPE_TERM ||
+	         term1->type == TERM_TYPE_ATOM)
 	{
 		M = create_multi_term_single(term1, symbol_table);
 	}
@@ -367,11 +367,11 @@ temp_mult_eq * create_temp_mult_eq_single(term * term1, hash * symbol_table)
 
 void symbol_table_add_variable(hash * symbol_table, term * term1)
 {
-	if (term1->type == TERM_ATOM)
+	if (term1->type == TERM_TYPE_ATOM)
 	{
 		/* do nothing */
 	}
-	else if (term1->type == TERM_VAR)
+	else if (term1->type == TERM_TYPE_VAR)
 	{
 		char c;
 		
@@ -383,7 +383,7 @@ void symbol_table_add_variable(hash * symbol_table, term * term1)
 			hash_insert(symbol_table, term1->name, var);
 		}
 	}
-	else if (term1->type == TERM_TERM)
+	else if (term1->type == TERM_TYPE_TERM)
 	{
 		ListIterator iter;
 		

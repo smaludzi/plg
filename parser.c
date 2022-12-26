@@ -1433,7 +1433,7 @@ yyreduce:
   case 5:
 #line 101 "parser.y"
       {
-          (yyval.val.term_val) = term_new_var(TERM_VAR, (yyvsp[0].val.var_val));
+          (yyval.val.term_val) = term_new_var(TERM_TYPE_VAR, (yyvsp[0].val.var_val));
           (yyval.val.term_val)->line_no = (yyvsp[0].line_no);
       }
 #line 1440 "parser.c"
@@ -1442,7 +1442,7 @@ yyreduce:
   case 6:
 #line 106 "parser.y"
       {
-          (yyval.val.term_val) = term_new(TERM_ATOM, (yyvsp[0].val.string_val));
+          (yyval.val.term_val) = term_new(TERM_TYPE_ATOM, (yyvsp[0].val.string_val));
           (yyval.val.term_val)->line_no = (yyvsp[0].line_no);
       }
 #line 1449 "parser.c"
@@ -1460,7 +1460,7 @@ yyreduce:
   case 8:
 #line 116 "parser.y"
       {
-      	  (yyval.val.term_val) = term_new(TERM_TERM, (yyvsp[-2].val.string_val));
+      	  (yyval.val.term_val) = term_new(TERM_TYPE_TERM, (yyvsp[-2].val.string_val));
           (yyval.val.term_val)->line_no = (yyvsp[-2].line_no);
       }
 #line 1467 "parser.c"
@@ -1469,7 +1469,7 @@ yyreduce:
   case 9:
 #line 121 "parser.y"
       {
-      	  (yyval.val.term_val) = term_new_list(TERM_TERM, (yyvsp[-3].val.string_val), (yyvsp[-1].val.terms_val));
+      	  (yyval.val.term_val) = term_new_list(TERM_TYPE_TERM, (yyvsp[-3].val.string_val), (yyvsp[-1].val.terms_val));
           (yyval.val.term_val)->line_no = (yyvsp[-3].line_no);
       }
 #line 1476 "parser.c"

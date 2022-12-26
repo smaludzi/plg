@@ -132,10 +132,11 @@ char * term_type_to_str(term_type value)
 {
 	switch (value)
 	{
-		case TERM_ANON: return "TERM_ANON";
-		case TERM_ATOM: return "TERM_ATOM";
-		case TERM_VAR: return "TERM_VAR";
-		case TERM_TERM: return "TERM_TERM";
+		case TERM_TYPE_UNKNOWN: return "TERM_TYPE_UNKNOWN";
+		case TERM_TYPE_ANON: return "TERM_TYPE_ANON";
+		case TERM_TYPE_ATOM: return "TERM_TYPE_ATOM";
+		case TERM_TYPE_VAR: return "TERM_TYPE_VAR";
+		case TERM_TYPE_TERM: return "TERM_TYPE_TERM";
 	}
-	return "TERM_UNKNOWN";
+	return "TERM_TYPE_UNKNOWN";
 }
