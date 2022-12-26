@@ -21,6 +21,7 @@
 #define __TERM_H__ 1
 
 #include "list.h"
+#include "var.h"
 
 typedef enum term_type {
     TERM_ANON = 1,
@@ -33,10 +34,12 @@ typedef struct term {
     term_type type;
     char * name;
     List * terms;
+    var * var_value;
     unsigned int line_no;
 } term;
 
 term * term_new(term_type type, char * name);
+term * term_new_var(term_type, var * var_value);
 term * term_new_list(term_type type, char * name, List * terms);
 void term_delete(term * t);
 

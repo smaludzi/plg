@@ -461,7 +461,7 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   41
+#define YYLAST   45
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  13
@@ -546,7 +546,7 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-23)
+#define YYPACT_NINF (-20)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -560,11 +560,11 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       7,     4,   -23,    28,    26,     6,    17,   -23,   -23,   -23,
-     -23,    30,   -23,    13,    24,    23,   -23,    20,    17,    31,
-      33,    -1,    14,    17,    20,   -23,    17,    29,   -23,   -23,
-     -23,   -23,    16,   -23,   -23,    20,     2,    14,   -23,   -23,
-      19,   -23,   -23
+      11,    26,   -20,     9,    29,    -4,     4,   -20,   -20,   -20,
+     -20,    31,   -20,    16,    27,    28,   -20,    30,     4,    32,
+      38,     0,    18,     4,    30,   -20,     4,    33,   -20,   -20,
+     -20,   -20,    19,   -20,   -20,    30,    15,    18,   -20,   -20,
+      24,   -20,   -20
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -574,16 +574,16 @@ static const yytype_int8 yydefact[] =
 {
        0,     0,    19,     0,     0,     0,     0,    20,    22,     1,
        2,     0,     3,     0,     0,     0,    15,    21,     0,     0,
-       0,     0,     0,     0,    17,     4,     0,     6,     7,     5,
-      12,    10,     0,    14,    16,    18,     0,     0,    13,     8,
+       0,     0,     0,     0,    17,     4,     0,     6,     7,    12,
+       5,    10,     0,    14,    16,    18,     0,     0,    13,     8,
        0,    11,     9
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -23,    -3,   -23,   -22,     5,    15,   -17,    37,   -23,   -23,
-     -23
+     -20,    -5,   -20,   -19,     6,    21,   -17,    42,   -20,   -20,
+     -20
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -598,20 +598,20 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      33,    24,    12,    27,    28,    29,    27,    28,    29,    35,
-      30,     1,    10,    39,     5,    41,    25,    11,    27,    28,
-      29,    14,    19,    10,    20,    37,     9,    38,    37,    23,
-      42,     6,     1,    18,    21,    22,    26,    10,    34,    36,
-       7,    40
+      12,    24,    10,    33,    27,    28,    10,    11,    14,    35,
+      10,    29,     6,     1,    25,     1,    30,    30,    41,    27,
+      28,    10,    27,    28,    10,    19,    39,    20,    37,     9,
+      38,    30,    30,    37,    18,    42,     5,    21,    10,    23,
+      22,    26,    40,    36,    34,     7
 };
 
 static const yytype_int8 yycheck[] =
 {
-      22,    18,     5,     4,     5,     6,     4,     5,     6,    26,
-      11,     4,     6,    11,    10,    37,    19,    11,     4,     5,
-       6,     4,     9,     6,    11,     9,     0,    11,     9,     9,
-      11,     3,     4,     3,    10,    12,     3,     6,    23,    10,
-       3,    36
+       5,    18,     6,    22,     4,     5,     6,    11,     4,    26,
+       6,    11,     3,     4,    19,     4,    21,    22,    37,     4,
+       5,     6,     4,     5,     6,     9,    11,    11,     9,     0,
+      11,    36,    37,     9,     3,    11,    10,    10,     6,     9,
+      12,     3,    36,    10,    23,     3
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -620,8 +620,8 @@ static const yytype_int8 yystos[] =
 {
        0,     4,    20,    21,    23,    10,     3,    20,    22,     0,
        6,    11,    14,    15,     4,    14,    18,    19,     3,     9,
-      11,    10,    12,     9,    19,    14,     3,     4,     5,     6,
-      11,    16,    17,    16,    18,    19,    10,     9,    11,    11,
+      11,    10,    12,     9,    19,    14,     3,     4,     5,    11,
+      14,    16,    17,    16,    18,    19,    10,     9,    11,    11,
       17,    16,    11
 };
 
@@ -1433,7 +1433,7 @@ yyreduce:
   case 5:
 #line 101 "parser.y"
       {
-          (yyval.val.term_val) = term_new(TERM_VAR, (yyvsp[0].val.string_val));
+          (yyval.val.term_val) = term_new_var(TERM_VAR, (yyvsp[0].val.var_val));
           (yyval.val.term_val)->line_no = (yyvsp[0].line_no);
       }
 #line 1440 "parser.c"

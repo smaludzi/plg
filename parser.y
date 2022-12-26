@@ -97,9 +97,9 @@ vars: var
      }
 ;
 
-term: TOK_VAR
+term: var
       {
-          $$ = term_new(TERM_VAR, $1);
+          $$ = term_new_var(TERM_VAR, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM

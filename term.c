@@ -26,6 +26,18 @@ term * term_new(term_type type, char * name)
 	return term_new_list(type, name, NULL);
 }
 
+term * term_new_var(term_type type, var * var_value)
+{
+	term * t = malloc(sizeof(term));
+
+	t->type = type;
+	t->name = NULL;
+	t->terms = NULL;
+	t->var_value = var_value;
+
+	return t;
+}
+
 term * term_new_list(term_type type, char * name, List * terms)
 {
 	term * t;
@@ -39,6 +51,7 @@ term * term_new_list(term_type type, char * name, List * terms)
 	t->type = type;
 	t->name = name;
 	t->terms = terms;
+	t->var_value = NULL;
 	
 	return t;
 }
@@ -52,6 +65,7 @@ void term_delete(term * t)
 	
 	list_delete(t->terms);
 	free(t->name);
+	var_delete(t->var_value);
 	free(t);
 }
 
