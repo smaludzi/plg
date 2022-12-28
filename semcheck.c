@@ -32,8 +32,6 @@ void var_is_bound_semcheck(symtab * stab, var * value, semcheck_result * result)
 
 void var_semcheck(symtab * stab, List * freevars, var * value, semcheck_result * result)
 {
-    var_print(value);
-
     if (stab == NULL)
     {
         return;
@@ -44,14 +42,12 @@ void var_semcheck(symtab * stab, List * freevars, var * value, semcheck_result *
     {
         value->type = VAR_TYPE_BOUND;
         value->bound_to = entry->var_value;
-        fprintf(stderr, "%u: var '%s' bound\n", value->line_no, value->name);
     }
     else
     {
         value->type = VAR_TYPE_UNBOUND;
-        value->bound_to = NULL;
+        value->bound_to = value;
         list_add_end_deallocator(freevars, value, var_null_deallocator);
-        fprintf(stderr, "%u: var '%s' unbound\n", value->line_no, value->name);
     }
 }
 
@@ -71,10 +67,51 @@ void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * resul
     }
 }
 
+void var_list_enumerate(List * list, unsigned int start)
+{
+    unsigned int index = start;
+    ListIterator iter = list_iterator_first(list);
+    while (!list_iterator_is_last(iter))
+    {
+        var * var_value = (var *)list_iterator_data(iter);
+
+        var_value->index = index++;
+
+        list_iterator_next(&iter);
+    }    
+}
+
+void var_list_add_symtab_semcheck(symtab * stab, List * list, semcheck_result * result)
+{
+    ListIterator iter = list_iterator_first(list);
+    while (!list_iterator_is_last(iter))
+    {
+        var_add_symtab_semcheck(stab, (var *)list_iterator_data(iter), result);
+        list_iterator_next(&iter);
+    }
+}
+
+void var_list_add_to_symtab(symtab * stab, List * freevars, semcheck_result * result)
+{
+    ListIterator iter = list_iterator_first(freevars);
+    while (!list_iterator_is_last(iter))
+    {
+        var * var_value = (var *)list_iterator_data(iter);
+        symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
+        if (entry != NULL)
+        {
+            var_value->bound_to = entry->var_value;
+        }
+        else
+        {
+            symtab_add_var(stab, var_value);
+        }           
+        list_iterator_next(&iter);
+    }    
+}
+
 void term_semcheck(symtab * stab, List * freevars, term * value, semcheck_result * result)
 {
-    printf("term %s\n", value->name);
-
     switch (value->type)
     {
         case TERM_TYPE_UNKNOWN:
@@ -108,35 +145,6 @@ void term_is_variable_semcheck(term * value, semcheck_result * result)
     }
 }
 
-void var_list_add_symtab_semcheck(symtab * stab, List * list, semcheck_result * result)
-{
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
-    {
-        var_add_symtab_semcheck(stab, (var *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
-    }    
-}
-
-void term_list_add_to_symtab(symtab * stab, List * freevars, semcheck_result * result)
-{
-    ListIterator iter = list_iterator_first(freevars);
-    while (!list_iterator_is_last(iter))
-    {
-        var * var_value = (var *)list_iterator_data(iter);
-        symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
-        if (entry != NULL)
-        {
-            var_value->bound_to = entry->var_value;
-        }
-        else
-        {
-            symtab_add_var(stab, var_value);
-        }           
-        list_iterator_next(&iter);
-    }    
-}
-
 void term_list_semcheck(symtab * stab, List * freevars, List * list, semcheck_result * result)
 {
     ListIterator iter = list_iterator_first(list);
@@ -149,24 +157,28 @@ void term_list_semcheck(symtab * stab, List * freevars, List * list, semcheck_re
 
 void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * result)
 {
-    printf("%s\n", value.name);
-
     List * freevars = list_new();
 
     term_list_semcheck(stab, freevars, value.terms, result);
-    term_list_add_to_symtab(stab, freevars, result);
+    var_list_enumerate(freevars, stab->count + 1);
+    var_list_add_to_symtab(stab, freevars, result);
 
     list_delete(freevars);
 }
 
 void goal_unification_semcheck(symtab * stab, goal_unification value, semcheck_result * result)
 {
-    List * freevars = list_new();
-
     var_is_bound_semcheck(stab, value.variable, result);
 
+    List * freevars = list_new();
     term_semcheck(stab, freevars, value.term_value, result);
-    term_list_add_to_symtab(stab, freevars, result);
+
+    if (list_size(freevars) > 0)
+    {
+        *result = SEMCHECK_FAILURE;
+        fprintf(stderr, "found free variables in goal unification\n");
+        term_list_print(freevars);
+    }
 
     list_delete(freevars);
 }
@@ -202,20 +214,23 @@ void goal_list_semcheck(symtab * stab, List * list, semcheck_result * result)
     }    
 }
 
-void clause_enumerate_vars(symtab * stab)
+void clause_enumerate_vars(symtab * stab, unsigned int start)
 {
     if (stab == NULL)
     {
         return;
     }
 
-    unsigned int index = 1;
+    unsigned int index = start;
     for (unsigned int i = 0; i < stab->size; i++)
     {
         if (stab->entries[i].type == SYMTAB_VAR)
         {
             var * var_value = stab->entries[i].var_value;
-            var_value->index = index++;
+            if (var_value->index == 0)
+            {
+                var_value->index = index++;
+            }
         }
     }
 }
@@ -226,9 +241,10 @@ void clause_semcheck(clause * value, semcheck_result * result)
     {
         value->stab = symtab_new(10, NULL);
     }
+    var_list_enumerate(value->vars, 1);
     var_list_add_symtab_semcheck(value->stab, value->vars, result);
     goal_list_semcheck(value->stab, value->goals, result);
-    clause_enumerate_vars(value->stab);
+    clause_enumerate_vars(value->stab, list_size(value->vars) + 1);
 }
 
 void clause_list_semcheck(List * list, semcheck_result * result)
@@ -243,7 +259,11 @@ void clause_list_semcheck(List * list, semcheck_result * result)
 
 void query_semcheck(query * value, semcheck_result * result)
 {
-    goal_list_semcheck(NULL, value->goals, result);
+    if (value->stab == NULL)
+    {
+        value->stab = symtab_new(10, NULL);
+    }
+    goal_list_semcheck(value->stab, value->goals, result);
 }
 
 void query_list_semcheck(List * list, semcheck_result * result)

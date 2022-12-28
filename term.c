@@ -86,15 +86,28 @@ void term_print(term * t)
 
 void term_print_rec(term * t)
 {
-    printf("%s", t->name);
-
-	if (t->terms != NULL)
+	if (t == NULL)
 	{
-		printf("(");
-		
+		return;
+	}
+
+	switch (t->type)
+	{
+    case TERM_TYPE_UNKNOWN:
+		printf("term unknown\n");
+		break;
+    case TERM_TYPE_ANON:
+		printf("term %s\n", t->name);
+		break;
+	case TERM_TYPE_ATOM:
+    	printf("term %s\n", t->name);
+		break;
+	case TERM_TYPE_VAR:
+		var_print(t->var_value);
+		break;
+	case TERM_TYPE_TERM:
 		term_list_print_rec(t->terms);
-	
-		printf(")");
+		break;
 	}
 }
 

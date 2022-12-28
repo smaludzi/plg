@@ -23,6 +23,7 @@ query * query_new(List * goals)
 {
     query * value = malloc(sizeof(query));
     value->goals = goals;
+    value->stab = NULL;
     return value;
 }
 
@@ -33,6 +34,7 @@ void query_delete(query * value)
         return;
     }
     list_delete(value->goals);
+    symtab_delete(value->stab);
     free(value);
 }
 

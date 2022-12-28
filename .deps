@@ -1,14 +1,16 @@
-plg.o: plg.c scanner.h parser.h program.h list.h query.h var.h term.h \
- goal.h clause.h semcheck.h
-var.o: var.c var.h
-term.o: term.c term.h list.h
-goal.o: goal.c goal.h list.h term.h
-clause.o: clause.c clause.h list.h term.h goal.h
-query.o: query.c goal.h list.h term.h query.h
-program.o: program.c program.h list.h query.h clause.h
+plg.o: plg.c scanner.h parser.h program.h list.h query.h symtab.h var.h \
+ term.h goal.h clause.h semcheck.h
+var.o: var.c var.h list.h
+term.o: term.c term.h list.h var.h
+goal.o: goal.c goal.h list.h var.h term.h
+clause.o: clause.c clause.h list.h symtab.h var.h term.h goal.h
+query.o: query.c goal.h list.h var.h term.h query.h symtab.h
+program.o: program.c program.h list.h query.h symtab.h var.h clause.h
 list.o: list.c list.h
 hash.o: hash.c hash.h
-semcheck.o: semcheck.c semcheck.h list.h term.h goal.h clause.h query.h \
- program.h
+symtab.o: symtab.c symtab.h var.h list.h hash.h
+semcheck.o: semcheck.c semcheck.h list.h term.h var.h goal.h clause.h \
+ symtab.h query.h program.h
 unify.o: unify.c unify.h
-unify_term.o: unify_term.c list.h hash.h unify.h unify_term.h term.h
+unify_term.o: unify_term.c list.h hash.h unify.h unify_term.h term.h \
+ var.h

@@ -26,5 +26,7 @@ void var_null_deallocator(void * value);
 void var_print(var * value);
 void var_list_print(List * list);
 
+char * var_type_to_str(var_type type);
+
 #endif /* __VAR_H__ */
 

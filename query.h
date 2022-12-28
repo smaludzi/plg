@@ -19,9 +19,11 @@
 #define __QUERY_H__
 
 #include "list.h"
+#include "symtab.h"
 
 typedef struct query {
     List * goals;
+    symtab * stab;
     unsigned int line_no;
 } query;
 
