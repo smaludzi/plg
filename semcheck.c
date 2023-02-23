@@ -30,7 +30,7 @@ void var_is_bound_semcheck(symtab * stab, var * value, semcheck_result * result)
     }
 }
 
-void var_semcheck(symtab * stab, List * freevars, var * value, semcheck_result * result)
+void var_semcheck(symtab * stab, var_list * freevars, var * value, semcheck_result * result)
 {
     if (stab == NULL)
     {
@@ -47,7 +47,7 @@ void var_semcheck(symtab * stab, List * freevars, var * value, semcheck_result *
     {
         value->type = VAR_TYPE_UNBOUND;
         value->bound_to = value;
-        list_add_end_deallocator(freevars, value, var_null_deallocator);
+        var_list_add_end(freevars, value);
     }
 }
 
@@ -67,36 +67,32 @@ void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * resul
     }
 }
 
-void var_list_enumerate(List * list, unsigned int start)
+void var_list_enumerate(var_list * list, unsigned int start)
 {
     unsigned int index = start;
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    var * var_value = list->head;
+    while (var_value != NULL)
     {
-        var * var_value = (var *)list_iterator_data(iter);
-
         var_value->index = index++;
-
-        list_iterator_next(&iter);
+        var_value = var_value->next;
     }    
 }
 
-void var_list_add_symtab_semcheck(symtab * stab, List * list, semcheck_result * result)
+void var_list_add_symtab_semcheck(symtab * stab, var_list * list, semcheck_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    var * var_value = list->head;
+    while (var_value != NULL)
     {
-        var_add_symtab_semcheck(stab, (var *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
+        var_add_symtab_semcheck(stab, var_value, result);
+        var_value = var_value->next;
     }
 }
 
-void var_list_add_to_symtab(symtab * stab, List * freevars, semcheck_result * result)
+void var_list_add_to_symtab(symtab * stab, var_list * freevars, semcheck_result * result)
 {
-    ListIterator iter = list_iterator_first(freevars);
-    while (!list_iterator_is_last(iter))
+    var * var_value = freevars->head;
+    while (var_value != NULL)
     {
-        var * var_value = (var *)list_iterator_data(iter);
         symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
         if (entry != NULL)
         {
@@ -106,11 +102,11 @@ void var_list_add_to_symtab(symtab * stab, List * freevars, semcheck_result * re
         {
             symtab_add_var(stab, var_value);
         }           
-        list_iterator_next(&iter);
-    }    
+        var_value = var_value->next;
+    }
 }
 
-void term_semcheck(symtab * stab, List * freevars, term * value, semcheck_result * result)
+void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_result * result)
 {
     switch (value->type)
     {
@@ -145,42 +141,42 @@ void term_is_variable_semcheck(term * value, semcheck_result * result)
     }
 }
 
-void term_list_semcheck(symtab * stab, List * freevars, List * list, semcheck_result * result)
+void term_list_semcheck(symtab * stab, var_list * freevars, term_list * list, semcheck_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    term * node = list->head;
+    while (node != NULL)
     {
-        term_semcheck(stab, freevars, (term *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
+        term_semcheck(stab, freevars, node, result);
+        node = node->next;
     }    
 }
 
 void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * result)
 {
-    List * freevars = list_new();
+    var_list * freevars = var_list_new();
 
     term_list_semcheck(stab, freevars, value.terms, result);
     var_list_enumerate(freevars, stab->count + 1);
     var_list_add_to_symtab(stab, freevars, result);
 
-    list_delete(freevars);
+    var_list_delete_null(freevars);
 }
 
 void goal_unification_semcheck(symtab * stab, goal_unification value, semcheck_result * result)
 {
     var_is_bound_semcheck(stab, value.variable, result);
 
-    List * freevars = list_new();
+    var_list * freevars = var_list_new();
     term_semcheck(stab, freevars, value.term_value, result);
 
-    if (list_size(freevars) > 0)
+    if (var_list_size(freevars) > 0)
     {
         *result = SEMCHECK_FAILURE;
         fprintf(stderr, "found free variables in goal unification\n");
-        term_list_print(freevars);
+        var_list_print(freevars);
     }
 
-    list_delete(freevars);
+    var_list_delete(freevars);
 }
 
 void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)
@@ -204,14 +200,14 @@ void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)
     }
 }
 
-void goal_list_semcheck(symtab * stab, List * list, semcheck_result * result)
+void goal_list_semcheck(symtab * stab, goal_list * list, semcheck_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    goal * node = list->head;
+    while (node != NULL)
     {
-        goal_semcheck(stab, (goal *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
-    }    
+        goal_semcheck(stab, node, result);
+        node = node->next;
+    }
 }
 
 void clause_enumerate_vars(symtab * stab, unsigned int start)
@@ -244,16 +240,16 @@ void clause_semcheck(clause * value, semcheck_result * result)
     var_list_enumerate(value->vars, 1);
     var_list_add_symtab_semcheck(value->stab, value->vars, result);
     goal_list_semcheck(value->stab, value->goals, result);
-    clause_enumerate_vars(value->stab, list_size(value->vars) + 1);
+    clause_enumerate_vars(value->stab, var_list_size(value->vars) + 1);
 }
 
-void clause_list_semcheck(List * list, semcheck_result * result)
+void clause_list_semcheck(clause_list * list, semcheck_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    clause * node = list->head;
+    while (node != NULL)
     {
-        clause_semcheck((clause *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
+        clause_semcheck(node, result);
+        node = node->next;
     }    
 }
 
@@ -264,16 +260,6 @@ void query_semcheck(query * value, semcheck_result * result)
         value->stab = symtab_new(10, NULL);
     }
     goal_list_semcheck(value->stab, value->goals, result);
-}
-
-void query_list_semcheck(List * list, semcheck_result * result)
-{
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
-    {
-        query_semcheck((query *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
-    }    
 }
 
 void program_semcheck(program * value, semcheck_result * result)

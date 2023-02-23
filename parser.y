@@ -66,11 +66,11 @@ int yylex(token * tokp)
 %destructor { if ($$) free($$); } TOK_ATOM
 %destructor { if ($$) free($$); } TOK_VAR
 %destructor { if ($$) term_delete($$); } term
-%destructor { if ($$) list_delete($$); } terms
+%destructor { if ($$) term_list_delete($$); } terms
 %destructor { if ($$) goal_delete($$); } goal
-%destructor { if ($$) list_delete($$); } goals
+%destructor { if ($$) goal_list_delete($$); } goals
 %destructor { if ($$) clause_delete($$); } clause
-%destructor { if ($$) list_delete($$); } clauses
+%destructor { if ($$) clause_list_delete($$); } clauses
 %destructor { if ($$) query_delete($$); } query
 %destructor { } program
 
@@ -87,51 +87,51 @@ var: TOK_VAR
 
 vars: var
      {
-          $$ = list_new();
-          list_add_end_deallocator($$, $1, var_deallocator);
+          $$ = var_list_new();
+          var_list_add_end($$, $1);
      }
      | vars ',' var
      {
-          list_add_end_deallocator($1, $3, var_deallocator);
+          var_list_add_end($1, $3);
           $$ = $1;
      }
 ;
 
 term: var
       {
-          $$ = term_new_var(TERM_VAR, $1);
+          $$ = term_new_var(TERM_TYPE_VAR, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM
       {
-          $$ = term_new(TERM_ATOM, $1);
+          $$ = term_new(TERM_TYPE_ATOM, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ANON
       {
-          $$ = term_new(TOK_ANON, $1);
+          $$ = term_new(TERM_TYPE_ANON, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' ')'
       {
-      	  $$ = term_new(TERM_TERM, $1);
+      	  $$ = term_new(TERM_TYPE_ATOM, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' terms ')'
       {
-      	  $$ = term_new_list(TERM_TERM, $1, $3);
+      	  $$ = term_new_list(TERM_TYPE_TERM, $1, $3);
           $$->line_no = $<line_no>1;
       }
 ;
 
 terms: term
       {
-          $$ = list_new();
-          list_add_end_deallocator($$, $1, term_deallocator);
+          $$ = term_list_new();
+          term_list_add_end($$, $1);
       }
     | terms ',' term
       {
-          list_add_end_deallocator($1, $3, term_deallocator);
+          term_list_add_end($1, $3);
           $$ = $1;
       }
 ;
@@ -155,12 +155,12 @@ goal: TOK_ATOM '(' ')'
 
 goals: goal
       {
-          $$ = list_new();
-          list_add_end_deallocator($$, $1, goal_deallocator);
+          $$ = goal_list_new();
+          goal_list_add_end($$, $1);
       }
     | goals ',' goal
       {
-          list_add_end_deallocator($1, $3, goal_deallocator);
+          goal_list_add_end($1, $3);
           $$ = $1;
       }
 ;
@@ -179,12 +179,12 @@ clause: TOK_ATOM '(' ')' TOK_ARR goals
 
 clauses: clause
       {
-          $$ = list_new();
-          list_add_end_deallocator($$, $1, clause_deallocator);
+          $$ = clause_list_new();
+          clause_list_add_end($$, $1);
       }
     | clauses clause
       {
-          list_add_end_deallocator($1, $2, clause_deallocator);
+          clause_list_add_end($1, $2);
           $$ = $1;
       }
 ;

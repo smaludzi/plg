@@ -20,20 +20,32 @@
 
 #include "list.h"
 #include "symtab.h"
+#include "goal.h"
 
 typedef struct clause {
     char * name;
-    List * vars;
-    List * goals;
+    var_list * vars;
+    goal_list * goals;
     symtab * stab;
     unsigned int line_no;
+    struct clause * next;
 } clause;
 
-clause * clause_new(char * name, List * terms, List * goals);
+typedef struct clause_list {
+    clause * head;
+    clause ** tail;
+} clause_list;
+
+clause * clause_new(char * name, var_list * vars, goal_list * goals);
 void clause_delete(clause * value);
 void clause_deallocator(void * value);
 
 void clause_print(clause * value);
-void clause_list_print(List * list);
+
+clause_list * clause_list_new();
+void clause_list_delete(clause_list * list);
+void clause_list_add_end(clause_list * list, clause * value);
+
+void clause_list_print(clause_list * list);
 
 #endif /* __CLAUSE_H__ */

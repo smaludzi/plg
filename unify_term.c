@@ -63,23 +63,22 @@ char terms_consistent(term * term1, term * term2)
 			{
 				return 0;
 			}
-			if (list_size(term1->terms) != list_size(term2->terms))
+			if (term_list_size(term1->terms) != term_list_size(term2->terms))
 			{
 				return 0;
 			}
 			
-			ListIterator iter1 = list_iterator_first(term1->terms);
-			ListIterator iter2 = list_iterator_first(term2->terms);			
-			while (!list_iterator_is_last(iter1) && !list_iterator_is_last(iter2))
+			term * iter1 = term1->terms->head;
+			term * iter2 = term2->terms->head;
+			while (!iter1 && !iter2)
 			{
-				if (terms_consistent((term *)list_iterator_data(iter1),
-						             (term *)list_iterator_data(iter2)) == 0)
+				if (terms_consistent(iter1, iter2) == 0)
 				{
 					return 0;
 				}
 			
-				list_iterator_next(&iter1);
-				list_iterator_next(&iter2);
+				iter1 = iter1->next;
+				iter2 = iter2->next;
 			}
 			
 			return 1;
@@ -208,8 +207,8 @@ multi_equation * create_multi_equation_variable(variable * var)
 multi_term * create_multi_term(term * term1, term * term2, hash * symbol_table)
 {
 	multi_term * multi;
-	ListIterator iter1;
-	ListIterator iter2;
+	term * iter1;
+	term * iter2;
 
 	if (!(term1->type == TERM_TYPE_TERM ||
 	      term1->type == TERM_TYPE_ATOM ||
@@ -220,20 +219,18 @@ multi_term * create_multi_term(term * term1, term * term2, hash * symbol_table)
 
 	multi = multi_term_new(term1->name, NULL);
 	
-	iter1 = list_iterator_first(term1->terms);
-	iter2 = list_iterator_first(term2->terms);	
-	while (!list_iterator_is_last(iter1) && !list_iterator_is_last(iter2))
+	iter1 = term1->terms->head;
+	iter2 = term2->terms->head;
+	while (!iter1 && !iter2)
 	{
 		temp_mult_eq * mult;
 	
-		mult = create_temp_mult_eq((term *)list_iterator_data(iter1),
-		                           (term *)list_iterator_data(iter2),
-		                           symbol_table);
+		mult = create_temp_mult_eq(iter1, iter2, symbol_table);
 			
 		multi->args = temp_mult_eq_node_new(mult, multi->args);
 	
-		list_iterator_next(&iter1);
-		list_iterator_next(&iter2);
+		iter1 = iter1->next;
+		iter2 = iter2->next;
 	}
 
 	return multi;
@@ -242,7 +239,7 @@ multi_term * create_multi_term(term * term1, term * term2, hash * symbol_table)
 multi_term * create_multi_term_single(term * term1, hash * symbol_table)
 {
 	multi_term * multi;
-	ListIterator iter1;
+	term * iter1;
 
 	if (term1->type != TERM_TYPE_TERM && term1->type != TERM_TYPE_ATOM)
 	{
@@ -251,17 +248,15 @@ multi_term * create_multi_term_single(term * term1, hash * symbol_table)
 
 	multi = multi_term_new(term1->name, NULL);
 	
-	iter1 = list_iterator_first(term1->terms);	
-	while (!list_iterator_is_last(iter1))
+	iter1 = term1->terms->head;	
+	while (!iter1)
 	{
 		temp_mult_eq * mult;
 	
-		mult = create_temp_mult_eq_single((term *)list_iterator_data(iter1),
-		                                  symbol_table);
-	
+		mult = create_temp_mult_eq_single(iter1, symbol_table);
 		multi->args = temp_mult_eq_node_new(mult, multi->args);
 	
-		list_iterator_next(&iter1);
+		iter1 = iter1->next;
 	}
 
 	return multi;
@@ -385,14 +380,13 @@ void symbol_table_add_variable(hash * symbol_table, term * term1)
 	}
 	else if (term1->type == TERM_TYPE_TERM)
 	{
-		ListIterator iter;
+		term * iter;
 		
-		iter = list_iterator_first(term1->terms);
-		while (!list_iterator_is_last(iter))
+		iter = term1->terms->head;
+		while (iter != NULL)
 		{
-			symbol_table_add_variable(symbol_table, list_iterator_data(iter));
-		
-			list_iterator_next(&iter);
+			symbol_table_add_variable(symbol_table, iter);
+			iter = iter->next;
 		}
 	}
 }

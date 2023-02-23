@@ -20,14 +20,15 @@
 
 #include "list.h"
 #include "symtab.h"
+#include "goal.h"
 
 typedef struct query {
-    List * goals;
+    goal_list * goals;
     symtab * stab;
     unsigned int line_no;
 } query;
 
-query * query_new(List * goals);
+query * query_new(goal_list * goals);
 void query_delete(query * value);
 void query_deallocator(void * value);
 

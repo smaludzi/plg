@@ -19,7 +19,7 @@
 #include "program.h"
 #include "clause.h"
 
-program * program_new(List * clausies, query * query_value)
+program * program_new(clause_list * clausies, query * query_value)
 {
     program * value = malloc(sizeof(program));
 
@@ -31,12 +31,14 @@ program * program_new(List * clausies, query * query_value)
 
 void program_delete(program * value)
 {
-    if (value == NULL)
+    if (value->clausies)
     {
-        return;
+        clause_list_delete(value->clausies);
     }
-    list_delete(value->clausies);
-    query_delete(value->query_value);
+    if (value->query_value)
+    {
+        query_delete(value->query_value);
+    }
     free(value);
 }
 

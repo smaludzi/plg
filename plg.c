@@ -23,6 +23,7 @@
 #include "parser.h"
 #include "program.h"
 #include "semcheck.h"
+#include "gencode.h"
 
 extern int yyparse(program ** program_value);
 
@@ -75,8 +76,10 @@ int main(int argc, char * argv[])
 
 	{
 		semcheck_result sem_res = SEMCHECK_SUCCESS;
+		gencode_result gen_res = GENCODE_SUCCESS;
 		program_semcheck(program_value, &sem_res);
     	program_print(program_value);
+		program_gencode(program_value, &gen_res);
 	}
 
 	program_delete(program_value);

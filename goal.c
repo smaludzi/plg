@@ -20,13 +20,15 @@
 #include <assert.h>
 #include "goal.h"
 
-goal * goal_new_literal(char * name, List * terms)
+goal * goal_new_literal(char * name, term_list * terms)
 {
     goal * value = malloc(sizeof(goal));
 
     value->type = GOAL_TYPE_LITERAL;
     value->literal.name = name;
     value->literal.terms = terms;
+    value->line_no = 0;
+    value->next = NULL;
 
     return value;
 }
@@ -38,26 +40,35 @@ goal * goal_new_unification(var * variable, term * term_value)
     value->type = GOAL_TYPE_UNIFICATION;
     value->unification.variable = variable;
     value->unification.term_value = term_value;
+    value->line_no = 0;
+    value->next = NULL;
 
     return value;
 }
 
 void goal_delete(goal * value)
 {
-    if (value == NULL)
-    {
-        return;
-    }
-
     switch (value->type)
     {
         case GOAL_TYPE_LITERAL:
-            free(value->literal.name);
-            list_delete(value->literal.terms);
+            if (value->literal.name)
+            {
+                free(value->literal.name);
+            }
+            if (value->literal.terms)
+            {
+                term_list_delete(value->literal.terms);
+            }
         break;
         case GOAL_TYPE_UNIFICATION:
-            var_delete(value->unification.variable);
-            term_delete(value->unification.term_value);
+            if (value->unification.variable)
+            {
+                var_delete(value->unification.variable);
+            }
+            if (value->unification.term_value)
+            {
+                term_delete(value->unification.term_value);
+            }
         break;
         case GOAL_TYPE_UNKNOW:
             assert(0);
@@ -97,12 +108,45 @@ void goal_print(goal * value)
     }
 }
 
-void goal_list_print(List * goals)
+goal_list * goal_list_new()
 {
-    ListIterator iter = list_iterator_first(goals);
-    while (!list_iterator_is_last(iter))
+    goal_list * list = NULL;
+
+    list = (goal_list *)malloc(sizeof(goal_list));
+    list->head = NULL;
+    list->tail = &list->head;
+
+    return list;
+}
+
+void goal_list_delete(goal_list * list)
+{
+    goal * node = list->head;
+    while (node != NULL)
     {
-        goal_print((goal *)list_iterator_data(iter));
-        list_iterator_next(&iter);
+        goal * next = node->next;
+        goal_delete(node);
+        node = next;
+    }
+    free(list);
+}
+
+void goal_list_add_end(goal_list * list, goal * value)
+{
+    *(list->tail) = value;
+    list->tail = &value->next;
+}
+
+void goal_list_print(goal_list * list)
+{
+    if (list == NULL)
+    {
+        return;
+    }
+    goal * node = list->head;
+    while (node)
+    {
+        goal_print(node);
+        node = node->next;
     }
 }

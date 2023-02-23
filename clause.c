@@ -21,7 +21,7 @@
 #include "term.h"
 #include "goal.h"
 
-clause * clause_new(char * name, List * vars, List * goals)
+clause * clause_new(char * name, var_list * vars, goal_list * goals)
 {
     clause * value = malloc(sizeof(clause));
 
@@ -29,20 +29,29 @@ clause * clause_new(char * name, List * vars, List * goals)
     value->vars = vars;
     value->goals = goals;
     value->stab = NULL;
+    value->next = NULL;
 
     return value;
 }
 
 void clause_delete(clause * value)
 {
-    if (value == NULL)
+    if (value->name)
     {
-        return;
+        free(value->name);
     }
-    free(value->name);
-    list_delete(value->vars);
-    list_delete(value->goals);
-    symtab_delete(value->stab);
+    if (value->vars)
+    {
+        var_list_delete(value->vars);
+    }
+    if (value->goals)
+    {
+        goal_list_delete(value->goals);
+    }
+    if (value->stab)
+    {
+        symtab_delete(value->stab);
+    }
     free(value);
 }
 
@@ -62,12 +71,39 @@ void clause_print(clause * value)
     goal_list_print(value->goals);
 }
 
-void clause_list_print(List * list)
+clause_list * clause_list_new()
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    clause_list * list = malloc(sizeof(clause_list));
+    
+    list->head = NULL;
+    list->tail = &list->head;
+
+    return list;
+}
+
+void clause_list_delete(clause_list * list)
+{
+    clause * node = list->head;
+    while (node != NULL) {
+        clause * next = node->next;
+        clause_delete(node);
+        node = next;
+    }
+    free(list);
+}
+
+void clause_list_add_end(clause_list * list, clause * value)
+{
+    (*list->tail) = value;
+    list->tail = &value->next;
+}
+
+void clause_list_print(clause_list * list)
+{
+    clause * node = list->head;
+    while (node != NULL)
     {
-        clause_print((clause *)list_iterator_data(iter));
-        list_iterator_next(&iter);
+        clause_print(node);
+        node = node->next;
     }    
 }

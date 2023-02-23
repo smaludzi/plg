@@ -28,17 +28,18 @@ term * term_new(term_type type, char * name)
 
 term * term_new_var(term_type type, var * var_value)
 {
-	term * t = malloc(sizeof(term));
+	term * value = malloc(sizeof(term));
 
-	t->type = type;
-	t->name = NULL;
-	t->terms = NULL;
-	t->var_value = var_value;
+	value->type = type;
+	value->name = NULL;
+	value->terms = NULL;
+	value->var_value = var_value;
+	value->next = NULL;
 
-	return t;
+	return value;
 }
 
-term * term_new_list(term_type type, char * name, List * terms)
+term * term_new_list(term_type type, char * name, term_list * terms)
 {
 	term * t;
 	
@@ -52,20 +53,25 @@ term * term_new_list(term_type type, char * name, List * terms)
 	t->name = name;
 	t->terms = terms;
 	t->var_value = NULL;
+	t->next = NULL;
 	
 	return t;
 }
 
 void term_delete(term * t)
 {
-	if (t == NULL)
+	if (t->name)
 	{
-		return;
+		free(t->name);
 	}
-	
-	list_delete(t->terms);
-	free(t->name);
-	var_delete(t->var_value);
+	if (t->terms)
+	{
+		term_list_delete(t->terms);
+	}
+	if (t->var_value)
+	{
+		var_delete(t->var_value);
+	}
 	free(t);
 }
 
@@ -111,33 +117,64 @@ void term_print_rec(term * t)
 	}
 }
 
-void term_list_print(List * l)
+term_list * term_list_new()
 {
-	if (l == NULL)
+	term_list * list = malloc(sizeof(term_list));
+
+	list->head = NULL;
+	list->tail = &list->head;
+	list->size = 0;
+
+	return list;
+}
+
+void term_list_delete(term_list * list)
+{
+	term * node = list->head;
+	while (node != NULL)
+	{
+		term * next = node->next;
+		term_delete(node);
+		node = next;
+	}
+	free(list);
+}
+
+void term_list_add_end(term_list * list, term * value)
+{
+	list->size++;
+	*(list->tail) = value;
+	list->tail = &value->next;
+}
+
+unsigned int term_list_size(term_list * list)
+{
+	return list->size;
+}
+
+void term_list_print(term_list * list)
+{
+	if (list == NULL)
 	{
 		return;
 	}
-
-	term_list_print_rec(l);	
+	term_list_print_rec(list);
 }
 
-void term_list_print_rec(List * l)
+void term_list_print_rec(term_list * list)
 {
 	char first = 1;
 
-	ListIterator iter = list_iterator_first(l);
-	while (!list_iterator_is_last(iter))
+	term * node = list->head;
+	while (!node)
 	{
 		if (first == 0)
 		{
 			printf(", ");
 		}
-
-		term_print_rec((term *)list_iterator_data(iter));
-
+		term_print_rec(node);
 		first = 0;
-		
-		list_iterator_next(&iter);
+		node = node->next;
 	}
 }
 

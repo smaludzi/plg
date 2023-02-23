@@ -1095,7 +1095,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, program ** plg)
 
     case 17: /* terms  */
 #line 69 "parser.y"
-            { if (((*yyvaluep).val.terms_val)) list_delete(((*yyvaluep).val.terms_val)); }
+            { if (((*yyvaluep).val.terms_val)) term_list_delete(((*yyvaluep).val.terms_val)); }
 #line 1100 "parser.c"
         break;
 
@@ -1107,7 +1107,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, program ** plg)
 
     case 19: /* goals  */
 #line 71 "parser.y"
-            { if (((*yyvaluep).val.goals_val)) list_delete(((*yyvaluep).val.goals_val)); }
+            { if (((*yyvaluep).val.goals_val)) goal_list_delete(((*yyvaluep).val.goals_val)); }
 #line 1112 "parser.c"
         break;
 
@@ -1119,7 +1119,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, program ** plg)
 
     case 21: /* clauses  */
 #line 73 "parser.y"
-            { if (((*yyvaluep).val.clauses_val)) list_delete(((*yyvaluep).val.clauses_val)); }
+            { if (((*yyvaluep).val.clauses_val)) clause_list_delete(((*yyvaluep).val.clauses_val)); }
 #line 1124 "parser.c"
         break;
 
@@ -1415,8 +1415,8 @@ yyreduce:
   case 3:
 #line 89 "parser.y"
      {
-          (yyval.val.vars_val) = list_new();
-          list_add_end_deallocator((yyval.val.vars_val), (yyvsp[0].val.var_val), var_deallocator);
+          (yyval.val.vars_val) = var_list_new();
+          var_list_add_end((yyval.val.vars_val), (yyvsp[0].val.var_val));
      }
 #line 1422 "parser.c"
     break;
@@ -1424,7 +1424,7 @@ yyreduce:
   case 4:
 #line 94 "parser.y"
      {
-          list_add_end_deallocator((yyvsp[-2].val.vars_val), (yyvsp[0].val.var_val), var_deallocator);
+          var_list_add_end((yyvsp[-2].val.vars_val), (yyvsp[0].val.var_val));
           (yyval.val.vars_val) = (yyvsp[-2].val.vars_val);
      }
 #line 1431 "parser.c"
@@ -1451,7 +1451,7 @@ yyreduce:
   case 7:
 #line 111 "parser.y"
       {
-          (yyval.val.term_val) = term_new(TOK_ANON, (yyvsp[0].val.string_val));
+          (yyval.val.term_val) = term_new(TERM_TYPE_ANON, (yyvsp[0].val.string_val));
           (yyval.val.term_val)->line_no = (yyvsp[0].line_no);
       }
 #line 1458 "parser.c"
@@ -1460,7 +1460,7 @@ yyreduce:
   case 8:
 #line 116 "parser.y"
       {
-      	  (yyval.val.term_val) = term_new(TERM_TYPE_TERM, (yyvsp[-2].val.string_val));
+      	  (yyval.val.term_val) = term_new(TERM_TYPE_ATOM, (yyvsp[-2].val.string_val));
           (yyval.val.term_val)->line_no = (yyvsp[-2].line_no);
       }
 #line 1467 "parser.c"
@@ -1478,8 +1478,8 @@ yyreduce:
   case 10:
 #line 128 "parser.y"
       {
-          (yyval.val.terms_val) = list_new();
-          list_add_end_deallocator((yyval.val.terms_val), (yyvsp[0].val.term_val), term_deallocator);
+          (yyval.val.terms_val) = term_list_new();
+          term_list_add_end((yyval.val.terms_val), (yyvsp[0].val.term_val));
       }
 #line 1485 "parser.c"
     break;
@@ -1487,7 +1487,7 @@ yyreduce:
   case 11:
 #line 133 "parser.y"
       {
-          list_add_end_deallocator((yyvsp[-2].val.terms_val), (yyvsp[0].val.term_val), term_deallocator);
+          term_list_add_end((yyvsp[-2].val.terms_val), (yyvsp[0].val.term_val));
           (yyval.val.terms_val) = (yyvsp[-2].val.terms_val);
       }
 #line 1494 "parser.c"
@@ -1523,8 +1523,8 @@ yyreduce:
   case 15:
 #line 157 "parser.y"
       {
-          (yyval.val.goals_val) = list_new();
-          list_add_end_deallocator((yyval.val.goals_val), (yyvsp[0].val.goal_val), goal_deallocator);
+          (yyval.val.goals_val) = goal_list_new();
+          goal_list_add_end((yyval.val.goals_val), (yyvsp[0].val.goal_val));
       }
 #line 1530 "parser.c"
     break;
@@ -1532,7 +1532,7 @@ yyreduce:
   case 16:
 #line 162 "parser.y"
       {
-          list_add_end_deallocator((yyvsp[-2].val.goals_val), (yyvsp[0].val.goal_val), goal_deallocator);
+          goal_list_add_end((yyvsp[-2].val.goals_val), (yyvsp[0].val.goal_val));
           (yyval.val.goals_val) = (yyvsp[-2].val.goals_val);
       }
 #line 1539 "parser.c"
@@ -1559,8 +1559,8 @@ yyreduce:
   case 19:
 #line 181 "parser.y"
       {
-          (yyval.val.clauses_val) = list_new();
-          list_add_end_deallocator((yyval.val.clauses_val), (yyvsp[0].val.clause_val), clause_deallocator);
+          (yyval.val.clauses_val) = clause_list_new();
+          clause_list_add_end((yyval.val.clauses_val), (yyvsp[0].val.clause_val));
       }
 #line 1566 "parser.c"
     break;
@@ -1568,7 +1568,7 @@ yyreduce:
   case 20:
 #line 186 "parser.y"
       {
-          list_add_end_deallocator((yyvsp[-1].val.clauses_val), (yyvsp[0].val.clause_val), clause_deallocator);
+          clause_list_add_end((yyvsp[-1].val.clauses_val), (yyvsp[0].val.clause_val));
           (yyval.val.clauses_val) = (yyvsp[-1].val.clauses_val);
       }
 #line 1575 "parser.c"

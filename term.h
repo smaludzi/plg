@@ -34,26 +34,39 @@ typedef enum term_type {
 typedef struct term {
     term_type type;
     char * name;
-    List * terms;
+    struct term_list * terms;
     var * var_value;
     unsigned int line_no;
+    struct term * next;
 } term;
+
+typedef struct term_list {
+    term * head;
+    term ** tail;
+    unsigned int size;
+} term_list;
 
 term * term_new(term_type type, char * name);
 term * term_new_var(term_type, var * var_value);
-term * term_new_list(term_type type, char * name, List * terms);
+term * term_new_list(term_type type, char * name, term_list * terms);
 void term_delete(term * t);
 
 void term_deallocator(void * data);
 
 void term_print(term * t);
-void term_list_print(List * l);
+
+term_list * term_list_new();
+void term_list_delete(term_list * list);
+void term_list_add_end(term_list * list, term * value);
+
+void term_list_print(term_list * list);
+unsigned int term_list_size(term_list * list);
 
 char * term_type_to_str(term_type value);
 
 /* private */
 void term_print_rec(term * t);
-void term_list_print_rec(List * l);
+void term_list_print_rec(term_list * list);
 
 #endif /* __TERM_H__ */
 

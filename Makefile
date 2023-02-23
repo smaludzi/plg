@@ -33,6 +33,7 @@ OBJECTS = plg.o \
 		  hash.o \
 		  symtab.o \
 		  semcheck.o \
+		  gencode.o \
 		  unify.o \
 		  unify_term.o
 SCAN_PAR = scanner.o parser.o

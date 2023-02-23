@@ -12,16 +12,16 @@ var * var_new(char * name)
     value->bound_to = NULL;
     value->index = 0;
     value->line_no = 0;
+    value->next = NULL;
 
     return value;
 }
 void var_delete(var * value)
 {
-    if (value == NULL)
+    if (value->name)
     {
-        return;
+        free(value->name);
     }
-    free(value->name);
     free(value);
 }
 
@@ -44,13 +44,53 @@ void var_print(var * value)
     }
 }
 
-void var_list_print(List * list)
+var_list * var_list_new()
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    var_list * list = (var_list *)malloc(sizeof(var_list));
+
+    list->head = NULL;
+    list->tail = &list->head;
+    list->size = 0;
+
+    return list;
+}
+
+void var_list_delete(var_list * list)
+{
+    var * node = list->head;
+    while (node != NULL)
     {
-        var_print((var *)list_iterator_data(iter));
-        list_iterator_next(&iter);
+        var * next = node->next;
+        var_delete(node);
+        node = next;
+    }
+    free(list);
+}
+
+void var_list_delete_null(var_list * list)
+{
+    free(list);
+}
+
+void var_list_add_end(var_list * list, var * value)
+{
+    *list->tail = value;
+    list->tail = &value->next;
+    list->size++;
+}
+
+unsigned int var_list_size(var_list * list)
+{
+    return list->size;
+}
+
+void var_list_print(var_list * list)
+{
+    var * node = list->head;
+    while (node != NULL)
+    {
+        var_print(node);
+        node = node->next;
     }   
 }
 

@@ -16,10 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <stdlib.h>
-#include "goal.h"
 #include "query.h"
 
-query * query_new(List * goals)
+query * query_new(goal_list * goals)
 {
     query * value = malloc(sizeof(query));
     value->goals = goals;
@@ -33,7 +32,7 @@ void query_delete(query * value)
     {
         return;
     }
-    list_delete(value->goals);
+    goal_list_delete(value->goals);
     symtab_delete(value->stab);
     free(value);
 }

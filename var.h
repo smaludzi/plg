@@ -16,7 +16,15 @@ typedef struct var
     struct var * bound_to;
     unsigned int index;
     unsigned int line_no;
+    struct var * next;
 } var;
+
+typedef struct var_list
+{
+    var * head;
+    var ** tail;
+    unsigned int size;
+} var_list;
 
 var * var_new(char * name);
 void var_delete(var * value);
@@ -24,7 +32,13 @@ void var_deallocator(void * value);
 void var_null_deallocator(void * value);
 
 void var_print(var * value);
-void var_list_print(List * list);
+
+var_list * var_list_new();
+void var_list_delete(var_list * list);
+void var_list_delete_null(var_list * list);
+void var_list_add_end(var_list * list, var * value);
+unsigned int var_list_size(var_list * list);
+void var_list_print(var_list * list);
 
 char * var_type_to_str(var_type type);
 

@@ -45,7 +45,7 @@ SPECIAL   [.,()=]
     
 	"_" {
 		tokp->line_no = line_no;
-		tokp->val.string_val = (char *)yytext;
+		tokp->val.string_val = (char *)strdup(yytext);
 		return TOK_ANON;
 	}
 

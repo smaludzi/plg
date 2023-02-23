@@ -30,7 +30,7 @@ typedef enum goal_type {
 
 typedef struct goal_literal {
     char * name;
-    List * terms;
+    term_list * terms;
 } goal_literal;
 
 typedef struct goal_unification {
@@ -45,14 +45,24 @@ typedef struct goal {
         goal_unification unification;
     };
     unsigned int line_no;
+    struct goal * next;
 } goal;
 
-goal * goal_new_literal(char * name, List * terms);
+typedef struct goal_list {
+    goal * head;
+    goal ** tail;
+} goal_list;
+
+goal * goal_new_literal(char * name, term_list * terms);
 goal * goal_new_unification(var * variable, term * term_value);
 void goal_delete(goal * value);
 void goal_deallocator(void * value);
-
 void goal_print(goal * value);
-void goal_list_print(List * goals);
+
+goal_list * goal_list_new();
+void goal_list_delete(goal_list * list);
+void goal_list_add_end(goal_list * list, goal * value);
+
+void goal_list_print(goal_list * list);
 
 #endif /* __GOAL_H__ */

@@ -36,13 +36,13 @@ typedef enum gencode_result {
 
 void var_gencode(var * value, gencode_result * result);
 void term_gencode(term * value, gencode_result * result);
-void term_list_gencode(List * list, gencode_result * result);
+void term_list_gencode(term_list * list, gencode_result * result);
 void goal_literal_gencode(goal_literal value, gencode_result * result);
 void goal_unification_gencode(goal_unification value, gencode_result * result);
 void goal_gencode(goal * value, gencode_result * result);
-void goal_list_gencode(List * list, gencode_result * result);
+void goal_list_gencode(goal_list * list, gencode_result * result);
 void clause_gencode(clause * value, gencode_result * result);
-void clause_list_gencode(List * list, gencode_result * result);
+void clause_list_gencode(clause_list * list, gencode_result * result);
 void query_gencode(query * value, gencode_result * result);
 void program_gencode(program * value, gencode_result * result);
 

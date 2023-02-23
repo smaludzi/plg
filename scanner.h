@@ -33,13 +33,13 @@ typedef union token_value {
     char char_val;
     char * string_val;
     var * var_val;
-    List * vars_val;
+    var_list * vars_val;
     term * term_val;
-    List * terms_val;
+    term_list * terms_val;
     goal * goal_val;
-    List * goals_val;
+    goal_list * goals_val;
     clause * clause_val;
-    List * clauses_val;
+    clause_list * clauses_val;
     query * query_val;
     program * program_val;
 } token_value;

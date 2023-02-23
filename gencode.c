@@ -57,18 +57,18 @@ void term_gencode(term * value, gencode_result * result)
         break;
         case TERM_TYPE_TERM:
             term_list_gencode(value->terms, result);
-            printf("PUT_STRUCT %s/%d\n", value->name, list_size(value->terms));
+            printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms));
         break;
     }
 }
 
-void term_list_gencode(List * list, gencode_result * result)
+void term_list_gencode(term_list * list, gencode_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    term * node = list->head;
+    while (node != NULL)
     {
-        term_gencode((term *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
+        term_gencode(node, result);
+        node = node->next;
     }    
 }
 
@@ -76,7 +76,7 @@ void goal_literal_gencode(goal_literal value, gencode_result * result)
 {
     printf("MARK B\n");
     term_list_gencode(value.terms, result);
-    printf("CALL %s/%u\n", value.name, list_size(value.terms));
+    printf("CALL %s/%u\n", value.name, term_list_size(value.terms));
     printf("B: ...\n");
 }
 
@@ -106,14 +106,14 @@ void goal_gencode(goal * value, gencode_result * result)
     }
 }
 
-void goal_list_gencode(List * list, gencode_result * result)
+void goal_list_gencode(goal_list * list, gencode_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    goal * node = list->head;
+    while (node != NULL)
     {
-        goal_gencode((goal *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
-    }    
+        goal_gencode(node, result);
+        node = node->next;
+    }
 }
 
 void clause_gencode(clause * value, gencode_result * result)
@@ -121,13 +121,13 @@ void clause_gencode(clause * value, gencode_result * result)
     goal_list_gencode(value->goals, result);
 }
 
-void clause_list_gencode(List * list, gencode_result * result)
+void clause_list_gencode(clause_list * list, gencode_result * result)
 {
-    ListIterator iter = list_iterator_first(list);
-    while (!list_iterator_is_last(iter))
+    clause * node = list->head;
+    while (node != NULL)
     {
-        clause_gencode((clause *)list_iterator_data(iter), result);
-        list_iterator_next(&iter);
+        clause_gencode(node, result);
+        node = node->next;
     }    
 }
 
