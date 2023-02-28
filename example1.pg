@@ -4,6 +4,7 @@ parent(X, Y) <= X = boguslaw, Y = slawek
 parent(X, Y) <= X = boguslaw, Y = beata
 
 grandparent(X,Y) <= parent(X, Z),
-                    parent(Z, Y)
+                    parent(Z, Y),
+                    Z = Z
 
 <= grandparent(X, Y)

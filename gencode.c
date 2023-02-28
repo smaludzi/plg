@@ -82,7 +82,27 @@ void goal_literal_gencode(goal_literal value, gencode_result * result)
 
 void goal_unification_gencode(goal_unification value, gencode_result * result)
 {
-    term_gencode(value.term_value, result);
+    switch (value.variable->type)
+    {
+    case VAR_TYPE_UNBOUND:
+    {
+        var_gencode(value.variable, result);
+        term_gencode(value.term_value, result);
+        printf("BIND\n");
+        break;
+    }
+    case VAR_TYPE_BOUND:
+    {
+        var_gencode(value.variable, result);
+        term_gencode(value.term_value, result);
+        printf("UNIFY\n");
+        break;
+    }
+    default:
+        var_gencode(value.variable, result);
+        term_gencode(value.term_value, result);
+        assert(0);
+    }
 }
 
 void goal_gencode(goal * value, gencode_result * result)
