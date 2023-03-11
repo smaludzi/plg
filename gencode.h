@@ -35,8 +35,16 @@ typedef enum gencode_result {
 } gencode_result;
 
 void var_gencode(var * value, gencode_result * result);
+void var_unify_gencode(var * value, gencode_result * result);
+void var_check_gencode(var * value, gencode_result * result);
+void var_get_bound_vars_gencode(var * value, var_list * bound_vars, gencode_result * result);
+void var_list_check_gencode(var_list * bound_vars, gencode_result * result);
 void term_gencode(term * value, gencode_result * result);
+void term_unify_gencode(term * value, gencode_result * result);
+void term_get_bound_vars_gencode(term * value, var_list * bound_vars, gencode_result * result);
 void term_list_gencode(term_list * list, gencode_result * result);
+void term_list_unify_gencode(term_list * list, gencode_result * result);
+void term_list_get_bound_vars_gencode(term_list * list, var_list * bound_vars, gencode_result * result);
 void goal_literal_gencode(goal_literal value, gencode_result * result);
 void goal_unification_gencode(goal_unification value, gencode_result * result);
 void goal_gencode(goal * value, gencode_result * result);

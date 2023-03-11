@@ -112,6 +112,7 @@ void term_print_rec(term * t)
 		var_print(t->var_value);
 		break;
 	case TERM_TYPE_TERM:
+		printf("term %s/%u\n", t->name, t->terms->size);
 		term_list_print_rec(t->terms);
 		break;
 	}
@@ -166,7 +167,7 @@ void term_list_print_rec(term_list * list)
 	char first = 1;
 
 	term * node = list->head;
-	while (!node)
+	while (node)
 	{
 		if (first == 0)
 		{

@@ -16,13 +16,18 @@ typedef struct var
     struct var * bound_to;
     unsigned int index;
     unsigned int line_no;
-    struct var * next;
 } var;
+
+typedef struct var_node
+{
+    var * value;
+    struct var_node * next;
+} var_node;
 
 typedef struct var_list
 {
-    var * head;
-    var ** tail;
+    var_node * head;
+    var_node ** tail;
     unsigned int size;
 } var_list;
 
@@ -32,6 +37,10 @@ void var_deallocator(void * value);
 void var_null_deallocator(void * value);
 
 void var_print(var * value);
+
+var_node * var_node_new(var * value);
+void var_node_delete(var_node * value);
+void var_node_delete_null(var_node * value);
 
 var_list * var_list_new();
 void var_list_delete(var_list * list);

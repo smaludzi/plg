@@ -70,39 +70,51 @@ void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * resul
 void var_list_enumerate(var_list * list, unsigned int start)
 {
     unsigned int index = start;
-    var * var_value = list->head;
-    while (var_value != NULL)
+    var_node * node = list->head;
+    while (node != NULL)
     {
-        var_value->index = index++;
-        var_value = var_value->next;
+        var * var_value = node->value;
+        if (var_value)
+        {
+            var_value->index = index++;
+        }
+        node = node->next;
     }    
 }
 
 void var_list_add_symtab_semcheck(symtab * stab, var_list * list, semcheck_result * result)
 {
-    var * var_value = list->head;
-    while (var_value != NULL)
+    var_node * node = list->head;
+    while (node != NULL)
     {
-        var_add_symtab_semcheck(stab, var_value, result);
-        var_value = var_value->next;
+        var * var_value = node->value;
+        if (var_value)
+        {
+            var_add_symtab_semcheck(stab, var_value, result);
+        }
+        node = node->next;
     }
 }
 
 void var_list_add_to_symtab(symtab * stab, var_list * freevars, semcheck_result * result)
 {
-    var * var_value = freevars->head;
-    while (var_value != NULL)
+    var_node * node = freevars->head;
+    while (node != NULL)
     {
-        symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
-        if (entry != NULL)
+        var * var_value = node->value;
+        if (var_value)
         {
-            var_value->bound_to = entry->var_value;
+            symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
+            if (entry != NULL)
+            {
+                var_value->bound_to = entry->var_value;
+            }
+            else
+            {
+                symtab_add_var(stab, var_value);
+            }
         }
-        else
-        {
-            symtab_add_var(stab, var_value);
-        }           
-        var_value = var_value->next;
+        node = node->next;
     }
 }
 
@@ -164,9 +176,9 @@ void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * 
 
 void goal_unification_semcheck(symtab * stab, goal_unification value, semcheck_result * result)
 {
-    var_is_bound_semcheck(stab, value.variable, result);
-
     var_list * freevars = var_list_new();
+
+    var_semcheck(stab, freevars, value.variable, result);
     term_semcheck(stab, freevars, value.term_value, result);
 
     if (var_list_size(freevars) > 0)
@@ -176,7 +188,7 @@ void goal_unification_semcheck(symtab * stab, goal_unification value, semcheck_r
         var_list_print(freevars);
     }
 
-    var_list_delete(freevars);
+    var_list_delete_null(freevars);
 }
 
 void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)

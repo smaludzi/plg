@@ -93,11 +93,12 @@ void goal_print(goal * value)
     switch (value->type)
     {
         case GOAL_TYPE_LITERAL:
-            printf("%s ", value->literal.name);
+            printf("goal literal %s/%u\n", value->literal.name, value->literal.terms->size);
             term_list_print(value->literal.terms);
             printf("\n");
         break;
         case GOAL_TYPE_UNIFICATION:
+            printf("goal unification\n");
             var_print(value->unification.variable);
             term_print(value->unification.term_value);
             printf("\n");

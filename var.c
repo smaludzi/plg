@@ -12,7 +12,6 @@ var * var_new(char * name)
     value->bound_to = NULL;
     value->index = 0;
     value->line_no = 0;
-    value->next = NULL;
 
     return value;
 }
@@ -44,6 +43,30 @@ void var_print(var * value)
     }
 }
 
+var_node * var_node_new(var * value)
+{
+    var_node * node = (var_node *)malloc(sizeof(var_node));
+
+    node->value = value;
+    node->next = NULL;
+
+    return node;
+}
+
+void var_node_delete(var_node * value)
+{
+    if (value->value)
+    {
+        var_delete(value->value);
+    }
+    free(value);
+}
+
+void var_node_delete_null(var_node * value)
+{
+    free(value);
+}
+
 var_list * var_list_new()
 {
     var_list * list = (var_list *)malloc(sizeof(var_list));
@@ -57,11 +80,11 @@ var_list * var_list_new()
 
 void var_list_delete(var_list * list)
 {
-    var * node = list->head;
+    var_node * node = list->head;
     while (node != NULL)
     {
-        var * next = node->next;
-        var_delete(node);
+        var_node * next = node->next;
+        var_node_delete(node);
         node = next;
     }
     free(list);
@@ -69,13 +92,21 @@ void var_list_delete(var_list * list)
 
 void var_list_delete_null(var_list * list)
 {
+    var_node * node = list->head;
+    while (node != NULL)
+    {
+        var_node * next = node->next;
+        var_node_delete_null(node);
+        node = next;
+    }
     free(list);
 }
 
 void var_list_add_end(var_list * list, var * value)
 {
-    *list->tail = value;
-    list->tail = &value->next;
+    var_node * node = var_node_new(value);
+    *list->tail = node;
+    list->tail = &node->next;
     list->size++;
 }
 
@@ -86,10 +117,10 @@ unsigned int var_list_size(var_list * list)
 
 void var_list_print(var_list * list)
 {
-    var * node = list->head;
+    var_node * node = list->head;
     while (node != NULL)
     {
-        var_print(node);
+        var_print(node->value);
         node = node->next;
     }   
 }

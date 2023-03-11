@@ -66,7 +66,7 @@ void clause_print(clause * value)
     {
         return;
     }
-    printf("%s", value->name);
+    printf("clause %s\n", value->name);
     var_list_print(value->vars);
     goal_list_print(value->goals);
 }
