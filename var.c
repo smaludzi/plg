@@ -9,7 +9,7 @@ var * var_new(char * name)
 
     value->type = VAR_TYPE_UNKNOWN;
     value->name = name;
-    value->bound_to = NULL;
+    value->bound_to = value;
     value->index = 0;
     value->line_no = 0;
 

@@ -1,8 +1,6 @@
 #ifndef __VAR_H__
 #define __VAR_H__
 
-#include "list.h"
-
 typedef enum var_type {
     VAR_TYPE_UNKNOWN = 0,
     VAR_TYPE_BOUND = 1,

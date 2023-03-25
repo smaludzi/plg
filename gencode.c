@@ -31,7 +31,7 @@ void var_gencode(var * value, gencode_result * result)
             printf("PUT_REF name %s index %d\n", value->name, value->bound_to->index);
         break;
         case VAR_TYPE_UNBOUND:
-            printf("PUT_VAR name %s index %d\n", value->name, value->bound_to->index);
+            printf("PUT_VAR name %s index %d\n", value->name, value->index);
         break;
         case VAR_TYPE_UNKNOWN:
             printf("PUT_VAR_UNKNOWN!!! %d: %s\n", value->line_no, value->name);
@@ -58,6 +58,21 @@ void var_unify_gencode(var * value, gencode_result * result)
 void var_check_gencode(var * value, gencode_result * result)
 {
      printf("CHECK name %s index %d\n", value->name, value->bound_to->index);
+}
+
+void var_get_unbound(var * value, var_list * local_vars)
+{
+    switch (value->type)
+    {
+        case VAR_TYPE_BOUND:
+        break;
+        case VAR_TYPE_UNBOUND:
+            var_list_add_end(local_vars, value);
+        break;
+        case VAR_TYPE_UNKNOWN:
+            assert(0);
+        break;
+    }
 }
 
 void var_get_bound_vars_gencode(var * value, var_list * bound_vars, gencode_result * result)
@@ -146,6 +161,25 @@ void term_unify_gencode(term * value, gencode_result * result)
     }
 }
 
+void term_get_local_vars(term * value, var_list * local_vars)
+{    switch (value->type)
+    {
+        case TERM_TYPE_UNKNOWN:
+            assert(0);
+        break;
+        case TERM_TYPE_ANON:
+        break;
+        case TERM_TYPE_ATOM:
+        break;
+        case TERM_TYPE_VAR:
+            var_get_unbound(value->var_value, local_vars);
+        break;
+        case TERM_TYPE_TERM:
+            term_list_get_local_vars(value->terms, local_vars);
+        break;
+    }
+}
+
 void term_get_bound_vars_gencode(term * value, var_list * bound_vars, gencode_result * result)
 {
     switch (value->type)
@@ -189,6 +223,16 @@ void term_list_unify_gencode(term_list * list, gencode_result * result)
     }
 }
 
+void term_list_get_local_vars(term_list * list, var_list * local_vars)
+{
+    term * node = list->head;
+    while (node != NULL)
+    {
+        term_get_local_vars(node, local_vars);
+        node = node->next;
+    }
+}
+
 void term_list_get_bound_vars_gencode(term_list * list, var_list * bound_vars, gencode_result * result)
 {
     term * node = list->head;
@@ -197,6 +241,11 @@ void term_list_get_bound_vars_gencode(term_list * list, var_list * bound_vars, g
         term_get_bound_vars_gencode(node, bound_vars, result);
         node = node->next;
     }
+}
+
+void goal_literal_get_local_vars(goal_literal value, var_list * local_vars)
+{
+    term_list_get_local_vars(value.terms, local_vars);
 }
 
 void goal_literal_gencode(goal_literal value, gencode_result * result)
@@ -231,6 +280,27 @@ void goal_unification_gencode(goal_unification value, gencode_result * result)
     }
 }
 
+void goal_get_local_vars(goal * value, var_list * local_vars)
+{
+    switch (value->type)
+    {
+        case GOAL_TYPE_LITERAL:
+        {
+            goal_literal_get_local_vars(value->literal, local_vars);
+            break;
+        }
+        case GOAL_TYPE_UNIFICATION:
+        {
+            /* not possible to get local variables */
+            break;
+        }
+        case GOAL_TYPE_UNKNOW:
+        {
+            assert(0);
+        }
+    }
+}
+
 void goal_gencode(goal * value, gencode_result * result)
 {
     switch (value->type)
@@ -252,6 +322,16 @@ void goal_gencode(goal * value, gencode_result * result)
     }
 }
 
+void goal_list_get_local_vars(goal_list * list, var_list * local_vars)
+{
+    goal * node = list->head;
+    while (node != NULL)
+    {
+        goal_get_local_vars(node, local_vars);
+        node = node->next;
+    }
+}
+
 void goal_list_gencode(goal_list * list, gencode_result * result)
 {
     goal * node = list->head;
@@ -262,9 +342,33 @@ void goal_list_gencode(goal_list * list, gencode_result * result)
     }
 }
 
+void clause_head_get_local_vars(var_list * vars, var_list * local_vars)
+{
+    var_node * node = vars->head;
+    while (node != NULL)
+    {
+        if (node->value != NULL)
+        {
+            var_list_add_end(local_vars, node->value);
+        }
+        node = node->next;
+    }
+}
+
 void clause_gencode(clause * value, gencode_result * result)
 {
+    var_list * local_vars = var_list_new();
+
+    clause_head_get_local_vars(value->vars, local_vars);
+    goal_list_get_local_vars(value->goals, local_vars);
+
+    printf("PUSHENV %u\n", local_vars->size);
+
+    var_list_delete_null(local_vars);
+
     goal_list_gencode(value->goals, result);
+
+    printf("POPENV\n");
 }
 
 void clause_list_gencode(clause_list * list, gencode_result * result)
