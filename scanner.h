@@ -21,7 +21,6 @@
 #define __SCANNER_H__ 1
 
 #include "parser.h"
-#include "list.h"
 #include "var.h"
 #include "term.h"
 #include "goal.h"

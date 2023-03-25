@@ -74,18 +74,18 @@ int main(int argc, char * argv[])
 
 	yyparse(&program_value);
 
+	if (program_value != NULL)
 	{
 		semcheck_result sem_res = SEMCHECK_SUCCESS;
 		program_semcheck(program_value, &sem_res);
-    	program_print(program_value);
+		program_print(program_value);
 		if (sem_res == SEMCHECK_SUCCESS)
 		{
 			gencode_result gen_res = GENCODE_SUCCESS;
 			program_gencode(program_value, &gen_res);
 		}
+		program_delete(program_value);
 	}
-
-	program_delete(program_value);
 
 	fclose(yyin);
 

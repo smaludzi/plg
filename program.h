@@ -18,7 +18,6 @@
 #ifndef __PROGRAM_H__
 #define __PROGRAM_H__
 
-#include "list.h"
 #include "clause.h"
 #include "query.h"
 

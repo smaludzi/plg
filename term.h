@@ -20,7 +20,6 @@
 #ifndef __TERM_H__
 #define __TERM_H__ 1
 
-#include "list.h"
 #include "var.h"
 
 typedef enum term_type {

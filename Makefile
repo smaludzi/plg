@@ -55,6 +55,9 @@ deps:
 clean:
 	rm -f plg $(OBJECTS) $(SCAN_PAR)
 
+rmcore:
+	rm core*
+
 %.c:  %.y
 	$(YACC) $< -o $@
 

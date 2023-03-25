@@ -18,7 +18,6 @@
 #ifndef __GOAL_H__
 #define __GOAL_H__
 
-#include "list.h"
 #include "var.h"
 #include "term.h"
 

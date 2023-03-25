@@ -1,0 +1,3 @@
+p <= a(X, Y)
+a(X, Y) <= f(X, X1), g(X1, Y)
+<= a(one, two)

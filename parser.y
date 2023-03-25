@@ -165,7 +165,12 @@ goals: goal
       }
 ;
 
-clause: TOK_ATOM '(' ')' TOK_ARR goals
+clause:  TOK_ATOM TOK_ARR goals
+      {
+          $$ = clause_new($1, NULL, $3);
+          $$->line_no = $<line_no>1;
+      }
+    | TOK_ATOM '(' ')' TOK_ARR goals
       {
           $$ = clause_new($1, NULL, $5);
           $$->line_no = $<line_no>1;

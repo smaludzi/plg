@@ -19,7 +19,6 @@
  */
 #include <stdio.h>
 #include <string.h>
-#include "list.h"
 #include "hash.h"
 #include "unify.h"
 #include "unify_term.h"

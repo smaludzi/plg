@@ -27,7 +27,6 @@
 #include "clause.h"
 #include "goal.h"
 #include "term.h"
-#include "list.h"
 
 typedef enum gencode_result {
     GENCODE_SUCCESS = 0,
@@ -37,25 +36,25 @@ typedef enum gencode_result {
 void var_gencode(var * value, gencode_result * result);
 void var_unify_gencode(var * value, gencode_result * result);
 void var_check_gencode(var * value, gencode_result * result);
-void var_get_unbound(var * value, var_list * local_vars);
+void var_get_unbound_gencode(var * value, var_list * local_vars);
 void var_get_bound_vars_gencode(var * value, var_list * bound_vars, gencode_result * result);
 void var_list_check_gencode(var_list * bound_vars, gencode_result * result);
 void term_gencode(term * value, gencode_result * result);
 void term_unify_gencode(term * value, gencode_result * result);
-void term_get_local_vars(term * value, var_list * local_vars);
+void term_get_local_vars_gencode(term * value, var_list * local_vars);
 void term_get_bound_vars_gencode(term * value, var_list * bound_vars, gencode_result * result);
 void term_list_gencode(term_list * list, gencode_result * result);
 void term_list_unify_gencode(term_list * list, gencode_result * result);
-void term_list_get_local_vars(term_list * list, var_list * local_vars);
+void term_list_get_local_vars_gencode(term_list * list, var_list * local_vars);
 void term_list_get_bound_vars_gencode(term_list * list, var_list * bound_vars, gencode_result * result);
-void goal_list_get_local_vars(goal_list * list, var_list * local_vars);
-void goal_literal_get_local_vars(goal_literal value, var_list * local_vars);
+void goal_list_get_local_vars_gencode(goal_list * list, var_list * local_vars);
+void goal_literal_get_local_vars_gencode(goal_literal value, var_list * local_vars);
 void goal_literal_gencode(goal_literal value, gencode_result * result);
 void goal_unification_gencode(goal_unification value, gencode_result * result);
-void goal_get_local_vars(goal * value, var_list * local_vars);
+void goal_get_local_vars_gencode(goal * value, var_list * local_vars);
 void goal_gencode(goal * value, gencode_result * result);
 void goal_list_gencode(goal_list * list, gencode_result * result);
-void clause_head_get_local_vars(var_list * vars, var_list * local_vars);
+void clause_head_get_local_vars_gencode(var_list * vars, var_list * local_vars);
 void clause_gencode(clause * value, gencode_result * result);
 void clause_list_gencode(clause_list * list, gencode_result * result);
 void query_gencode(query * value, gencode_result * result);

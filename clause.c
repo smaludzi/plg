@@ -67,8 +67,14 @@ void clause_print(clause * value)
         return;
     }
     printf("clause %s\n", value->name);
-    var_list_print(value->vars);
-    goal_list_print(value->goals);
+    if (value->vars != NULL)
+    {
+        var_list_print(value->vars);
+    }
+    if (value->goals != NULL)
+    {
+        goal_list_print(value->goals);
+    }
 }
 
 clause_list * clause_list_new()

@@ -18,7 +18,6 @@
 #ifndef __CLAUSE_H__
 #define __CLAUSE_H__
 
-#include "list.h"
 #include "symtab.h"
 #include "goal.h"
 

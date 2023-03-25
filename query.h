@@ -18,7 +18,6 @@
 #ifndef __QUERY_H__
 #define __QUERY_H__
 
-#include "list.h"
 #include "symtab.h"
 #include "goal.h"
 

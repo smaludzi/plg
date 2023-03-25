@@ -249,10 +249,19 @@ void clause_semcheck(clause * value, semcheck_result * result)
     {
         value->stab = symtab_new(10, NULL);
     }
-    var_list_enumerate(value->vars, 1);
-    var_list_add_symtab_semcheck(value->stab, value->vars, result);
+    if (value->vars != NULL)
+    {
+        var_list_enumerate(value->vars, 1);
+    }
+    if (value->vars != NULL)
+    {
+        var_list_add_symtab_semcheck(value->stab, value->vars, result);
+    }
     goal_list_semcheck(value->stab, value->goals, result);
-    clause_enumerate_vars(value->stab, var_list_size(value->vars) + 1);
+    if (value->vars != NULL)
+    {
+        clause_enumerate_vars(value->stab, var_list_size(value->vars) + 1);
+    }
 }
 
 void clause_list_semcheck(clause_list * list, semcheck_result * result)
@@ -276,8 +285,14 @@ void query_semcheck(query * value, semcheck_result * result)
 
 void program_semcheck(program * value, semcheck_result * result)
 {
-    clause_list_semcheck(value->clausies, result);
-    query_semcheck(value->query_value, result);
+    if (value->clausies != NULL)
+    {
+        clause_list_semcheck(value->clausies, result);
+    }
+    if (value->query_value != NULL)
+    {
+        query_semcheck(value->query_value, result);
+    }
 }
 
 

@@ -18,7 +18,6 @@
 #ifndef __SEMCHECK_H__
 #define __SEMCHECK_H__
 
-#include "list.h"
 #include "var.h"
 #include "term.h"
 #include "goal.h"
