@@ -266,10 +266,13 @@ void clause_semcheck(clause * value, semcheck_result * result)
 
 void clause_list_semcheck(clause_list * list, semcheck_result * result)
 {
-    clause * node = list->head;
+    clause_node * node = list->head;
     while (node != NULL)
     {
-        clause_semcheck(node, result);
+        if (node->value)
+        {
+            clause_semcheck(node->value, result);
+        }
         node = node->next;
     }    
 }

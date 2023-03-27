@@ -27,22 +27,35 @@ typedef struct clause {
     goal_list * goals;
     symtab * stab;
     unsigned int line_no;
-    struct clause * next;
+    char gencode;
 } clause;
 
+typedef struct clause_node {
+    clause * value;
+    struct clause_node * next;
+} clause_node;
+
 typedef struct clause_list {
-    clause * head;
-    clause ** tail;
+    clause_node * head;
+    clause_node ** tail;
+    unsigned int size;
 } clause_list;
 
 clause * clause_new(char * name, var_list * vars, goal_list * goals);
 void clause_delete(clause * value);
 void clause_deallocator(void * value);
 
+unsigned int clause_arity(clause * value);
+
 void clause_print(clause * value);
+
+clause_node * clause_node_new(clause * value);
+void clause_node_delete(clause_node * value);
+void clause_node_delete_null(clause_node * value);
 
 clause_list * clause_list_new();
 void clause_list_delete(clause_list * list);
+void clause_list_delete_null(clause_list * list);
 void clause_list_add_end(clause_list * list, clause * value);
 
 void clause_list_print(clause_list * list);

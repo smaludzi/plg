@@ -29,7 +29,7 @@ clause * clause_new(char * name, var_list * vars, goal_list * goals)
     value->vars = vars;
     value->goals = goals;
     value->stab = NULL;
-    value->next = NULL;
+    value->gencode = 0;
 
     return value;
 }
@@ -60,6 +60,15 @@ void clause_deallocator(void * data)
     clause_delete((clause *)data);
 }
 
+unsigned int clause_arity(clause * value)
+{
+    if (value == NULL || value->vars == NULL)
+    {
+        return 0;
+    }
+    return value->vars->size;
+}
+
 void clause_print(clause * value)
 {
     if (value == NULL)
@@ -77,22 +86,58 @@ void clause_print(clause * value)
     }
 }
 
+clause_node * clause_node_new(clause * value)
+{
+    clause_node * node = (clause_node *)malloc(sizeof(clause_node));
+
+    node->value = value;
+    node->next = NULL;
+
+    return node;
+}
+
+void clause_node_delete(clause_node * value)
+{
+    if (value->value)
+    {
+        clause_delete(value->value);
+    }
+    free(value);
+}
+
+void clause_node_delete_null(clause_node * value)
+{
+    free(value);
+}
+
 clause_list * clause_list_new()
 {
     clause_list * list = malloc(sizeof(clause_list));
     
     list->head = NULL;
     list->tail = &list->head;
+    list->size = 0;
 
     return list;
 }
 
 void clause_list_delete(clause_list * list)
 {
-    clause * node = list->head;
+    clause_node * node = list->head;
     while (node != NULL) {
-        clause * next = node->next;
-        clause_delete(node);
+        clause_node * next = node->next;
+        clause_node_delete(node);
+        node = next;
+    }
+    free(list);
+}
+
+void clause_list_delete_null(clause_list * list)
+{
+    clause_node * node = list->head;
+    while (node != NULL) {
+        clause_node * next = node->next;
+        clause_node_delete_null(node);
         node = next;
     }
     free(list);
@@ -100,16 +145,21 @@ void clause_list_delete(clause_list * list)
 
 void clause_list_add_end(clause_list * list, clause * value)
 {
-    (*list->tail) = value;
-    list->tail = &value->next;
+    clause_node * node = clause_node_new(value);
+    *list->tail = node;
+    list->tail = &node->next;
+    list->size++;
 }
 
 void clause_list_print(clause_list * list)
 {
-    clause * node = list->head;
+    clause_node * node = list->head;
     while (node != NULL)
     {
-        clause_print(node);
+        if (node->value)
+        {
+            clause_print(node->value);
+        }
         node = node->next;
-    }    
+    }
 }

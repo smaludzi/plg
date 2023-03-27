@@ -120,9 +120,12 @@ void var_list_print(var_list * list)
     var_node * node = list->head;
     while (node != NULL)
     {
-        var_print(node->value);
+        if (node->value)
+        {
+            var_print(node->value);
+        }
         node = node->next;
-    }   
+    }
 }
 
 char * var_type_to_str(var_type type)

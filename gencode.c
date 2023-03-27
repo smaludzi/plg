@@ -21,6 +21,7 @@
  */
 #include "gencode.h"
 #include <assert.h>
+#include <string.h>
 #include <stdio.h>
 
 void var_gencode(var * value, gencode_result * result)
@@ -377,14 +378,107 @@ void clause_gencode(clause * value, gencode_result * result)
     printf("POPENV\n");
 }
 
-void clause_list_gencode(clause_list * list, gencode_result * result)
+void predicate_0_gencode(clause * value, gencode_result * result)
 {
-    clause * node = list->head;
+    clause_gencode(value, result);
+}
+
+void predicate_N_gencode(clause_list * list, gencode_result * result)
+{
+    printf("SETBTP\n");
+    unsigned int clause_nbr = 1;
+    clause_node * clause = list->head;
+    assert(clause);
+    clause = clause->next; /* omit one clause */
+    while (clause != NULL)
+    {
+        if (clause->value != NULL)
+        {
+            printf("TRY A%u\n", clause_nbr++);
+        }
+        clause = clause->next;
+    }
+    printf("DELBTP\n");
+    printf("JUMP A%u\n", clause_nbr);
+    clause_nbr = 1;
+    clause = list->head;
+    while (clause != NULL)
+    {
+        if (clause->value != NULL)
+        {
+            printf("A%u:\n", clause_nbr++);
+            clause_gencode(clause->value, result);
+        }
+        clause = clause->next;
+    }
+}
+
+void predicate_gencode(clause_list * list, gencode_result * result)
+{
+    if (list->size == 1)
+    {
+        clause_node * node = list->head;
+        if (node && node->value != NULL)
+        {
+            predicate_0_gencode(node->value, result);
+        }
+    }
+    else
+    {
+        predicate_N_gencode(list, result);
+    }
+}
+
+void predicate_gather_gencode(clause_node * first, gencode_result * result)
+{
+    char first_clause = 0;
+    char * predicate_name = NULL;
+    unsigned int predicate_arity = 0;
+    clause_list * predicates = clause_list_new();
+
+    clause_node * node = first;
     while (node != NULL)
     {
-        clause_gencode(node, result);
+        clause * value = node->value;
+        if (value && value->gencode == 0)
+        {
+            if (first_clause == 0)
+            {
+                first_clause = 1;
+                value->gencode = 1;
+                predicate_name = value->name;
+                predicate_arity = clause_arity(value);
+                clause_list_add_end(predicates, value);
+            }
+            else
+            {
+                if (strcmp(value->name, predicate_name) == 0 &&
+                    predicate_arity == clause_arity(value))
+                {
+                    value->gencode = 1;
+                    clause_list_add_end(predicates, value);
+                }
+            }
+        }
         node = node->next;
-    }    
+    }
+
+    if (predicates->size > 0)
+    {
+        predicate_gencode(predicates, result);
+    }
+
+    clause_list_delete_null(predicates);
+}
+
+void clause_list_gencode(clause_list * list, gencode_result * result)
+{
+    clause_node * node = list->head;
+    while (node != NULL)
+    {
+        predicate_gather_gencode(node, result);
+        node = node->next;
+    }
 }
 
 void query_gencode(query * value, gencode_result * result)

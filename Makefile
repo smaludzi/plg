@@ -29,7 +29,6 @@ OBJECTS = plg.o \
 		  clause.o \
 		  query.o \
 		  program.o \
-          list.o \
 		  hash.o \
 		  symtab.o \
 		  semcheck.o \

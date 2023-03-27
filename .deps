@@ -1,19 +1,17 @@
-plg.o: plg.c scanner.h parser.h program.h list.h clause.h symtab.h var.h \
- goal.h term.h query.h semcheck.h gencode.h
-var.o: var.c var.h list.h
-term.o: term.c term.h list.h var.h
-goal.o: goal.c goal.h list.h var.h term.h
-clause.o: clause.c clause.h list.h symtab.h var.h goal.h term.h
-query.o: query.c query.h list.h symtab.h var.h goal.h term.h
-program.o: program.c program.h list.h clause.h symtab.h var.h goal.h \
- term.h query.h
-list.o: list.c list.h
+plg.o: plg.c scanner.h parser.h program.h clause.h symtab.h var.h goal.h \
+ term.h query.h semcheck.h gencode.h
+var.o: var.c var.h
+term.o: term.c term.h var.h
+goal.o: goal.c goal.h var.h term.h
+clause.o: clause.c clause.h symtab.h var.h goal.h term.h
+query.o: query.c query.h symtab.h var.h goal.h term.h
+program.o: program.c program.h clause.h symtab.h var.h goal.h term.h \
+ query.h
 hash.o: hash.c hash.h
-symtab.o: symtab.c symtab.h var.h list.h hash.h
-semcheck.o: semcheck.c semcheck.h list.h var.h term.h goal.h clause.h \
- symtab.h query.h program.h
-gencode.o: gencode.c gencode.h program.h list.h clause.h symtab.h var.h \
- goal.h term.h query.h
+symtab.o: symtab.c symtab.h var.h hash.h
+semcheck.o: semcheck.c semcheck.h var.h term.h goal.h clause.h symtab.h \
+ query.h program.h
+gencode.o: gencode.c gencode.h program.h clause.h symtab.h var.h goal.h \
+ term.h query.h
 unify.o: unify.c unify.h
-unify_term.o: unify_term.c list.h hash.h unify.h unify_term.h term.h \
- var.h
+unify_term.o: unify_term.c hash.h unify.h unify_term.h term.h var.h
