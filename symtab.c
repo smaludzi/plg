@@ -185,6 +185,33 @@ symtab_entry * symtab_lookup(symtab * tab, const char * id, symtab_lookup_op loo
     }
 }
 
+unsigned int symtab_size(symtab * tab)
+{
+    if (tab == NULL)
+    {
+        return 0;
+    }
+    return tab->size;
+}
+
+unsigned int symtab_size_type(symtab * tab, symtab_entry_type type)
+{
+    if (tab == NULL)
+    {
+        return 0;
+    }
+    unsigned int size = 0;
+    unsigned int i;
+    for (i = 0; i < tab->size; i++)
+    {
+        if (tab->entries[i].type == type)
+        {
+            size++;
+        }
+    }
+    return size;
+}
+
 void symtab_print(symtab * tab)
 {
     unsigned int i;

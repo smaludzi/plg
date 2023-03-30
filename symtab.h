@@ -69,8 +69,9 @@ symtab * symtab_new(unsigned int size, symtab * parent);
 void symtab_delete(symtab * tab);
 
 void symtab_add_var(symtab * tab, var * var_value);
-
 symtab_entry * symtab_lookup(symtab * tab, const char * id, symtab_lookup_op lookup);
+unsigned int symtab_size(symtab * tab);
+unsigned int symtab_size_type(symtab * tab, symtab_entry_type type);
 
 void symtab_resize(symtab * tab);
 

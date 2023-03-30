@@ -167,7 +167,10 @@ void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * 
 {
     var_list * freevars = var_list_new();
 
-    term_list_semcheck(stab, freevars, value.terms, result);
+    if (value.terms != NULL)
+    {
+        term_list_semcheck(stab, freevars, value.terms, result);
+    }
     var_list_enumerate(freevars, stab->count + 1);
     var_list_add_to_symtab(stab, freevars, result);
 

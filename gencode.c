@@ -246,13 +246,19 @@ void term_list_get_bound_vars_gencode(term_list * list, var_list * bound_vars, g
 
 void goal_literal_get_local_vars_gencode(goal_literal value, var_list * local_vars)
 {
-    term_list_get_local_vars_gencode(value.terms, local_vars);
+    if (value.terms != NULL)
+    {
+        term_list_get_local_vars_gencode(value.terms, local_vars);
+    }
 }
 
 void goal_literal_gencode(goal_literal value, gencode_result * result)
 {
     printf("MARK B\n");
-    term_list_gencode(value.terms, result);
+    if (value.terms != NULL)
+    {
+        term_list_gencode(value.terms, result);
+    }
     printf("CALL %s/%u\n", value.name, term_list_size(value.terms));
     printf("B: ...\n");
 }
@@ -483,12 +489,17 @@ void clause_list_gencode(clause_list * list, gencode_result * result)
 
 void query_gencode(query * value, gencode_result * result)
 {
+    printf("INIT A\n");
+    printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR));
     goal_list_gencode(value->goals, result);
+    printf("HALT %u\n", symtab_size_type(value->stab, SYMTAB_VAR));
+    printf("A:\n");
+    printf("NO\n");
 }
 
 void program_gencode(program * value, gencode_result * result)
 {
-    clause_list_gencode(value->clausies, result);
     query_gencode(value->query_value, result);
+    clause_list_gencode(value->clausies, result);
 }
 

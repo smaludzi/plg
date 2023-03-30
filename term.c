@@ -150,6 +150,10 @@ void term_list_add_end(term_list * list, term * value)
 
 unsigned int term_list_size(term_list * list)
 {
+	if (list == NULL)
+	{
+		return 0;
+	}
 	return list->size;
 }
 

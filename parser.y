@@ -136,7 +136,13 @@ terms: term
       }
 ;
 
-goal: TOK_ATOM '(' ')'
+goal: TOK_ATOM
+      {
+          $$ = goal_new_literal($1, NULL);
+          $$->line_no = $<line_no>1;
+      }
+    |
+      TOK_ATOM '(' ')'
       {
           $$ = goal_new_literal($1, NULL);
           $$->line_no = $<line_no>1;

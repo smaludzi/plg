@@ -25,16 +25,16 @@ CFLAGS = -Wall -Wextra -Wno-unused-parameter -g
 OBJECTS = plg.o \
           var.o \
           term.o \
-		  goal.o \
-		  clause.o \
-		  query.o \
-		  program.o \
-		  hash.o \
-		  symtab.o \
-		  semcheck.o \
-		  gencode.o \
-		  unify.o \
-		  unify_term.o
+          goal.o \
+          clause.o \
+          query.o \
+          program.o \
+          hash.o \
+          symtab.o \
+          semcheck.o \
+          gencode.o \
+          unify.o \
+          unify_term.o
 SCAN_PAR = scanner.o parser.o
 
 #TEST_HASH = hash.o test_hash.o
