@@ -81,8 +81,10 @@ int main(int argc, char * argv[])
 		program_print(program_value);
 		if (sem_res == SEMCHECK_SUCCESS)
 		{
+			gencode * gen = gencode_new();
 			gencode_result gen_res = GENCODE_SUCCESS;
-			program_gencode(program_value, &gen_res);
+			program_gencode(gen, program_value, &gen_res);
+			gencode_delete(gen);
 		}
 		program_delete(program_value);
 	}

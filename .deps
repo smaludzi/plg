@@ -1,5 +1,5 @@
 plg.o: plg.c scanner.h parser.h program.h clause.h symtab.h var.h goal.h \
- term.h query.h semcheck.h gencode.h
+ term.h query.h semcheck.h gencode.h bytecode.h
 var.o: var.c var.h
 term.o: term.c term.h var.h
 goal.o: goal.c goal.h var.h term.h
@@ -11,7 +11,8 @@ hash.o: hash.c hash.h
 symtab.o: symtab.c symtab.h var.h hash.h
 semcheck.o: semcheck.c semcheck.h var.h term.h goal.h clause.h symtab.h \
  query.h program.h
+bytecode.o: bytecode.c bytecode.h
 gencode.o: gencode.c gencode.h program.h clause.h symtab.h var.h goal.h \
- term.h query.h
+ term.h query.h bytecode.h
 unify.o: unify.c unify.h
 unify_term.o: unify_term.c hash.h unify.h unify_term.h term.h var.h

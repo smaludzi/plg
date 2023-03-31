@@ -32,6 +32,7 @@ OBJECTS = plg.o \
           hash.o \
           symtab.o \
           semcheck.o \
+          bytecode.o \
           gencode.o \
           unify.o \
           unify_term.o
