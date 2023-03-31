@@ -35,13 +35,14 @@ typedef enum gencode_result {
 } gencode_result;
 
 typedef struct gencode {
+    unsigned int current_addr;
     bytecode_list * list;
 } gencode;
 
 gencode * gencode_new();
 void gencode_delete(gencode * value);
 
-void gencode_add_bytecode(gencode * value, bytecode * code);
+bytecode * gencode_add_bytecode(gencode * value, bytecode * code);
 
 void var_gencode(gencode * gen, var * value, gencode_result * result);
 void var_unify_gencode(gencode * gen, var * value, gencode_result * result);

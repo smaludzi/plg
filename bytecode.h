@@ -26,11 +26,26 @@ typedef enum bytecode_type {
     BYTECODE_UNKNOWN = 0,
     BYTECODE_POP = 1,
     BYTECODE_PUT_REF = 2,
-    BYTECODE_PUT_VAR = 3
+    BYTECODE_PUT_VAR = 3,
+    BYTECODE_U_REF = 4,
+    BYTECODE_U_VAR = 5,
+    BYTECODE_CHECK = 6,
+    BYTECODE_PUT_ANON,
+    BYTECODE_PUT_ATOM,
+    BYTECODE_PUT_STRUCT,
+    BYTECODE_U_ATOM,
+    BYTECODE_U_STRUCT,
+    BYTECODE_UP,
+    BYTECODE_BIND,
+    BYTECODE_SON,
+    BYTECODE_JUMP,
+    BYTECODE_LABEL,
+    BYTECODE_END
 } bytecode_type;
 
 typedef struct bytecode {
     bytecode_type type;
+    unsigned int addr;
     union {
         struct {
             unsigned int index;
@@ -38,6 +53,31 @@ typedef struct bytecode {
         struct {
             unsigned int index;
         } put_var;
+        struct {
+            unsigned int index;
+        } u_ref;
+        struct {
+            unsigned int index;
+        } u_var;
+        struct {
+            unsigned int index;
+        } check;
+        struct {
+            unsigned int size;
+        } put_struct;
+        struct {
+            unsigned int size;
+            int offset;
+        } u_struct;
+        struct {
+            int offset;
+        } up;
+        struct {
+            unsigned int number;
+        } son;
+        struct {
+            int offset;
+        } jump;
     };
 } bytecode;
 
@@ -51,10 +91,34 @@ typedef struct bytecode_list {
     bytecode_node ** tail;
 } bytecode_list;
 
+typedef struct bytecode_print_func {
+    bytecode_type type;
+    void (*print)(bytecode * value);
+} bytecode_print_func;
+
 bytecode * bytecode_new_pop();
 void bytecode_delete(bytecode * value);
 
+void bytecode_print_unknown(bytecode * value);
+void bytecode_print_pop(bytecode * value);
+void bytecode_print_put_ref(bytecode * value);
+void bytecode_print_put_var(bytecode * value);
+void bytecode_print_u_ref(bytecode * value);
+void bytecode_print_u_var(bytecode * value);
+void bytecode_print_check(bytecode * value);
+void bytecode_print_put_anon(bytecode * value);
+void bytecode_print_put_atom(bytecode * value);
+void bytecode_print_put_struct(bytecode * value);
+void bytecode_print_u_atom(bytecode * value);
+void bytecode_print_u_struct(bytecode * value);
+void bytecode_print_up(bytecode * value);
+void bytecode_print_bind(bytecode * value);
+void bytecode_print_son(bytecode * value);
+void bytecode_print_jump(bytecode * value);
+void bytecode_print_label(bytecode * value);
+
 void bytecode_print(bytecode * value);
+void bytecode_print_test();
 const char * bytecode_type_str(bytecode_type type);
 
 bytecode_node * bytecode_node_new();
@@ -63,7 +127,7 @@ void bytecode_node_delete(bytecode_node * value);
 bytecode_list * bytecode_list_new();
 void bytecode_list_delete(bytecode_list * list);
 
-void bytecode_list_add_end(bytecode_list * list, bytecode * value);
+bytecode * bytecode_list_add_end(bytecode_list * list, bytecode * value);
 void bytecode_list_print(bytecode_list * list);
 
 #endif /* __BYTECODE_H__ */

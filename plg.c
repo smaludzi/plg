@@ -24,6 +24,7 @@
 #include "program.h"
 #include "semcheck.h"
 #include "gencode.h"
+#include "bytecode.h"
 
 extern int yyparse(program ** program_value);
 
@@ -69,7 +70,9 @@ int main(int argc, char * argv[])
 	{
 		yyin = stdin;
 	}
-	
+
+	bytecode_print_test();
+
 	program * program_value = NULL;
 
 	yyparse(&program_value);
