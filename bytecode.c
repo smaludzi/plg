@@ -40,6 +40,16 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_UP, bytecode_print_up },
     { BYTECODE_BIND, bytecode_print_bind },
     { BYTECODE_SON, bytecode_print_son },
+    { BYTECODE_MARK, bytecode_print_mark },
+    { BYTECODE_CALL, bytecode_print_call },
+    { BYTECODE_PUSH_ENV, bytecode_print_push_env },
+    { BYTECODE_POP_ENV, bytecode_print_pop_env },
+    { BYTECODE_SET_BTP, bytecode_print_set_btp },
+    { BYTECODE_DEL_BTP, bytecode_print_del_btp },
+    { BYTECODE_TRY, bytecode_print_try },
+    { BYTECODE_INIT, bytecode_print_init },
+    { BYTECODE_HALT, bytecode_print_halt },
+    { BYTECODE_NO, bytecode_print_no },
     { BYTECODE_JUMP, bytecode_print_jump },
     { BYTECODE_LABEL, bytecode_print_label }
 };
@@ -131,6 +141,56 @@ void bytecode_print_son(bytecode * value)
     printf("%d: %s number %d\n", value->addr, bytecode_type_str(value->type), value->son.number);
 }
 
+void bytecode_print_mark(bytecode * value)
+{
+    printf("%d: %s offset %d\n", value->addr, bytecode_type_str(value->type), value->mark.offset);
+}
+
+void bytecode_print_call(bytecode * value)
+{
+    printf("%d: %s size %u\n", value->addr, bytecode_type_str(value->type), value->call.size);
+}
+
+void bytecode_print_push_env(bytecode * value)
+{
+    printf("%d: %s size %u\n", value->addr, bytecode_type_str(value->type), value->push_env.size);
+}
+
+void bytecode_print_pop_env(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_set_btp(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_del_btp(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_try(bytecode * value)
+{
+    printf("%d: %s offset %d\n", value->addr, bytecode_type_str(value->type), value->try.offset);
+}
+
+void bytecode_print_init(bytecode * value)
+{
+    printf("%d: %s offset %d\n", value->addr, bytecode_type_str(value->type), value->init.offset);
+}
+
+void bytecode_print_halt(bytecode * value)
+{
+    printf("%d: %s size %u\n", value->addr, bytecode_type_str(value->type), value->halt.size);
+}
+
+void bytecode_print_no(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
 void bytecode_print_jump(bytecode * value)
 {
     printf("%d: %s index %d\n", value->addr, bytecode_type_str(value->type), value->jump.offset);
@@ -174,7 +234,17 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_UP: return "BYTECODE_UP";
         case BYTECODE_BIND: return "BYTECODE_BIND";
         case BYTECODE_SON: return "BYTECODE_SON";
+        case BYTECODE_MARK: return "BYTECODE_MARK";
+        case BYTECODE_CALL: return "BYTECODE_CALL";
+        case BYTECODE_PUSH_ENV: return "BYTECODE_PUSH_ENV";
+        case BYTECODE_POP_ENV: return "BYTECODE_POP_ENV";
+        case BYTECODE_SET_BTP: return "BYTECODE_SET_BTP";
+        case BYTECODE_DEL_BTP: return "BYTECODE_DEL_BTP";
+        case BYTECODE_TRY: return "BYTECODE_TRY";
         case BYTECODE_JUMP: return "BYTECODE_JUMP";
+        case BYTECODE_INIT: return "BYTECODE_INIT";
+        case BYTECODE_HALT: return "BYTECODE_HALT";
+        case BYTECODE_NO: return "BYTECODE_NO";
         case BYTECODE_LABEL: return "BYTECODE_LABEL";
         case BYTECODE_END: return "BYTECODE_END";
     }

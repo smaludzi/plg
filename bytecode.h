@@ -38,6 +38,16 @@ typedef enum bytecode_type {
     BYTECODE_UP,
     BYTECODE_BIND,
     BYTECODE_SON,
+    BYTECODE_MARK,
+    BYTECODE_CALL,
+    BYTECODE_PUSH_ENV,
+    BYTECODE_POP_ENV,
+    BYTECODE_SET_BTP,
+    BYTECODE_DEL_BTP,
+    BYTECODE_TRY,
+    BYTECODE_INIT,
+    BYTECODE_HALT,
+    BYTECODE_NO,
     BYTECODE_JUMP,
     BYTECODE_LABEL,
     BYTECODE_END
@@ -77,6 +87,24 @@ typedef struct bytecode {
         } son;
         struct {
             int offset;
+        } mark;
+        struct {
+            unsigned int size;
+        } push_env;
+        struct {
+            int offset;
+        } try;
+        struct {
+            unsigned int size;
+        } call;
+        struct {
+            int offset;
+        } init;
+        struct {
+            unsigned int size;
+        } halt;
+        struct {
+            int offset;
         } jump;
     };
 } bytecode;
@@ -114,6 +142,16 @@ void bytecode_print_u_struct(bytecode * value);
 void bytecode_print_up(bytecode * value);
 void bytecode_print_bind(bytecode * value);
 void bytecode_print_son(bytecode * value);
+void bytecode_print_mark(bytecode * value);
+void bytecode_print_call(bytecode * value);
+void bytecode_print_push_env(bytecode * value);
+void bytecode_print_pop_env(bytecode * value);
+void bytecode_print_set_btp(bytecode * value);
+void bytecode_print_del_btp(bytecode * value);
+void bytecode_print_try(bytecode * value);
+void bytecode_print_init(bytecode * value);
+void bytecode_print_halt(bytecode * value);
+void bytecode_print_no(bytecode * value);
 void bytecode_print_jump(bytecode * value);
 void bytecode_print_label(bytecode * value);
 
