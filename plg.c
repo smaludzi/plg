@@ -90,6 +90,7 @@ int main(int argc, char * argv[])
 			program_gencode(gen, program_value, &gen_res);
 
 			strtab_print(gen->strtab_value);
+			bytecode_list_print(gen->list);
 
 			gencode_delete(gen);
 		}

@@ -694,6 +694,7 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     printf("INIT A\n");
 
     bytecode bc_push_env = { 0 };
+    bc_push_env.type = BYTECODE_PUSH_ENV;
     bc_push_env.push_env.size = symtab_size_type(value->stab, SYMTAB_VAR);
     gencode_add_bytecode(gen, &bc_push_env);
     printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR));
@@ -701,6 +702,7 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     goal_list_gencode(gen, value->goals, result);
 
     bytecode bc_halt = { 0 };
+    bc_halt.type = BYTECODE_HALT;
     bc_halt.halt.size = symtab_size_type(value->stab, SYMTAB_VAR);
     gencode_add_bytecode(gen, &bc_halt);
     printf("HALT %u\n", symtab_size_type(value->stab, SYMTAB_VAR));

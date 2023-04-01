@@ -145,7 +145,7 @@ void strtab_print(strtab * tab)
     {
         if (tab->entries[i].string != NULL)
         {
-            printf("%s\n", tab->entries[i].string);
+            printf("%u: %s\n", tab->entries[i].order, tab->entries[i].string);
         }
     }
 
