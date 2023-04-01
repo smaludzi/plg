@@ -78,11 +78,17 @@ typedef struct bytecode {
             unsigned int index;
         } check;
         struct {
+            unsigned int index;
+        } put_atom;
+        struct {
             union {
                 unsigned int addr;
                 clause * predicate_ref;
             };
         } put_struct;
+        struct {
+            unsigned int index;
+        } u_atom;
         struct {
             int offset;
             union {

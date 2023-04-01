@@ -25,6 +25,7 @@
 #include "semcheck.h"
 #include "gencode.h"
 #include "bytecode.h"
+#include "strtab.h"
 
 extern int yyparse(program ** program_value);
 
@@ -87,6 +88,9 @@ int main(int argc, char * argv[])
 			gencode * gen = gencode_new();
 			gencode_result gen_res = GENCODE_SUCCESS;
 			program_gencode(gen, program_value, &gen_res);
+
+			strtab_print(gen->strtab_value);
+
 			gencode_delete(gen);
 		}
 		program_delete(program_value);

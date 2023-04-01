@@ -30,6 +30,7 @@ gencode * gencode_new()
 {
     gencode * value = (gencode *)malloc(sizeof(gencode));
 
+    value->strtab_value = strtab_new(32);
     value->current_addr = 0;
     value->list = bytecode_list_new();
 
@@ -38,6 +39,10 @@ gencode * gencode_new()
 
 void gencode_delete(gencode * value)
 {
+    if (value->strtab_value)
+    {
+        strtab_delete(value->strtab_value);
+    }
     if (value->list)
     {
         bytecode_list_delete(value->list);
@@ -185,8 +190,8 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
         {
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_ATOM;
+            bc.put_atom.index = strtab_add_string(gen->strtab_value, value->name);
             gencode_add_bytecode(gen, &bc);
-            /* TODO: add atom cache */
             printf("PUT_ATOM %s\n", value->name);
         }
         break;
@@ -228,8 +233,8 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
         {
             bytecode bc = { 0 };
             bc.type = BYTECODE_U_ATOM;
+            bc.u_atom.index = strtab_add_string(gen->strtab_value, value->name);
             gencode_add_bytecode(gen, &bc);
-            /* TODO: add atom cache */
             printf("UATOM %s\n", value->name);
         }
         break;

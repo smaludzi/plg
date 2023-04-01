@@ -112,7 +112,7 @@ void bytecode_print_put_anon(bytecode * value)
 
 void bytecode_print_put_atom(bytecode * value)
 {
-    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+    printf("%d: %s index %u\n", value->addr, bytecode_type_str(value->type), value->put_atom.index);
 }
 
 void bytecode_print_put_struct(bytecode * value)
@@ -129,7 +129,7 @@ void bytecode_print_put_struct_addr(bytecode * value)
 
 void bytecode_print_u_atom(bytecode * value)
 {
-    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+    printf("%d: %s index %u\n", value->addr, bytecode_type_str(value->type), value->u_atom.index);
 }
 
 void bytecode_print_u_struct(bytecode * value)

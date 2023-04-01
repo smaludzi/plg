@@ -28,6 +28,7 @@
 #include "goal.h"
 #include "term.h"
 #include "bytecode.h"
+#include "strtab.h"
 
 typedef enum gencode_result {
     GENCODE_SUCCESS = 0,
@@ -35,6 +36,7 @@ typedef enum gencode_result {
 } gencode_result;
 
 typedef struct gencode {
+    strtab * strtab_value;
     unsigned int current_addr;
     bytecode_list * list;
 } gencode;
