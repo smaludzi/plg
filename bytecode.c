@@ -172,6 +172,7 @@ void bytecode_print_call(bytecode * value)
 
 void bytecode_print_call_addr(bytecode * value)
 {
+    printf("%d: %s addr %u\n", value->addr, bytecode_type_str(value->type), value->call.addr);
 }
 
 void bytecode_print_push_env(bytecode * value)
@@ -312,6 +313,34 @@ void bytecode_list_delete(bytecode_list * list)
         node = next;
     }
     free(list);
+}
+
+void bytecode_list_set_addr(bytecode_list * list)
+{
+    bytecode_node * node = list->head;
+    while (node != NULL)
+    {
+        bytecode * value = &node->value;
+        
+        if (value->type == BYTECODE_PUT_STRUCT)
+        {
+            value->type = BYTECODE_PUT_STRUCT_ADDR;
+            unsigned int addr = value->put_struct.predicate_ref->addr;
+            value->put_struct.addr = addr;
+        } else if (value->type == BYTECODE_U_STRUCT)
+        {
+            value->type = BYTECODE_U_STRUCT_ADDR;
+            unsigned int addr = value->u_struct.predicate_ref->addr;
+            value->u_struct.addr = addr;
+        } else if (value->type == BYTECODE_CALL)
+        {
+            value->type = BYTECODE_CALL_ADDR;
+            unsigned int addr = value->call.predicate_ref->addr;
+            value->call.addr = addr;
+        }
+
+        node = node->next;
+    }
 }
 
 bytecode * bytecode_list_add_end(bytecode_list * list, bytecode * value)

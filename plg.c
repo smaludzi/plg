@@ -89,6 +89,8 @@ int main(int argc, char * argv[])
 			gencode_result gen_res = GENCODE_SUCCESS;
 			program_gencode(gen, program_value, &gen_res);
 
+			bytecode_list_set_addr(gen->list);
+
 			strtab_print(gen->strtab_value);
 			bytecode_list_print(gen->list);
 

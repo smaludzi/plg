@@ -188,6 +188,7 @@ void bytecode_node_delete(bytecode_node * value);
 bytecode_list * bytecode_list_new();
 void bytecode_list_delete(bytecode_list * list);
 
+void bytecode_list_set_addr(bytecode_list * list);
 bytecode * bytecode_list_add_end(bytecode_list * list, bytecode * value);
 void bytecode_list_print(bytecode_list * list);
 
