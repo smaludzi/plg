@@ -43,16 +43,6 @@ void var_delete(var * value)
     free(value);
 }
 
-void var_deallocator(void * value)
-{
-    var_delete((var *)value);
-}
-
-void var_null_deallocator(void * value)
-{
-    return;
-}
-
 void var_print(var * value)
 {
     printf("var name: %s\n", value->name);

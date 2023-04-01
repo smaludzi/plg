@@ -22,7 +22,8 @@
 #ifndef __SYMTAB_H__
 #define __SYMTAB_H__
 
-#include "var.h"
+typedef struct clause clause;
+typedef struct var var;
 
 typedef enum symtab_lookup_op
 {
@@ -32,15 +33,19 @@ typedef enum symtab_lookup_op
 
 typedef enum symtab_entry_type
 {
+    SYMTAB_UNKNOWN = 0,
     SYMTAB_VAR = 1,
+    SYMTAB_CLAUSE = 2
 } symtab_entry_type;
 
 typedef struct symtab_entry
 {
     symtab_entry_type type;
     const char * id;
+    unsigned int arity;
     union {
         var * var_value;
+        clause * predicate_value;
         void * object_value;
     };
 } symtab_entry;
@@ -56,9 +61,12 @@ typedef struct symtab
 symtab_entry * symtab_entry_new(unsigned int size);
 void symtab_entry_delete(symtab_entry * entries);
 void symtab_entry_add_object(symtab_entry * entries, unsigned int size,
-                             int type, const char * id, void * object_value);
+                             int type, const char * id, unsigned int arity,
+                             void * object_value);
 symtab_entry * symtab_entry_lookup_object(symtab_entry * entries,
-                                          unsigned int size, const char * id);
+                                          unsigned int size,
+                                          const char * id,
+                                          unsigned int arity);
 void symtab_entry_resize(symtab_entry * entries, int size,
                          symtab_entry * entries_new, int size_new);
 
@@ -69,7 +77,9 @@ symtab * symtab_new(unsigned int size, symtab * parent);
 void symtab_delete(symtab * tab);
 
 void symtab_add_var(symtab * tab, var * var_value);
+void symtab_add_predicate(symtab * tab, clause * clause_value);
 symtab_entry * symtab_lookup(symtab * tab, const char * id, symtab_lookup_op lookup);
+symtab_entry * symtab_lookup_arity(symtab * tab, const char * id, unsigned int arity, symtab_lookup_op lookup);
 unsigned int symtab_size(symtab * tab);
 unsigned int symtab_size_type(symtab * tab, symtab_entry_type type);
 

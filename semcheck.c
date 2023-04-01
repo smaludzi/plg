@@ -16,9 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "semcheck.h"
-
-#include <stdio.h>
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
 
 void var_is_bound_semcheck(symtab * stab, var * value, semcheck_result * result)
 {
@@ -36,7 +36,6 @@ void var_semcheck(symtab * stab, var_list * freevars, var * value, semcheck_resu
     {
         return;
     }
-
     symtab_entry * entry = symtab_lookup(stab, value->name, SYMTAB_LOOKUP_LOCAL);
     if (entry != NULL && entry->type == SYMTAB_VAR)
     {
@@ -135,7 +134,22 @@ void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_re
             var_semcheck(stab, freevars, value->var_value, result);
         break;
         case TERM_TYPE_TERM:
+        {
+            symtab_entry * entry = symtab_lookup_arity(stab, value->name, term_arity(value), SYMTAB_LOOKUP_GLOBAL);
+            if (entry != NULL)
+            {
+                assert(entry->type == SYMTAB_CLAUSE &&
+                       entry->arity == term_arity(value) &&
+                       strcmp(entry->id, value->name));
+                value->predicate_ref = entry->predicate_value;
+            }
+            else
+            {
+                *result = SEMCHECK_FAILURE;
+                fprintf(stderr, "%u: unknown predicate '%s/%u'\n", value->line_no, value->name, term_arity(value));
+            }
             term_list_semcheck(stab, freevars, value->terms, result);
+        }
         break;
     }
 }
@@ -163,13 +177,25 @@ void term_list_semcheck(symtab * stab, var_list * freevars, term_list * list, se
     }    
 }
 
-void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * result)
+void goal_literal_semcheck(symtab * stab, goal * goal_value, goal_literal * value, semcheck_result * result)
 {
-    var_list * freevars = var_list_new();
-
-    if (value.terms != NULL)
+    symtab_entry * entry = symtab_lookup_arity(stab, value->name, term_list_arity(value->terms), SYMTAB_LOOKUP_GLOBAL);
+    if (entry != NULL)
     {
-        term_list_semcheck(stab, freevars, value.terms, result);
+        assert(entry->type == SYMTAB_CLAUSE &&
+               entry->arity == term_list_arity(value->terms) &&
+               strcmp(entry->id, value->name) == 0);
+        value->predicate_ref = entry->predicate_value;
+    }
+    else
+    {
+        *result = SEMCHECK_FAILURE;
+        fprintf(stderr, "%d: cannot find predicate %s/%u\n", goal_value->line_no, value->name, term_list_arity(value->terms));
+    }
+    var_list * freevars = var_list_new();
+    if (value->terms != NULL)
+    {
+        term_list_semcheck(stab, freevars, value->terms, result);
     }
     var_list_enumerate(freevars, stab->count + 1);
     var_list_add_to_symtab(stab, freevars, result);
@@ -177,17 +203,17 @@ void goal_literal_semcheck(symtab * stab, goal_literal value, semcheck_result * 
     var_list_delete_null(freevars);
 }
 
-void goal_unification_semcheck(symtab * stab, goal_unification value, semcheck_result * result)
+void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unification * value, semcheck_result * result)
 {
     var_list * freevars = var_list_new();
 
-    var_semcheck(stab, freevars, value.variable, result);
-    term_semcheck(stab, freevars, value.term_value, result);
+    var_semcheck(stab, freevars, value->variable, result);
+    term_semcheck(stab, freevars, value->term_value, result);
 
     if (var_list_size(freevars) > 0)
     {
         *result = SEMCHECK_FAILURE;
-        fprintf(stderr, "found free variables in goal unification\n");
+        fprintf(stderr, "%d: found free variables in goal unification\n", goal_value->line_no);
         var_list_print(freevars);
     }
 
@@ -200,12 +226,12 @@ void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)
     {
         case GOAL_TYPE_LITERAL:
         {
-            goal_literal_semcheck(stab, value->literal, result);
+            goal_literal_semcheck(stab, value, &value->literal, result);
             break;
         }
         case GOAL_TYPE_UNIFICATION:
         {
-            goal_unification_semcheck(stab, value->unification, result);
+            goal_unification_semcheck(stab, value, &value->unification, result);
             break;
         }
         case GOAL_TYPE_UNKNOW:
@@ -246,11 +272,11 @@ void clause_enumerate_vars(symtab * stab, unsigned int start)
     }
 }
 
-void clause_semcheck(clause * value, semcheck_result * result)
+void clause_semcheck(symtab * stab, clause * value, semcheck_result * result)
 {
     if (value->stab == NULL)
     {
-        value->stab = symtab_new(10, NULL);
+        value->stab = symtab_new(16, stab);
     }
     if (value->vars != NULL)
     {
@@ -267,37 +293,56 @@ void clause_semcheck(clause * value, semcheck_result * result)
     }
 }
 
-void clause_list_semcheck(clause_list * list, semcheck_result * result)
+void clause_list_semcheck(symtab * stab, clause_list * list, semcheck_result * result)
 {
     clause_node * node = list->head;
     while (node != NULL)
     {
         if (node->value)
         {
-            clause_semcheck(node->value, result);
+            clause_semcheck(stab, node->value, result);
         }
         node = node->next;
     }    
 }
 
-void query_semcheck(query * value, semcheck_result * result)
+void query_semcheck(symtab * stab, query * value, semcheck_result * result)
 {
     if (value->stab == NULL)
     {
-        value->stab = symtab_new(10, NULL);
+        value->stab = symtab_new(16, stab);
     }
     goal_list_semcheck(value->stab, value->goals, result);
+}
+
+void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck_result * result)
+{
+    clause_node * node = list->head;
+    while (node != NULL)
+    {
+        clause * value = node->value;
+        if (value != NULL)
+        {
+            symtab_entry * entry = symtab_lookup_arity(stab, value->name, clause_arity(value), SYMTAB_LOOKUP_GLOBAL);
+            if (entry == NULL)
+            {
+                symtab_add_predicate(stab, value);
+            }
+        }
+        node = node->next;
+    }
 }
 
 void program_semcheck(program * value, semcheck_result * result)
 {
     if (value->clausies != NULL)
     {
-        clause_list_semcheck(value->clausies, result);
+        program_add_predicates_semcheck(value->stab, value->clausies, result);
+        clause_list_semcheck(value->stab, value->clausies, result);
     }
     if (value->query_value != NULL)
     {
-        query_semcheck(value->query_value, result);
+        query_semcheck(value->stab, value->query_value, result);
     }
 }
 

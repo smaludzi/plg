@@ -20,7 +20,8 @@
 #ifndef __TERM_H__
 #define __TERM_H__ 1
 
-#include "var.h"
+typedef struct var var;
+typedef struct clause clause;
 
 typedef enum term_type {
     TERM_TYPE_UNKNOWN = 0,
@@ -35,6 +36,7 @@ typedef struct term {
     char * name;
     struct term_list * terms;
     var * var_value;
+    clause * predicate_ref;
     unsigned int line_no;
     struct term * next;
 } term;
@@ -50,14 +52,14 @@ term * term_new_var(term_type, var * var_value);
 term * term_new_list(term_type type, char * name, term_list * terms);
 void term_delete(term * t);
 
-void term_deallocator(void * data);
-
+unsigned int term_arity(term * t);
 void term_print(term * t);
 
 term_list * term_list_new();
 void term_list_delete(term_list * list);
 void term_list_add_end(term_list * list, term * value);
 
+unsigned int term_list_arity(term_list * list);
 void term_list_print(term_list * list);
 unsigned int term_list_size(term_list * list);
 

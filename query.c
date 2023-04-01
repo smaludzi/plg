@@ -37,11 +37,6 @@ void query_delete(query * value)
     free(value);
 }
 
-void query_deallocator(void * value)
-{
-    query_delete((query *)value);
-}
-
 void query_print(query * value)
 {
     goal_list_print(value->goals);

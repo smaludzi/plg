@@ -27,6 +27,7 @@ goal * goal_new_literal(char * name, term_list * terms)
     value->type = GOAL_TYPE_LITERAL;
     value->literal.name = name;
     value->literal.terms = terms;
+    value->literal.predicate_ref = NULL;
     value->line_no = 0;
     value->next = NULL;
 
@@ -76,11 +77,6 @@ void goal_delete(goal * value)
     }
 
     free(value);
-}
-
-void goal_deallocator(void * value)
-{
-    goal_delete((goal *)value);
 }
 
 void goal_print(goal * value)

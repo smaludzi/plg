@@ -30,6 +30,7 @@ clause * clause_new(char * name, var_list * vars, goal_list * goals)
     value->goals = goals;
     value->stab = NULL;
     value->gencode = 0;
+    value->addr = 0;
 
     return value;
 }
@@ -53,11 +54,6 @@ void clause_delete(clause * value)
         symtab_delete(value->stab);
     }
     free(value);
-}
-
-void clause_deallocator(void * data)
-{
-    clause_delete((clause *)data);
 }
 
 unsigned int clause_arity(clause * value)

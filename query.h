@@ -29,7 +29,6 @@ typedef struct query {
 
 query * query_new(goal_list * goals);
 void query_delete(query * value);
-void query_deallocator(void * value);
 
 void query_print(query * value);
 

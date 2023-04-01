@@ -50,8 +50,6 @@ typedef struct var_list
 
 var * var_new(char * name);
 void var_delete(var * value);
-void var_deallocator(void * value);
-void var_null_deallocator(void * value);
 
 void var_print(var * value);
 

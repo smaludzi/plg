@@ -22,6 +22,8 @@
 #ifndef __BYTECODE_H__
 #define __BYTECODE_H__
 
+typedef struct clause clause;
+
 typedef enum bytecode_type {
     BYTECODE_UNKNOWN = 0,
     BYTECODE_POP = 1,
@@ -33,13 +35,16 @@ typedef enum bytecode_type {
     BYTECODE_PUT_ANON,
     BYTECODE_PUT_ATOM,
     BYTECODE_PUT_STRUCT,
+    BYTECODE_PUT_STRUCT_ADDR,
     BYTECODE_U_ATOM,
     BYTECODE_U_STRUCT,
+    BYTECODE_U_STRUCT_ADDR,
     BYTECODE_UP,
     BYTECODE_BIND,
     BYTECODE_SON,
     BYTECODE_MARK,
     BYTECODE_CALL,
+    BYTECODE_CALL_ADDR,
     BYTECODE_PUSH_ENV,
     BYTECODE_POP_ENV,
     BYTECODE_SET_BTP,
@@ -73,11 +78,17 @@ typedef struct bytecode {
             unsigned int index;
         } check;
         struct {
-            unsigned int size;
+            union {
+                unsigned int addr;
+                clause * predicate_ref;
+            };
         } put_struct;
         struct {
-            unsigned int size;
             int offset;
+            union {
+                unsigned int addr;
+                clause * predicate_ref;
+            };
         } u_struct;
         struct {
             int offset;
@@ -95,7 +106,10 @@ typedef struct bytecode {
             int offset;
         } try;
         struct {
-            unsigned int size;
+            union {
+                unsigned int addr;
+                clause * predicate_ref;
+            };
         } call;
         struct {
             int offset;
@@ -137,13 +151,16 @@ void bytecode_print_check(bytecode * value);
 void bytecode_print_put_anon(bytecode * value);
 void bytecode_print_put_atom(bytecode * value);
 void bytecode_print_put_struct(bytecode * value);
+void bytecode_print_put_struct_addr(bytecode * value);
 void bytecode_print_u_atom(bytecode * value);
 void bytecode_print_u_struct(bytecode * value);
+void bytecode_print_u_struct_addr(bytecode * value);
 void bytecode_print_up(bytecode * value);
 void bytecode_print_bind(bytecode * value);
 void bytecode_print_son(bytecode * value);
 void bytecode_print_mark(bytecode * value);
 void bytecode_print_call(bytecode * value);
+void bytecode_print_call_addr(bytecode * value);
 void bytecode_print_push_env(bytecode * value);
 void bytecode_print_pop_env(bytecode * value);
 void bytecode_print_set_btp(bytecode * value);

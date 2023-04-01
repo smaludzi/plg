@@ -20,6 +20,8 @@
  * THE SOFTWARE.
  */
 #include "symtab.h"
+#include "var.h"
+#include "clause.h"
 #include "hash.h"
 #include <assert.h>
 #include <stdio.h>
@@ -39,12 +41,12 @@ symtab_entry * symtab_entry_new(unsigned int size)
 void symtab_entry_delete(symtab_entry * entries) { free(entries); }
 
 void symtab_entry_add_object(symtab_entry * entries, unsigned int size,
-                             int type, const char * id, void * object_value)                             
+                             int type, const char * id, unsigned int arity, void * object_value)
 {
     unsigned int times = 0;
     unsigned int index = 0;
 
-    index = hash_str(id) % size;
+    index = (hash_str(id) + 32 * arity) % size;
     while (entries[index].type != 0)
     {
         index = (index + 1) % size;
@@ -56,19 +58,23 @@ void symtab_entry_add_object(symtab_entry * entries, unsigned int size,
     }
     entries[index].type = type;
     entries[index].id = id;
+    entries[index].arity = arity;
     entries[index].object_value = object_value;
 }
 
 symtab_entry * symtab_entry_lookup_object(symtab_entry * entries,
-                                          unsigned int size, const char * id)
+                                          unsigned int size,
+                                          const char * id,
+                                          unsigned int arity)
 {
     unsigned int times = 0;
     unsigned int index = 0;
     
-    index = hash_str(id) % size;
+    index = (hash_str(id) + 32 * arity) % size;
     while (entries[index].type != 0)
     {
-        if (strcmp(entries[index].id, id) == 0)
+        if (entries[index].arity == arity &&
+            strcmp(entries[index].id, id) == 0)
         {
             return &entries[index];
         }
@@ -93,7 +99,8 @@ void symtab_entry_resize(symtab_entry * entries, int size,
         if (entries[i].id != NULL)
         {
             symtab_entry_add_object(entries_new, size_new, entries[i].type,
-                                    entries[i].id, entries[i].object_value);
+                                    entries[i].id, entries[i].arity,
+                                    entries[i].object_value);
         }
     }
 }
@@ -110,9 +117,11 @@ char * symtab_entry_type_str(symtab_entry_type type)
 {
     switch (type)
     {
-        case SYMTAB_VAR: return "var";
+        case SYMTAB_UNKNOWN: return "SYMTAB_UNKNOWN";
+        case SYMTAB_VAR: return "SYMTAB_VAR";
+        case SYMTAB_CLAUSE: return "SYMTAB_CLAUSE";
     }
-    return "unknown";
+    return "SYMTAB_UNKNOWN";
 }
 
 symtab * symtab_new(unsigned int size, symtab * parent)
@@ -148,7 +157,6 @@ void symtab_resize(symtab * tab)
         symtab_entry * entries_new = symtab_entry_new(size_new);
 
         symtab_entry_resize(tab->entries, tab->size, entries_new, size_new);
-
         symtab_entry_delete(tab->entries);
 
         tab->size = size_new;
@@ -162,22 +170,40 @@ void symtab_add_var(symtab * tab, var * var_value)
     {
         return;
     }
-    symtab_entry_add_object(tab->entries, tab->size, SYMTAB_VAR, var_value->name,
-                            var_value);
+    symtab_entry_add_object(tab->entries, tab->size, SYMTAB_VAR,
+                            var_value->name, 0, var_value);
+    tab->count++;
+    symtab_resize(tab);
+}
+
+void symtab_add_predicate(symtab * tab, clause * clause_value)
+{
+    if (clause_value->name == NULL)
+    {
+        return;
+    }
+    symtab_entry_add_object(tab->entries, tab->size, SYMTAB_CLAUSE,
+                            clause_value->name, clause_arity(clause_value),
+                            clause_value);
     tab->count++;
     symtab_resize(tab);
 }
 
 symtab_entry * symtab_lookup(symtab * tab, const char * id, symtab_lookup_op lookup)
 {
+    return symtab_lookup_arity(tab, id, 0, lookup);
+}
+
+symtab_entry * symtab_lookup_arity(symtab * tab, const char * id, unsigned int arity, symtab_lookup_op lookup)
+{
     symtab_entry * entry = NULL;
 
-    entry = symtab_entry_lookup_object(tab->entries, tab->size, id);
+    entry = symtab_entry_lookup_object(tab->entries, tab->size, id, arity);
     if ((lookup == SYMTAB_LOOKUP_GLOBAL) &&
         (entry == NULL) && 
         (tab->parent != NULL))
     {
-        return symtab_lookup(tab->parent, id, lookup);
+        return symtab_lookup_arity(tab->parent, id, arity, lookup);
     }
     else
     {

@@ -186,6 +186,7 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_ATOM;
             gencode_add_bytecode(gen, &bc);
+            /* TODO: add atom cache */
             printf("PUT_ATOM %s\n", value->name);
         }
         break;
@@ -200,9 +201,8 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
 
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_STRUCT;
-            bc.put_struct.size = term_list_size(value->terms);
+            bc.put_struct.predicate_ref = value->predicate_ref;
             gencode_add_bytecode(gen, &bc);
-            /* TODO: extend call with predicate address, check predicate in semcheck */
             printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms));
         }
         break;
@@ -221,7 +221,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode bc = { 0 };
             bc.type = BYTECODE_POP;
             gencode_add_bytecode(gen, &bc);
-            printf("POP \n");
+            printf("POP\n");
         }
         break;
         case TERM_TYPE_ATOM:
@@ -229,6 +229,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode bc = { 0 };
             bc.type = BYTECODE_U_ATOM;
             gencode_add_bytecode(gen, &bc);
+            /* TODO: add atom cache */
             printf("UATOM %s\n", value->name);
         }
         break;
@@ -241,9 +242,8 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode * bc_u_struct_ptr;
             bc_u_struct.type = BYTECODE_U_STRUCT;
             bc_u_struct.u_struct.offset = 0;
-            bc_u_struct.u_struct.size = term_list_size(value->terms);
+            bc_u_struct.u_struct.predicate_ref = value->predicate_ref;
             bc_u_struct_ptr = gencode_add_bytecode(gen, &bc_u_struct);
-            /* TODO: extend call with predicate address, check predicate in semcheck */
             printf("USTRUCT %s/%d A\n", value->name, term_list_size(value->terms));
 
             term_list_unify_gencode(gen, value->terms, result);
@@ -395,9 +395,8 @@ void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * re
 
     bytecode bc_call = { 0 };
     bc_call.type = BYTECODE_CALL;
-    bc_call.call.size = term_list_size(value.terms);
+    bc_call.call.predicate_ref = value.predicate_ref;
     gencode_add_bytecode(gen, &bc_call);
-    /* TODO: extend call with predicate address, check predicate in semcheck */
     printf("CALL %s/%u\n", value.name, term_list_size(value.terms));
 
     bytecode bc_label = { 0 };
@@ -528,6 +527,8 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
     bc_push_env.push_env.size = local_vars->size;
     gencode_add_bytecode(gen, &bc_push_env);
     printf("PUSHENV %u\n", local_vars->size);
+
+    value->addr = bc_push_env.addr;
 
     var_list_delete_null(local_vars);
     goal_list_gencode(gen, value->goals, result);

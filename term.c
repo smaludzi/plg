@@ -19,7 +19,9 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #include "term.h"
+#include "var.h"
 
 term * term_new(term_type type, char * name)
 {
@@ -34,6 +36,7 @@ term * term_new_var(term_type type, var * var_value)
 	value->name = NULL;
 	value->terms = NULL;
 	value->var_value = var_value;
+	value->predicate_ref = NULL;
 	value->next = NULL;
 
 	return value;
@@ -53,6 +56,7 @@ term * term_new_list(term_type type, char * name, term_list * terms)
 	t->name = name;
 	t->terms = terms;
 	t->var_value = NULL;
+	t->predicate_ref = NULL;
 	t->next = NULL;
 	
 	return t;
@@ -75,9 +79,17 @@ void term_delete(term * t)
 	free(t);
 }
 
-void term_deallocator(void * data)
+unsigned int term_arity(term * t)
 {
-	term_delete((term *)data);
+	switch (t->type)
+	{
+		case TERM_TYPE_UNKNOWN: assert(0);
+		case TERM_TYPE_ANON: return 0;
+		case TERM_TYPE_ATOM: return 0;
+		case TERM_TYPE_VAR: return 0;
+		case TERM_TYPE_TERM: return term_list_size(t->terms);
+	}
+	return 0;
 }
 
 void term_print(term * t)
@@ -149,6 +161,15 @@ void term_list_add_end(term_list * list, term * value)
 }
 
 unsigned int term_list_size(term_list * list)
+{
+	if (list == NULL)
+	{
+		return 0;
+	}
+	return list->size;
+}
+
+unsigned int term_list_arity(term_list * list)
 {
 	if (list == NULL)
 	{

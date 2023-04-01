@@ -20,8 +20,10 @@
 
 #include "clause.h"
 #include "query.h"
+#include "symtab.h"
 
 typedef struct program {
+    symtab * stab;
     clause_list * clausies;
     query * query_value;
 } program;

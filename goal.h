@@ -21,6 +21,8 @@
 #include "var.h"
 #include "term.h"
 
+typedef struct clause clause;
+
 typedef enum goal_type { 
     GOAL_TYPE_UNKNOW,
     GOAL_TYPE_LITERAL,
@@ -30,6 +32,7 @@ typedef enum goal_type {
 typedef struct goal_literal {
     char * name;
     term_list * terms;
+    clause * predicate_ref;
 } goal_literal;
 
 typedef struct goal_unification {
@@ -55,7 +58,6 @@ typedef struct goal_list {
 goal * goal_new_literal(char * name, term_list * terms);
 goal * goal_new_unification(var * variable, term * term_value);
 void goal_delete(goal * value);
-void goal_deallocator(void * value);
 void goal_print(goal * value);
 
 goal_list * goal_list_new();

@@ -28,6 +28,7 @@ typedef struct clause {
     symtab * stab;
     unsigned int line_no;
     char gencode;
+    unsigned int addr;
 } clause;
 
 typedef struct clause_node {
@@ -43,7 +44,6 @@ typedef struct clause_list {
 
 clause * clause_new(char * name, var_list * vars, goal_list * goals);
 void clause_delete(clause * value);
-void clause_deallocator(void * value);
 
 unsigned int clause_arity(clause * value);
 

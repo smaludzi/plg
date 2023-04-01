@@ -23,6 +23,7 @@ program * program_new(clause_list * clausies, query * query_value)
 {
     program * value = malloc(sizeof(program));
 
+    value->stab = symtab_new(32, NULL);
     value->clausies = clausies;
     value->query_value = query_value;
 
@@ -31,6 +32,10 @@ program * program_new(clause_list * clausies, query * query_value)
 
 void program_delete(program * value)
 {
+    if (value->stab)
+    {
+        symtab_delete(value->stab);
+    }
     if (value->clausies)
     {
         clause_list_delete(value->clausies);

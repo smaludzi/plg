@@ -20,6 +20,7 @@
  * THE SOFTWARE.
  */
 #include "bytecode.h"
+#include "clause.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -35,13 +36,16 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_PUT_ANON, bytecode_print_put_anon },
     { BYTECODE_PUT_ATOM, bytecode_print_put_atom },
     { BYTECODE_PUT_STRUCT, bytecode_print_put_struct },
+    { BYTECODE_PUT_STRUCT_ADDR, bytecode_print_put_struct_addr },
     { BYTECODE_U_ATOM, bytecode_print_u_atom },
     { BYTECODE_U_STRUCT, bytecode_print_u_struct },
+    { BYTECODE_U_STRUCT_ADDR, bytecode_print_u_struct_addr },
     { BYTECODE_UP, bytecode_print_up },
     { BYTECODE_BIND, bytecode_print_bind },
     { BYTECODE_SON, bytecode_print_son },
     { BYTECODE_MARK, bytecode_print_mark },
     { BYTECODE_CALL, bytecode_print_call },
+    { BYTECODE_CALL_ADDR, bytecode_print_call_addr },
     { BYTECODE_PUSH_ENV, bytecode_print_push_env },
     { BYTECODE_POP_ENV, bytecode_print_pop_env },
     { BYTECODE_SET_BTP, bytecode_print_set_btp },
@@ -113,7 +117,14 @@ void bytecode_print_put_atom(bytecode * value)
 
 void bytecode_print_put_struct(bytecode * value)
 {
-    printf("%d: %s size %u\n", value->addr, bytecode_type_str(value->type), value->put_struct.size);
+    printf("%d: %s %s/%u\n", value->addr, bytecode_type_str(value->type),
+            value->put_struct.predicate_ref->name, clause_arity(value->put_struct.predicate_ref));
+}
+
+void bytecode_print_put_struct_addr(bytecode * value)
+{
+    printf("%d: %s addr %u\n", value->addr, bytecode_type_str(value->type),
+           value->put_struct.addr);
 }
 
 void bytecode_print_u_atom(bytecode * value)
@@ -123,7 +134,14 @@ void bytecode_print_u_atom(bytecode * value)
 
 void bytecode_print_u_struct(bytecode * value)
 {
-    printf("%d: %s size %u offset %d\n", value->addr, bytecode_type_str(value->type), value->u_struct.size, value->u_struct.offset);
+    printf("%d: %s %s/%u offset %d\n", value->addr, bytecode_type_str(value->type),
+           value->u_struct.predicate_ref->name, clause_arity(value->u_struct.predicate_ref), value->u_struct.offset);
+}
+
+void bytecode_print_u_struct_addr(bytecode * value)
+{
+    printf("%d: %s addr %u offset %d\n", value->addr, bytecode_type_str(value->type),
+            value->u_struct.addr, value->u_struct.offset);
 }
 
 void bytecode_print_up(bytecode * value)
@@ -148,7 +166,12 @@ void bytecode_print_mark(bytecode * value)
 
 void bytecode_print_call(bytecode * value)
 {
-    printf("%d: %s size %u\n", value->addr, bytecode_type_str(value->type), value->call.size);
+    printf("%d: %s %s/%u\n", value->addr, bytecode_type_str(value->type),
+           value->call.predicate_ref->name, clause_arity(value->call.predicate_ref));
+}
+
+void bytecode_print_call_addr(bytecode * value)
+{
 }
 
 void bytecode_print_push_env(bytecode * value)
@@ -229,13 +252,16 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_PUT_ANON: return "BYTECODE_PUT_ANON";
         case BYTECODE_PUT_ATOM: return "BYTECODE_PUT_ATOM";
         case BYTECODE_PUT_STRUCT: return "BYTECODE_PUT_STRUCT";
+        case BYTECODE_PUT_STRUCT_ADDR: return "BYTECODE_PUT_STRUCT_ADDR";
         case BYTECODE_U_ATOM: return "BYTECODE_U_ATOM";
         case BYTECODE_U_STRUCT: return "BYTECODE_U_STRUCT";
+        case BYTECODE_U_STRUCT_ADDR: return "BYTECODE_U_STRUCT_ADDR";
         case BYTECODE_UP: return "BYTECODE_UP";
         case BYTECODE_BIND: return "BYTECODE_BIND";
         case BYTECODE_SON: return "BYTECODE_SON";
         case BYTECODE_MARK: return "BYTECODE_MARK";
         case BYTECODE_CALL: return "BYTECODE_CALL";
+        case BYTECODE_CALL_ADDR: return "BYTECODE_CALL_ADDR";
         case BYTECODE_PUSH_ENV: return "BYTECODE_PUSH_ENV";
         case BYTECODE_POP_ENV: return "BYTECODE_POP_ENV";
         case BYTECODE_SET_BTP: return "BYTECODE_SET_BTP";

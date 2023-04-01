@@ -1,5 +1,5 @@
-parent(X, Y, Z, Q) <= X = slawek(Z), Y = maks
 parent(X, Y) <= X = slawek, Y = kuba
+parent(X, Y) <= X = slawek, Y = maks
 parent(X, Y) <= X = boguslaw, Y = slawek
 parent(X, Y) <= X = boguslaw, Y = beata
 
