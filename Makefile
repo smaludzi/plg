@@ -37,7 +37,8 @@ OBJECTS = plg.o \
           unify.o \
           unify_term.o \
           hash.o \
-          strtab.o
+          strtab.o \
+          object.o
 SCAN_PAR = scanner.o parser.o
 
 #TEST_HASH = hash.o test_hash.o

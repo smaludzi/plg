@@ -18,3 +18,4 @@ unify.o: unify.c unify.h
 unify_term.o: unify_term.c hash.h unify.h unify_term.h term.h
 hash.o: hash.c hash.h
 strtab.o: strtab.c strtab.h hash.h
+object.o: object.c object.h
