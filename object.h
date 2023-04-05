@@ -73,7 +73,7 @@ object * object_new_atom(unsigned int idx);
 object * object_new_anon();
 object * object_new_var();
 object * object_new_ref(mem_ptr ptr_value);
-object * object_struct(unsigned int size);
+object * object_new_struct(unsigned int size);
 
 void object_delete(object * value);
 

@@ -64,7 +64,7 @@ object * object_new_ref(mem_ptr ptr_value)
     return value;
 }
 
-object * object_struct(unsigned int size)
+object * object_new_struct(unsigned int size)
 {
     mem_ptr * refs = NULL;
     object * value = (object *)malloc(sizeof(object));
