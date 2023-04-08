@@ -190,6 +190,11 @@ void gc_run(gc * collector, gc_stack * omfalos, stack_ptr stack_size)
         mem_ptr * ref_ptr = &(omfalos[si].addr);
         *ref_ptr = collector->mem[curr_mem][*ref_ptr].back_ptr;
     }
+    // reset unused memory
+    for (mi = 0; mi < collector->free[curr_mem]; mi++)
+    {
+        collector->mem[curr_mem][mi].object_value = NULL;
+    }
     // change memory side
     collector->free[curr_mem] = 1;
     collector->mem_idx = next_mem;
@@ -219,12 +224,16 @@ mem_ptr gc_alloc_atom(gc * collector, unsigned int idx)
 
 mem_ptr gc_alloc_anon(gc * collector)
 {
-    return gc_alloc_any(collector, object_new_anon());
+    mem_ptr value = gc_alloc_any(collector, object_new_anon());
+    collector->mem[collector->mem_idx][value].object_value->anon_value.ref = value;
+    return value;
 }
 
 mem_ptr gc_alloc_var(gc * collector)
 {
-    return gc_alloc_any(collector, object_new_var());
+    mem_ptr value = gc_alloc_any(collector, object_new_var());
+    collector->mem[collector->mem_idx][value].object_value->var_value.ref = value;
+    return value;
 }
 
 mem_ptr gc_alloc_ref(gc * collector, mem_ptr ptr_value)
@@ -281,7 +290,7 @@ mem_ptr gc_get_struct_ref(gc * collector, mem_ptr addr, unsigned int idx)
 {
     assert(collector->mem_size >= addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_STRUCT);
-    assert(collector->mem[collector->mem_idx][addr].object_value->struct_value.size >= addr);
+    assert(collector->mem[collector->mem_idx][addr].object_value->struct_value.size > idx);
 
     return collector->mem[collector->mem_idx][addr].object_value->struct_value.refs[idx];
 }
@@ -322,7 +331,7 @@ mem_ptr gc_set_struct_ref(gc * collector, mem_ptr addr, unsigned int idx, mem_pt
 {
     assert(collector->mem_size >= addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_STRUCT);
-    assert(collector->mem[collector->mem_idx][addr].object_value->struct_value.size >= addr);
+    assert(collector->mem[collector->mem_idx][addr].object_value->struct_value.size > idx);
 
     return collector->mem[collector->mem_idx][addr].object_value->struct_value.refs[idx] = ref;
 }

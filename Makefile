@@ -44,6 +44,7 @@ SCAN_PAR = scanner.o parser.o
 
 #TEST_HASH = hash.o test_hash.o
 #TEST_UNIFY = test_unify.o unify.o
+TEST_GC = object.o gc.o test_gc.o
 
 plg: $(OBJECTS) $(SCAN_PAR)
 
@@ -52,6 +53,7 @@ parser.h parser.c: parser.y
 
 test_hash: $(TEST_HASH)
 test_unify: $(TEST_UNIFY)
+test_gc: $(TEST_GC)
 
 deps:
 	$(CC) -MM $(TEST_HASH:.o=.c) $(OBJECTS:.o=.c) > .deps
