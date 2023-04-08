@@ -39,7 +39,8 @@ OBJECTS = plg.o \
           hash.o \
           strtab.o \
           object.o \
-          gc.o
+          gc.o \
+          vm.o
 SCAN_PAR = scanner.o parser.o
 
 #TEST_HASH = hash.o test_hash.o

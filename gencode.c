@@ -533,6 +533,8 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
     gencode_add_bytecode(gen, &bc_push_env);
     printf("PUSHENV %u\n", local_vars->size);
 
+    /* TODO: correct clause vs. predicate address */
+    /* move to predicate_0_gencode and predicate_n_gencode */
     value->addr = bc_push_env.addr;
 
     var_list_delete_null(local_vars);

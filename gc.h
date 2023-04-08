@@ -29,50 +29,50 @@ typedef struct gc_mem
     char mark;
     union {
         object * object_value;
-        mem_ptr back_ptr; // used to correct references
+        heap_ptr back_ptr; // used to correct references
     };
 } gc_mem;
 
 typedef struct gc_stack
 {
-    mem_ptr addr;
+    heap_ptr addr;
 } gc_stack;
 
 typedef struct gc
 {
-    mem_ptr free[2];
     gc_mem * mem[2];
+    heap_size_t free[2];
     unsigned int mem_idx;
-    unsigned int mem_size;
+    heap_size_t size;
 } gc;
 
-gc * gc_new(unsigned int mem_size);
+gc * gc_new(heap_size_t size);
 void gc_delete(gc * collector);
 
-void gc_mark(gc * collector, mem_ptr addr);
+void gc_mark(gc * collector, heap_size_t addr);
 void gc_run(gc * collector, gc_stack * omfalos, stack_ptr stack_size);
 
-mem_ptr gc_alloc_any(gc * collector, object * value);
-mem_ptr gc_alloc_atom(gc * collector, unsigned int idx);
-mem_ptr gc_alloc_anon(gc * collector);
-mem_ptr gc_alloc_var(gc * collector);
-mem_ptr gc_alloc_ref(gc * collector, mem_ptr ptr_value);
-mem_ptr gc_alloc_struct(gc * collector, unsigned int size);
+heap_ptr gc_alloc_any(gc * collector, object * value);
+heap_ptr gc_alloc_atom(gc * collector, atom_idx_t idx);
+heap_ptr gc_alloc_anon(gc * collector);
+heap_ptr gc_alloc_var(gc * collector);
+heap_ptr gc_alloc_ref(gc * collector, heap_ptr ptr_value);
+heap_ptr gc_alloc_struct(gc * collector, heap_size_t size);
 
-unsigned int gc_get_atom_idx(gc * collector, mem_ptr addr);
-mem_ptr gc_get_anon_ref(gc * collector, mem_ptr addr);
-mem_ptr gc_get_var_ref(gc * collector, mem_ptr addr);
-mem_ptr gc_get_ref_ref(gc * collector, mem_ptr addr);
-unsigned int gc_get_struct_size(gc * collector, mem_ptr addr);
-mem_ptr gc_get_struct_ref(gc * collector, mem_ptr addr, unsigned int idx);
+atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr);
+heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr);
+heap_ptr gc_get_var_ref(gc * collector, heap_ptr addr);
+heap_ptr gc_get_ref_ref(gc * collector, heap_ptr addr);
+heap_size_t gc_get_struct_size(gc * collector, heap_ptr addr);
+heap_ptr gc_get_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx);
 
-unsigned int gc_set_atom_idx(gc * collector, mem_ptr addr, unsigned int idx);
-mem_ptr gc_set_anon_ref(gc * collector, mem_ptr addr, mem_ptr ref);
-mem_ptr gc_set_var_ref(gc * collector, mem_ptr addr, mem_ptr ref);
-mem_ptr gc_set_ref_ref(gc * collector, mem_ptr addr, mem_ptr ref);
-mem_ptr gc_set_struct_ref(gc * collector, mem_ptr addr, unsigned int idx, mem_ptr ref);
+atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx);
+heap_ptr gc_set_anon_ref(gc * collector, heap_ptr addr, heap_ptr ref);
+heap_ptr gc_set_var_ref(gc * collector, heap_ptr addr, heap_ptr ref);
+heap_ptr gc_set_ref_ref(gc * collector, heap_ptr addr, heap_ptr ref);
+heap_ptr gc_set_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx, heap_ptr ref);
 
-gc_stack * gc_stack_new(int stack_size);
+gc_stack * gc_stack_new(stack_size_t size);
 void gc_stack_delete(gc_stack * stack);
 
 #endif /* __GC_H__ */

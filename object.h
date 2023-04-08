@@ -22,9 +22,12 @@
 #ifndef __OBJECT_H__
 #define __OBJECT_H__
 
-typedef unsigned int ip_ptr;
-typedef unsigned int mem_ptr;
+typedef unsigned int pc_ptr;
+typedef unsigned int heap_ptr;
+typedef unsigned int heap_size_t;
 typedef int stack_ptr;
+typedef int stack_size_t;
+typedef unsigned int atom_idx_t;
 
 typedef enum object_type
 {
@@ -37,24 +40,24 @@ typedef enum object_type
 } object_type;
 
 typedef struct obj_atom {
-    unsigned int idx;
+    atom_idx_t idx;
 } obj_atom;
 
 typedef struct obj_anon {
-    mem_ptr ref;
+    heap_ptr ref;
 } obj_anon;
 
 typedef struct obj_var {
-    mem_ptr ref;
+    heap_ptr ref;
 } obj_var;
 
 typedef struct obj_ref {
-    mem_ptr ref;
+    heap_ptr ref;
 } obj_ref;
 
 typedef struct obj_struct {
-    unsigned int size;
-    mem_ptr * refs;
+    heap_size_t size;
+    heap_ptr * refs;
 } obj_struct;
 
 typedef struct object
@@ -69,11 +72,11 @@ typedef struct object
     };
 } object;
 
-object * object_new_atom(unsigned int idx);
+object * object_new_atom(atom_idx_t idx);
 object * object_new_anon();
 object * object_new_var();
-object * object_new_ref(mem_ptr ptr_value);
-object * object_new_struct(unsigned int size);
+object * object_new_ref(heap_ptr ptr_value);
+object * object_new_struct(heap_size_t size);
 
 void object_delete(object * value);
 

@@ -34,12 +34,12 @@ void test_two()
 {
     gc * collector = gc_new(64);
 
-    mem_ptr atom1 = gc_alloc_atom(collector, 12);
-    mem_ptr atom2 = gc_alloc_atom(collector, 10);
+    heap_ptr atom1 = gc_alloc_atom(collector, 12);
+    heap_ptr atom2 = gc_alloc_atom(collector, 10);
     gc_set_atom_idx(collector, atom2, 22);
 
-    mem_ptr ref1 = gc_alloc_ref(collector, atom1);
-    mem_ptr ref2 = gc_alloc_ref(collector, atom2);
+    heap_ptr ref1 = gc_alloc_ref(collector, atom1);
+    heap_ptr ref2 = gc_alloc_ref(collector, atom2);
 
     assert(gc_get_atom_idx(collector, atom1) == 12);
     assert(gc_get_atom_idx(collector, atom2) == 22);
@@ -54,11 +54,11 @@ void test_three()
 {
     gc * collector = gc_new(64);
 
-    mem_ptr anon1 = gc_alloc_anon(collector);
-    mem_ptr anon2 = gc_alloc_anon(collector);
+    heap_ptr anon1 = gc_alloc_anon(collector);
+    heap_ptr anon2 = gc_alloc_anon(collector);
 
-    mem_ptr ref1 = gc_alloc_ref(collector, anon1);
-    mem_ptr ref2 = gc_alloc_ref(collector, anon1);
+    heap_ptr ref1 = gc_alloc_ref(collector, anon1);
+    heap_ptr ref2 = gc_alloc_ref(collector, anon1);
     gc_set_ref_ref(collector, ref2, anon2);
 
     assert(gc_get_anon_ref(collector, anon1) == anon1);
@@ -74,11 +74,11 @@ void test_four()
 {
     gc * collector = gc_new(64);
 
-    mem_ptr var1 = gc_alloc_var(collector);
-    mem_ptr var2 = gc_alloc_var(collector);
+    heap_ptr var1 = gc_alloc_var(collector);
+    heap_ptr var2 = gc_alloc_var(collector);
 
-    mem_ptr ref1 = gc_alloc_ref(collector, var1);
-    mem_ptr ref2 = gc_alloc_ref(collector, var2);
+    heap_ptr ref1 = gc_alloc_ref(collector, var1);
+    heap_ptr ref2 = gc_alloc_ref(collector, var2);
 
     assert(gc_get_var_ref(collector, var1) == var1);
     assert(gc_get_var_ref(collector, var2) == var2);
@@ -93,14 +93,14 @@ void test_five()
 {
     gc * collector = gc_new(64);
 
-    mem_ptr atom1 = gc_alloc_atom(collector, 12);
-    mem_ptr atom2 = gc_alloc_atom(collector, 22);
+    heap_ptr atom1 = gc_alloc_atom(collector, 12);
+    heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
-    mem_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
-    mem_ptr ref1 = gc_alloc_ref(collector, struct1);
+    heap_ptr ref1 = gc_alloc_ref(collector, struct1);
 
     assert(gc_get_atom_idx(collector, atom1) == 12);
     assert(gc_get_atom_idx(collector, atom2) == 22);
@@ -117,14 +117,14 @@ void test_six()
     gc * collector = gc_new(64);
     gc_stack stack[2] = { 0 };
 
-    mem_ptr atom1 = gc_alloc_atom(collector, 12);
-    mem_ptr atom2 = gc_alloc_atom(collector, 22);
+    heap_ptr atom1 = gc_alloc_atom(collector, 12);
+    heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
-    mem_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
-    mem_ptr ref1 = gc_alloc_ref(collector, struct1);
+    heap_ptr ref1 = gc_alloc_ref(collector, struct1);
 
     stack[0].addr = ref1;
     stack[1].addr = struct1;
@@ -145,15 +145,15 @@ void test_seven()
     gc_stack stack[2] = { 0 };
 
     gc_alloc_anon(collector);
-    mem_ptr atom1 = gc_alloc_atom(collector, 12);
-    mem_ptr atom2 = gc_alloc_atom(collector, 22);
+    heap_ptr atom1 = gc_alloc_atom(collector, 12);
+    heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
     gc_alloc_anon(collector);
-    mem_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
-    mem_ptr ref1 = gc_alloc_ref(collector, struct1);
+    heap_ptr ref1 = gc_alloc_ref(collector, struct1);
     gc_alloc_anon(collector);
 
     stack[0].addr = ref1;
@@ -177,16 +177,16 @@ void test_eight()
     gc_stack stack[2] = { 0 };
 
     gc_alloc_anon(collector);
-    mem_ptr atom1 = gc_alloc_atom(collector, 12);
-    mem_ptr atom2 = gc_alloc_atom(collector, 22);
+    heap_ptr atom1 = gc_alloc_atom(collector, 12);
+    heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
     gc_alloc_anon(collector);
-    mem_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
     gc_alloc_anon(collector);
-    mem_ptr ref1 = gc_alloc_ref(collector, struct1);
+    heap_ptr ref1 = gc_alloc_ref(collector, struct1);
 
     stack[0].addr = ref1;
     stack[1].addr = struct1;

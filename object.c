@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-object * object_new_atom(unsigned int idx)
+object * object_new_atom(atom_idx_t idx)
 {
     object * value = (object *)malloc(sizeof(object));
 
@@ -54,7 +54,7 @@ object * object_new_var()
     return value;
 }
 
-object * object_new_ref(mem_ptr ptr_value)
+object * object_new_ref(heap_ptr ptr_value)
 {
     object * value = (object *)malloc(sizeof(object));
 
@@ -64,14 +64,14 @@ object * object_new_ref(mem_ptr ptr_value)
     return value;
 }
 
-object * object_new_struct(unsigned int size)
+object * object_new_struct(heap_size_t size)
 {
-    mem_ptr * refs = NULL;
+    heap_ptr * refs = NULL;
     object * value = (object *)malloc(sizeof(object));
 
     if (size > 0)
     {
-        refs = (mem_ptr *)malloc(sizeof(mem_ptr) * size);
+        refs = (heap_ptr *)malloc(sizeof(heap_ptr) * size);
     }
 
     value->type = OBJECT_STRUCT;

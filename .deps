@@ -20,3 +20,4 @@ hash.o: hash.c hash.h
 strtab.o: strtab.c strtab.h hash.h
 object.o: object.c object.h
 gc.o: gc.c gc.h object.h
+vm.o: vm.c vm.h bytecode.h gc.h object.h
