@@ -38,8 +38,8 @@ object * object_new_anon()
 {
     object * value = (object *)malloc(sizeof(object));
 
-    value->type = OBJECT_ANON;
-    value->anon_value.ref = 0;
+    value->type = OBJECT_REF;
+    value->ref_value.ref = 0;
 
     return value;
 }
@@ -48,8 +48,8 @@ object * object_new_var()
 {
     object * value = (object *)malloc(sizeof(object));
 
-    value->type = OBJECT_VAR;
-    value->var_value.ref = 0;
+    value->type = OBJECT_REF;
+    value->ref_value.ref = 0;
 
     return value;
 }
@@ -64,7 +64,7 @@ object * object_new_ref(heap_ptr ptr_value)
     return value;
 }
 
-object * object_new_struct(heap_size_t size)
+object * object_new_struct(heap_size_t size, pc_ptr addr)
 {
     heap_ptr * refs = NULL;
     object * value = (object *)malloc(sizeof(object));
@@ -76,6 +76,7 @@ object * object_new_struct(heap_size_t size)
 
     value->type = OBJECT_STRUCT;
     value->struct_value.size = size;
+    value->struct_value.addr = addr;
     value->struct_value.refs = refs;
 
     return value;
@@ -89,10 +90,6 @@ void object_delete(object * value)
             assert(0);
         break;
         case OBJECT_ATOM:
-        break;
-        case OBJECT_ANON:
-        break;
-        case OBJECT_VAR:
         break;
         case OBJECT_REF:
         break;
@@ -118,12 +115,6 @@ void object_print(object * value)
         case OBJECT_ATOM:
             printf("%s %u\n", object_type_str(value->type), value->atom_value.idx);
         break;
-        case OBJECT_ANON:
-            printf("%s %u\n", object_type_str(value->type), value->anon_value.ref);
-        break;
-        case OBJECT_VAR:
-            printf("%s %u\n", object_type_str(value->type), value->var_value.ref);
-        break;
         case OBJECT_REF:
             printf("%s %u\n", object_type_str(value->type), value->ref_value.ref);
         break;
@@ -146,8 +137,6 @@ const char * object_type_str(object_type type)
     {
         case OBJECT_UNKNOWN: return "OBJECT_UNKNOWN";
         case OBJECT_ATOM: return "OBJECT_ATOM";
-        case OBJECT_ANON: return "OBEJCT_ANON";
-        case OBJECT_VAR: return "OBJECT_VAR";
         case OBJECT_REF: return "OBJECT_REF";
         case OBJECT_STRUCT: return "OBJECT_STRUCT";
     }

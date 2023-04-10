@@ -22,6 +22,13 @@
 #include "gencode.h"
 #include "gc.h"
 
+typedef enum vm_state
+{
+    VM_STOP = 0,
+    VM_RUNNING = 1,
+    VM_ERROR = 2
+} vm_state;
+
 typedef struct vm {
     pc_ptr pc; /* program counter */
     heap_ptr hp; /* heap pointer */
@@ -33,6 +40,11 @@ typedef struct vm {
     stack_size_t stack_size; /* stack size */
     stack_size_t trail_size; /* trail size */
 
+    gc * collector;
+    gc_stack * stack;
+    gc_stack * trail;
+
+    vm_state state;
     gencode_binary * binary_value_ref;
 } vm;
 
@@ -45,7 +57,8 @@ typedef struct vm_execute_str
 vm * vm_new(heap_size_t heap_size, stack_size_t stack_size, stack_size_t trail_size);
 void vm_delete(vm * machine);
 
-void vm_execute(vm * machine, gencode_binary * binary_value);
+heap_ptr vm_execute_deref(vm * machine, heap_ptr ref);
+int vm_execute(vm * machine, gencode_binary * binary_value);
 void vm_execute_test();
 
 void vm_execute_unknown(vm * machine, bytecode * code);

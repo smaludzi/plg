@@ -89,8 +89,6 @@ void gc_mark(gc * collector, heap_ptr addr)
             assert(0);
         break;
         case OBJECT_ATOM:
-        case OBJECT_ANON:
-        case OBJECT_VAR:
             collector->mem[collector->mem_idx][addr].mark = 1;
         break;
         case OBJECT_REF:
@@ -153,18 +151,6 @@ void gc_run(gc * collector, gc_stack * omfalos, stack_ptr stack_size)
                 break;
                 case OBJECT_ATOM:
                 break;
-                case OBJECT_ANON:
-                {
-                    heap_ptr * ref_ptr = &(collector->mem[next_mem][mi].object_value->anon_value.ref);
-                    *ref_ptr = collector->mem[curr_mem][*ref_ptr].back_ptr;
-                }
-                break;
-                case OBJECT_VAR:
-                {
-                    heap_ptr * ref_ptr = &(collector->mem[next_mem][mi].object_value->var_value.ref);
-                    *ref_ptr = collector->mem[curr_mem][*ref_ptr].back_ptr;
-                }
-                break;
                 case OBJECT_REF:
                 {
                     heap_ptr * ref_ptr = &(collector->mem[next_mem][mi].object_value->ref_value.ref);
@@ -225,14 +211,14 @@ heap_ptr gc_alloc_atom(gc * collector, atom_idx_t idx)
 heap_ptr gc_alloc_anon(gc * collector)
 {
     heap_ptr value = gc_alloc_any(collector, object_new_anon());
-    collector->mem[collector->mem_idx][value].object_value->anon_value.ref = value;
+    collector->mem[collector->mem_idx][value].object_value->ref_value.ref = value;
     return value;
 }
 
 heap_ptr gc_alloc_var(gc * collector)
 {
     heap_ptr value = gc_alloc_any(collector, object_new_var());
-    collector->mem[collector->mem_idx][value].object_value->var_value.ref = value;
+    collector->mem[collector->mem_idx][value].object_value->ref_value.ref = value;
     return value;
 }
 
@@ -241,14 +227,24 @@ heap_ptr gc_alloc_ref(gc * collector, heap_ptr ptr_value)
     return gc_alloc_any(collector, object_new_ref(ptr_value));
 }
 
-heap_ptr gc_alloc_struct(gc * collector, heap_size_t size)
+heap_ptr gc_alloc_struct(gc * collector, heap_size_t size, pc_ptr addr)
 {
-    return gc_alloc_any(collector, object_new_struct(size));
+    return gc_alloc_any(collector, object_new_struct(size, addr));
+}
+
+object_type gc_get_object_type(gc * collector, heap_ptr addr)
+{
+    assert(collector->size > addr);
+    if (collector->mem[collector->mem_idx][addr].object_value != NULL)
+    {
+        return collector->mem[collector->mem_idx][addr].object_value->type;
+    }
+    return OBJECT_UNKNOWN;
 }
 
 atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_ATOM);
 
     return collector->mem[collector->mem_idx][addr].object_value->atom_value.idx;
@@ -256,23 +252,23 @@ atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr)
 
 heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr)
 {
-    assert(collector->size >= addr);
-    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_ANON);
+    assert(collector->size > addr);
+    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_REF);
 
-    return collector->mem[collector->mem_idx][addr].object_value->anon_value.ref;
+    return collector->mem[collector->mem_idx][addr].object_value->ref_value.ref;
 }
 
 heap_ptr gc_get_var_ref(gc * collector, heap_ptr addr)
 {
-    assert(collector->size >= addr);
-    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_VAR);
+    assert(collector->size > addr);
+    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_REF);
 
-    return collector->mem[collector->mem_idx][addr].object_value->var_value.ref;
+    return collector->mem[collector->mem_idx][addr].object_value->ref_value.ref;
 }
 
 heap_ptr gc_get_ref_ref(gc * collector, heap_ptr addr)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_REF);
 
     return collector->mem[collector->mem_idx][addr].object_value->ref_value.ref;
@@ -280,7 +276,7 @@ heap_ptr gc_get_ref_ref(gc * collector, heap_ptr addr)
 
 heap_size_t gc_get_struct_size(gc * collector, heap_ptr addr)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_STRUCT);
 
     return collector->mem[collector->mem_idx][addr].object_value->struct_value.size;
@@ -288,7 +284,7 @@ heap_size_t gc_get_struct_size(gc * collector, heap_ptr addr)
 
 heap_ptr gc_get_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_STRUCT);
     assert(collector->mem[collector->mem_idx][addr].object_value->struct_value.size > idx);
 
@@ -297,7 +293,7 @@ heap_ptr gc_get_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx)
 
 atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_ATOM);
 
     return collector->mem[collector->mem_idx][addr].object_value->atom_value.idx = idx;
@@ -305,23 +301,23 @@ atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx)
 
 heap_ptr gc_set_anon_ref(gc * collector, heap_ptr addr, heap_ptr ref)
 {
-    assert(collector->size >= addr);
-    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_ANON);
+    assert(collector->size > addr);
+    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_REF);
 
-    return collector->mem[collector->mem_idx][addr].object_value->anon_value.ref = ref;
+    return collector->mem[collector->mem_idx][addr].object_value->ref_value.ref = ref;
 }
 
 heap_ptr gc_set_var_ref(gc * collector, heap_ptr addr, heap_ptr ref)
 {
-    assert(collector->size >= addr);
-    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_VAR);
+    assert(collector->size > addr);
+    assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_REF);
 
-    return collector->mem[collector->mem_idx][addr].object_value->var_value.ref = ref;
+    return collector->mem[collector->mem_idx][addr].object_value->ref_value.ref = ref;
 }
 
 heap_ptr gc_set_ref_ref(gc * collector, heap_ptr addr, heap_ptr ref)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_REF);
 
     return collector->mem[collector->mem_idx][addr].object_value->ref_value.ref = ref;
@@ -329,7 +325,7 @@ heap_ptr gc_set_ref_ref(gc * collector, heap_ptr addr, heap_ptr ref)
 
 heap_ptr gc_set_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx, heap_ptr ref)
 {
-    assert(collector->size >= addr);
+    assert(collector->size > addr);
     assert(collector->mem[collector->mem_idx][addr].object_value->type == OBJECT_STRUCT);
     assert(collector->mem[collector->mem_idx][addr].object_value->struct_value.size > idx);
 

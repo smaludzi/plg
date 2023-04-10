@@ -69,6 +69,12 @@ vm * vm_new(
     machine->heap_size = heap_size;
     machine->stack_size = stack_size;
     machine->trail_size = trail_size;
+    machine->binary_value_ref = NULL;
+    machine->state = VM_STOP;
+
+    machine->collector = gc_new(heap_size);
+    machine->stack = gc_stack_new(stack_size);
+    machine->trail = gc_stack_new(trail_size);
 
     vm_execute_test();
 
@@ -77,6 +83,18 @@ vm * vm_new(
 
 void vm_delete(vm * machine)
 {
+    if (machine->collector != NULL)
+    {
+        gc_delete(machine->collector);
+    }
+    if (machine->stack != NULL)
+    {
+        gc_stack_delete(machine->stack);
+    }
+    if (machine->trail != NULL)
+    {
+        gc_stack_delete(machine->stack);
+    }
     free(machine);
 }
 
@@ -96,17 +114,19 @@ void vm_execute_unknown(vm * machine, bytecode * code)
 
 void vm_execute_pop(vm * machine, bytecode * code)
 {
-
+    machine->sp--;
 }
 
 void vm_execute_put_ref(vm * machine, bytecode * code)
 {
-
+    machine->sp++;
+    machine->stack[machine->sp].addr = gc_alloc_ref(machine->collector, vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr));
 }
 
 void vm_execute_put_var(vm * machine, bytecode * code)
 {
-
+    machine->sp++;
+    machine->stack[machine->fp + code->put_var.index].addr = machine->stack[machine->sp].addr = gc_alloc_var(machine->collector);
 }
 
 void vm_execute_u_ref(vm * machine, bytecode * code)
@@ -126,17 +146,26 @@ void vm_execute_check(vm * machine, bytecode * code)
 
 void vm_execute_put_anon(vm * machine, bytecode * code)
 {
-
+    machine->sp++;
+    machine->stack[machine->sp].addr = gc_alloc_anon(machine->collector);
 }
 
 void vm_execute_put_atom(vm * machine, bytecode * code)
 {
-
+    machine->sp++;
+    machine->stack[machine->sp].addr = gc_alloc_atom(machine->collector, code->put_atom.index);
 }
 
 void vm_execute_put_struct(vm * machine, bytecode * code)
 {
-
+    unsigned int i = 0;
+    machine->sp = machine->sp - code->put_struct.n + 1;
+    heap_ptr value = gc_alloc_struct(machine->collector, code->put_struct.n, code->put_struct.addr);
+    for (i = 0; i < code->put_struct.n; i++)
+    {
+        gc_set_struct_ref(machine->collector, value, i, machine->stack[machine->sp + i].addr);
+    }
+    machine->stack[machine->sp].addr = value;
 }
 
 void vm_execute_put_struct_addr(vm * machine, bytecode * code)
@@ -226,7 +255,7 @@ void vm_execute_halt(vm * machine, bytecode * code)
 
 void vm_execute_no(vm * machine, bytecode * code)
 {
-
+    machine->state = VM_STOP;
 }
 
 void vm_execute_jump(vm * machine, bytecode * code)
@@ -239,7 +268,38 @@ void vm_execute_label(vm * machine, bytecode * code)
 
 }
 
-void vm_execute(vm * machine, gencode_binary * binary_value)
+heap_ptr vm_execute_deref(vm * machine, heap_ptr ref)
 {
+    if (gc_get_object_type(machine->collector, ref) == OBJECT_REF &&
+        gc_get_ref_ref(machine->collector, ref) != ref) {
+            return vm_execute_deref(machine, gc_get_ref_ref(machine->collector, ref));
+    } else {
+        return ref;
+    }
+}
+
+int vm_execute(vm * machine, gencode_binary * binary_value)
+{
+    bytecode * bc = NULL;
     machine->binary_value_ref = binary_value;
+
+    machine->state = VM_RUNNING;
+    while (machine->state == VM_RUNNING)
+    {
+        bc = machine->binary_value_ref->code_array + machine->pc;
+        machine->pc++;
+        vm_execute_op[bc->type].execute(machine, bc);
+    }
+
+    if (machine->state == VM_ERROR)
+    {
+        // print machine error state
+        return 1;
+    }
+    else if (machine->state == VM_STOP)
+    {
+        return 0;
+    }
+
+    return 1;
 }

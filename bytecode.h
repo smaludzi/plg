@@ -81,6 +81,7 @@ typedef struct bytecode {
             unsigned int index;
         } put_atom;
         struct {
+            unsigned int n;
             union {
                 unsigned int addr;
                 clause * predicate_ref;

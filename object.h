@@ -33,8 +33,6 @@ typedef enum object_type
 {
     OBJECT_UNKNOWN = 0,
     OBJECT_ATOM = 1,
-    OBJECT_ANON = 2,
-    OBJECT_VAR = 3,
     OBJECT_REF = 4,
     OBJECT_STRUCT = 5,
 } object_type;
@@ -43,20 +41,13 @@ typedef struct obj_atom {
     atom_idx_t idx;
 } obj_atom;
 
-typedef struct obj_anon {
-    heap_ptr ref;
-} obj_anon;
-
-typedef struct obj_var {
-    heap_ptr ref;
-} obj_var;
-
 typedef struct obj_ref {
     heap_ptr ref;
 } obj_ref;
 
 typedef struct obj_struct {
     heap_size_t size;
+    pc_ptr addr;
     heap_ptr * refs;
 } obj_struct;
 
@@ -65,8 +56,6 @@ typedef struct object
     object_type type;
     union {
         obj_atom atom_value;
-        obj_anon anon_value;
-        obj_var var_value;
         obj_ref ref_value;
         obj_struct struct_value;
     };
@@ -76,7 +65,7 @@ object * object_new_atom(atom_idx_t idx);
 object * object_new_anon();
 object * object_new_var();
 object * object_new_ref(heap_ptr ptr_value);
-object * object_new_struct(heap_size_t size);
+object * object_new_struct(heap_size_t size, pc_ptr addr);
 
 void object_delete(object * value);
 

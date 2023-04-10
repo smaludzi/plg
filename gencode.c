@@ -238,6 +238,7 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
 
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_STRUCT;
+            bc.put_struct.n = value->terms->size;
             bc.put_struct.predicate_ref = value->predicate_ref;
             gencode_add_bytecode(gen, &bc);
             printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms));
@@ -565,10 +566,6 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
     gencode_add_bytecode(gen, &bc_push_env);
     printf("PUSHENV %u\n", local_vars->size);
 
-    /* TODO: correct clause vs. predicate address */
-    /* move to predicate_0_gencode and predicate_n_gencode */
-    value->addr = bc_push_env.addr;
-
     var_list_delete_null(local_vars);
     goal_list_gencode(gen, value->goals, result);
 
@@ -580,11 +577,20 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
 
 void predicate_0_gencode(gencode * gen, clause * value, gencode_result * result)
 {
+    bytecode bc = { 0 };
+    bc.type = BYTECODE_LABEL;
+    gencode_add_bytecode(gen, &bc);
+    value->addr = bc.addr;
+
     clause_gencode(gen, value, result);
 }
 
 void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * result)
 {
+    bytecode bc_addr = { 0 };
+    bc_addr.type = BYTECODE_LABEL;
+    gencode_add_bytecode(gen, &bc_addr);
+
     bytecode bc_set_btp = { 0 };
     bc_set_btp.type = BYTECODE_SET_BTP;
     gencode_add_bytecode(gen, &bc_set_btp);
@@ -594,12 +600,14 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
     bytecode ** try_arr = malloc(sizeof(bytecode *) * (list->size + 1));
 
     unsigned int clause_nbr = 1;
-    clause_node * clause = list->head;
-    assert(clause);
-    clause = clause->next; /* omit one clause */
-    while (clause != NULL)
+    clause_node * node = list->head;
+    assert(node);
+    node->value->addr = bc_addr.addr;
+
+    node = node->next; /* omit one clause */
+    while (node != NULL)
     {
-        if (clause->value != NULL)
+        if (node->value != NULL)
         {
             bytecode bc_try = { 0 };
             bc_try.type = BYTECODE_TRY;
@@ -609,7 +617,7 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
 
             clause_nbr++;
         }
-        clause = clause->next;
+        node = node->next;
     }
 
     bytecode bc_del_btp = { 0 };
@@ -627,10 +635,10 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
     printf("JUMP A%u\n", clause_nbr);
 
     clause_nbr = 1;
-    clause = list->head;
-    while (clause != NULL)
+    node = list->head;
+    while (node != NULL)
     {
-        if (clause->value != NULL)
+        if (node->value != NULL)
         {
             bytecode bc_label = { 0 };
             bytecode * bc_label_ptr;
@@ -641,9 +649,9 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
             printf("A%u:\n", clause_nbr);
             clause_nbr++;
 
-            clause_gencode(gen, clause->value, result);
+            clause_gencode(gen, node->value, result);
         }
-        clause = clause->next;
+        node = node->next;
     }
     bc_jump_ptr->jump.offset = bc_last_clause_ptr->addr - bc_jump_ptr->addr;
 
