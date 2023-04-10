@@ -24,14 +24,14 @@
 
 #include "object.h"
 
-typedef struct gc_mem
+typedef struct gc_heap
 {
     char mark;
     union {
         object * object_value;
         heap_ptr back_ptr; // used to correct references
     };
-} gc_mem;
+} gc_heap;
 
 typedef struct gc_stack
 {
@@ -40,9 +40,9 @@ typedef struct gc_stack
 
 typedef struct gc
 {
-    gc_mem * mem[2];
+    gc_heap * heap[2];
     heap_size_t free[2];
-    unsigned int mem_idx;
+    unsigned int heap_idx;
     heap_size_t size;
 } gc;
 
@@ -66,6 +66,7 @@ heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr);
 heap_ptr gc_get_var_ref(gc * collector, heap_ptr addr);
 heap_ptr gc_get_ref_ref(gc * collector, heap_ptr addr);
 heap_size_t gc_get_struct_size(gc * collector, heap_ptr addr);
+pc_ptr gc_get_struct_addr(gc * collector, heap_ptr addr);
 heap_ptr gc_get_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx);
 
 atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx);

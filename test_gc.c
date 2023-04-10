@@ -96,7 +96,7 @@ void test_five()
     heap_ptr atom1 = gc_alloc_atom(collector, 12);
     heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
-    heap_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2, 100);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
@@ -105,6 +105,7 @@ void test_five()
     assert(gc_get_atom_idx(collector, atom1) == 12);
     assert(gc_get_atom_idx(collector, atom2) == 22);
     assert(gc_get_struct_size(collector, struct1) == 2);
+    assert(gc_get_struct_addr(collector, struct1) == 100);
     assert(gc_get_struct_ref(collector, struct1, 0) == atom1);
     assert(gc_get_struct_ref(collector, struct1, 1) == atom2);
     assert(gc_get_ref_ref(collector, ref1) == struct1);
@@ -120,7 +121,7 @@ void test_six()
     heap_ptr atom1 = gc_alloc_atom(collector, 12);
     heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
-    heap_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2, 0);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
@@ -149,7 +150,7 @@ void test_seven()
     heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
     gc_alloc_anon(collector);
-    heap_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2, 0);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
@@ -159,9 +160,9 @@ void test_seven()
     stack[0].addr = ref1;
     stack[1].addr = struct1;
 
-    assert(collector->free[collector->mem_idx] == 8);
+    assert(collector->free[collector->heap_idx] == 8);
     gc_run(collector, stack, 2);
-    assert(collector->free[collector->mem_idx] == 5);
+    assert(collector->free[collector->heap_idx] == 5);
 
     assert(gc_get_ref_ref(collector, stack[0].addr) == stack[1].addr);
     assert(gc_get_struct_size(collector, stack[1].addr) == 2);
@@ -181,7 +182,7 @@ void test_eight()
     heap_ptr atom2 = gc_alloc_atom(collector, 22);
 
     gc_alloc_anon(collector);
-    heap_ptr struct1 = gc_alloc_struct(collector, 2);
+    heap_ptr struct1 = gc_alloc_struct(collector, 2, 0);
     gc_set_struct_ref(collector, struct1, 0, atom1);
     gc_set_struct_ref(collector, struct1, 1, atom2);
 
@@ -191,16 +192,16 @@ void test_eight()
     stack[0].addr = ref1;
     stack[1].addr = struct1;
 
-    assert(collector->mem_idx == 0);
-    assert(collector->free[collector->mem_idx] == 8);
+    assert(collector->heap_idx == 0);
+    assert(collector->free[collector->heap_idx] == 8);
 
     gc_run(collector, stack, 2);
-    assert(collector->mem_idx == 1);
-    assert(collector->free[collector->mem_idx] == 5);
+    assert(collector->heap_idx == 1);
+    assert(collector->free[collector->heap_idx] == 5);
 
     gc_run(collector, stack, 2);
-    assert(collector->mem_idx == 0);
-    assert(collector->free[collector->mem_idx] == 5);
+    assert(collector->heap_idx == 0);
+    assert(collector->free[collector->heap_idx] == 5);
 
     assert(gc_get_ref_ref(collector, stack[0].addr) == stack[1].addr);
     assert(gc_get_struct_size(collector, stack[1].addr) == 2);
