@@ -37,8 +37,15 @@ typedef enum gencode_result {
 
 typedef struct gencode {
     strtab * strtab_value;
+
+    char ** strtab_array;
+    unsigned int strtab_size;
+
     unsigned int current_addr;
     bytecode_list * list;
+
+    bytecode * code_array;
+    unsigned int code_size;
 } gencode;
 
 gencode * gencode_new();

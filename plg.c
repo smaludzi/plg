@@ -89,10 +89,15 @@ int main(int argc, char * argv[])
 			gencode_result gen_res = GENCODE_SUCCESS;
 			program_gencode(gen, program_value, &gen_res);
 
-			bytecode_list_set_addr(gen->list);
+			if (gen_res == GENCODE_SUCCESS)
+			{
+				strtab_print(gen->strtab_value);
+				bytecode_list_print(gen->list);
 
-			strtab_print(gen->strtab_value);
-			bytecode_list_print(gen->list);
+				bytecode_list_set_addr(gen->list);
+				strtab_to_array(gen->strtab_value, &gen->strtab_array, &gen->strtab_size);
+				bytecode_to_array(gen->list, &gen->code_array, &gen->code_size);
+			}
 
 			gencode_delete(gen);
 		}

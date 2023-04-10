@@ -31,8 +31,12 @@ gencode * gencode_new()
     gencode * value = (gencode *)malloc(sizeof(gencode));
 
     value->strtab_value = strtab_new(32);
+    value->strtab_array = NULL;
+    value->strtab_size = 0;
     value->current_addr = 0;
     value->list = bytecode_list_new();
+    value->code_array = NULL;
+    value->code_size = 0;
 
     return value;
 }
@@ -43,9 +47,17 @@ void gencode_delete(gencode * value)
     {
         strtab_delete(value->strtab_value);
     }
+    if (value->strtab_array != NULL)
+    {
+        strtab_array_delete(value->strtab_array, value->strtab_size);
+    }
     if (value->list)
     {
         bytecode_list_delete(value->list);
+    }
+    if (value->code_array != NULL)
+    {
+        bytecode_array_delete(value->code_array);
     }
     free(value);
 }

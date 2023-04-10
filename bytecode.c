@@ -299,6 +299,7 @@ bytecode_list * bytecode_list_new()
 
     list->head = NULL;
     list->tail = &list->head;
+    list->size = 0;
 
     return list;
 }
@@ -349,6 +350,7 @@ bytecode * bytecode_list_add_end(bytecode_list * list, bytecode * value)
 
     *(list->tail) = node;
     list->tail = &node->next;
+    list->size++;
 
     return &node->value;
 }
@@ -361,4 +363,50 @@ void bytecode_list_print(bytecode_list * list)
         bytecode_print(&node->value);
         node = node->next;
     }
+}
+
+void bytecode_to_array(bytecode_list * code, bytecode ** code_arr,
+                       unsigned int * code_size)
+{
+    unsigned int addr = 0;
+    bytecode_node * node = NULL;
+
+    *code_size = code->size;
+    *code_arr = (bytecode *)malloc(code->size * sizeof(bytecode));
+
+    node = code->head;
+    while (node != NULL)
+    {
+        if (node->value.addr != addr)
+        {
+            fprintf(stderr, "incorrectly generated code\n");
+            assert(0);
+        }
+        if (node->value.type == BYTECODE_CALL)
+        {
+            fprintf(stderr, "cannot generate bytecode array with function "
+                            "pointers, use bytecode_func_addr\n");
+            assert(0);
+        }
+
+        (*code_arr)[addr++] = node->value;
+
+        node = node->next;
+    }
+}
+
+void bytecode_array_delete(bytecode * code_arr) { free(code_arr); }
+
+void bytecode_array_print(bytecode * code_arr, unsigned int size)
+{
+    unsigned int i;
+
+    printf("---- bytecode array beg ---\n");
+
+    for (i = 0; i < size; i++)
+    {
+        bytecode_print_arr[code_arr[i].type].print(code_arr + i);
+    }
+
+    printf("---- bytecode array end ---\n");
 }

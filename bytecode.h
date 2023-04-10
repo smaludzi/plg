@@ -137,6 +137,7 @@ typedef struct bytecode_node {
 typedef struct bytecode_list {
     bytecode_node * head;
     bytecode_node ** tail;
+    unsigned int size;
 } bytecode_list;
 
 typedef struct bytecode_print_func {
@@ -191,5 +192,10 @@ void bytecode_list_delete(bytecode_list * list);
 void bytecode_list_set_addr(bytecode_list * list);
 bytecode * bytecode_list_add_end(bytecode_list * list, bytecode * value);
 void bytecode_list_print(bytecode_list * list);
+
+void bytecode_to_array(bytecode_list * code, bytecode ** code_arr,
+                       unsigned int * code_size);
+void bytecode_array_delete(bytecode * code_arr);
+void bytecode_array_print(bytecode * code_arr, unsigned int size);
 
 #endif /* __BYTECODE_H__ */
