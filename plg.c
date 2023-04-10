@@ -26,6 +26,7 @@
 #include "gencode.h"
 #include "bytecode.h"
 #include "strtab.h"
+#include "vm.h"
 
 extern int yyparse(program ** program_value);
 
@@ -72,8 +73,6 @@ int main(int argc, char * argv[])
 		yyin = stdin;
 	}
 
-	bytecode_print_test();
-
 	program * program_value = NULL;
 
 	yyparse(&program_value);
@@ -94,11 +93,15 @@ int main(int argc, char * argv[])
 				strtab_print(gen->strtab_value);
 				bytecode_list_print(gen->list);
 
-				bytecode_list_set_addr(gen->list);
-				strtab_to_array(gen->strtab_value, &gen->strtab_array, &gen->strtab_size);
-				bytecode_to_array(gen->list, &gen->code_array, &gen->code_size);
-			}
+				gencode_binary * binary_value = gencode_binary_new();
+				gencode_binary_generate(binary_value, gen);
 
+				vm * vm_value = vm_new(256, 64, 64);
+				vm_execute(vm_value, binary_value);
+				vm_delete(vm_value);
+
+				gencode_binary_delete(binary_value);
+			}
 			gencode_delete(gen);
 		}
 		program_delete(program_value);

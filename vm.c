@@ -70,6 +70,8 @@ vm * vm_new(
     machine->stack_size = stack_size;
     machine->trail_size = trail_size;
 
+    vm_execute_test();
+
     return machine;
 }
 
@@ -235,4 +237,9 @@ void vm_execute_jump(vm * machine, bytecode * code)
 void vm_execute_label(vm * machine, bytecode * code)
 {
 
+}
+
+void vm_execute(vm * machine, gencode_binary * binary_value)
+{
+    machine->binary_value_ref = binary_value;
 }

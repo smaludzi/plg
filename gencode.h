@@ -38,18 +38,24 @@ typedef enum gencode_result {
 typedef struct gencode {
     strtab * strtab_value;
 
+    unsigned int current_addr;
+    bytecode_list * list;
+} gencode;
+
+typedef struct gencode_binary {
     char ** strtab_array;
     unsigned int strtab_size;
 
-    unsigned int current_addr;
-    bytecode_list * list;
-
     bytecode * code_array;
     unsigned int code_size;
-} gencode;
+} gencode_binary;
 
 gencode * gencode_new();
 void gencode_delete(gencode * value);
+
+gencode_binary * gencode_binary_new();
+void gencode_binary_delete(gencode_binary * value);
+void gencode_binary_generate(gencode_binary * value, gencode * gen);
 
 bytecode * gencode_add_bytecode(gencode * value, bytecode * code);
 

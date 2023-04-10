@@ -19,6 +19,7 @@
 #define __VM_H__
 
 #include "bytecode.h"
+#include "gencode.h"
 #include "gc.h"
 
 typedef struct vm {
@@ -31,6 +32,8 @@ typedef struct vm {
     heap_size_t heap_size; /* heap size */
     stack_size_t stack_size; /* stack size */
     stack_size_t trail_size; /* trail size */
+
+    gencode_binary * binary_value_ref;
 } vm;
 
 typedef struct vm_execute_str
@@ -42,6 +45,7 @@ typedef struct vm_execute_str
 vm * vm_new(heap_size_t heap_size, stack_size_t stack_size, stack_size_t trail_size);
 void vm_delete(vm * machine);
 
+void vm_execute(vm * machine, gencode_binary * binary_value);
 void vm_execute_test();
 
 void vm_execute_unknown(vm * machine, bytecode * code);

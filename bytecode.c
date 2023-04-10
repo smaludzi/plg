@@ -62,6 +62,8 @@ bytecode * bytecode_new()
 {
     bytecode * value = (bytecode *)malloc(sizeof(bytecode));
 
+    bytecode_print_test();
+
     return value;
 }
 
