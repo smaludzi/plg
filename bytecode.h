@@ -80,7 +80,7 @@ typedef struct bytecode {
             unsigned int index;
         } check;
         struct {
-            unsigned int index;
+            atom_idx_t idx;
         } put_atom;
         struct {
             unsigned int n;
@@ -90,7 +90,7 @@ typedef struct bytecode {
             };
         } put_struct;
         struct {
-            unsigned int index;
+            atom_idx_t idx;
         } u_atom;
         struct {
             pc_offset offset;

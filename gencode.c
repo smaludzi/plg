@@ -222,7 +222,7 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
         {
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_ATOM;
-            bc.put_atom.index = strtab_add_string(gen->strtab_value, value->name);
+            bc.put_atom.idx = strtab_add_string(gen->strtab_value, value->name);
             gencode_add_bytecode(gen, &bc);
             printf("PUT_ATOM %s\n", value->name);
         }
@@ -266,7 +266,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
         {
             bytecode bc = { 0 };
             bc.type = BYTECODE_U_ATOM;
-            bc.u_atom.index = strtab_add_string(gen->strtab_value, value->name);
+            bc.u_atom.idx = strtab_add_string(gen->strtab_value, value->name);
             gencode_add_bytecode(gen, &bc);
             printf("UATOM %s\n", value->name);
         }

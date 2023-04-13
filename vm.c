@@ -132,17 +132,26 @@ void vm_execute_put_var(vm * machine, bytecode * code)
 
 void vm_execute_u_ref(vm * machine, bytecode * code)
 {
-
+    vm_execute_unify(machine,
+                     machine->stack[machine->sp].addr,
+                     vm_execute_deref(machine, machine->stack[machine->fp + code->u_ref.index].addr));
+    machine->sp--;
 }
 
 void vm_execute_u_var(vm * machine, bytecode * code)
 {
-
+    machine->stack[machine->fp + code->u_var.index].addr = machine->stack[machine->sp].addr;
+    machine->sp--;
 }
 
 void vm_execute_check(vm * machine, bytecode * code)
 {
-
+    if (!vm_execute_check_low(machine,
+                              machine->stack[machine->sp].addr,
+                              vm_execute_deref(machine, machine->stack[machine->fp + code->check.index].addr)))
+    {
+        vm_execute_backtrack(machine);
+    }
 }
 
 void vm_execute_put_anon(vm * machine, bytecode * code)
@@ -154,7 +163,7 @@ void vm_execute_put_anon(vm * machine, bytecode * code)
 void vm_execute_put_atom(vm * machine, bytecode * code)
 {
     machine->sp++;
-    machine->stack[machine->sp].addr = gc_alloc_atom(machine->collector, code->put_atom.index);
+    machine->stack[machine->sp].addr = gc_alloc_atom(machine->collector, code->put_atom.idx);
 }
 
 void vm_execute_put_struct(vm * machine, bytecode * code)
@@ -177,7 +186,28 @@ void vm_execute_put_struct_addr(vm * machine, bytecode * code)
 
 void vm_execute_u_atom(vm * machine, bytecode * code)
 {
-
+    heap_ptr h_ref = machine->stack[machine->sp].addr;
+    machine->sp--;
+    switch (gc_get_object_type(machine->collector, h_ref))
+    {
+        case OBJECT_UNKNOWN:
+            assert(0);
+        break;
+        case OBJECT_ATOM:
+        break;
+        case OBJECT_REF:
+        {
+            /* TODO: check */
+            gc_set_var_ref(machine->collector, machine->hp, gc_alloc_atom(machine->collector, code->u_atom.idx));
+            gc_set_var_ref(machine->collector, h_ref, gc_alloc_ref(machine->collector, machine->hp));
+            vm_execute_trail(machine, h_ref);
+            machine->hp++;
+        }
+        break;
+        case OBJECT_STRUCT:
+            vm_execute_backtrack(machine);
+        break;
+    }
 }
 
 void vm_execute_u_struct(vm * machine, bytecode * code)
@@ -188,22 +218,43 @@ void vm_execute_u_struct(vm * machine, bytecode * code)
 
 void vm_execute_u_struct_addr(vm * machine, bytecode * code)
 {
-
+    /* TODO: check */
+    switch(gc_get_object_type(machine->collector, gc_get_ref_ref(machine->collector, machine->stack[machine->sp].addr)))
+    {
+        case OBJECT_UNKNOWN:
+            assert(0);
+        break;
+        case OBJECT_ATOM:
+            vm_execute_backtrack(machine);
+        break;
+        case OBJECT_REF:
+        {
+            machine->pc = code->u_struct.addr;
+        }
+        break;
+        case OBJECT_STRUCT:
+        break;
+    }
 }
 
 void vm_execute_up(vm * machine, bytecode * code)
 {
-
+    machine->sp--;
+    machine->pc = code->up.offset;
 }
 
 void vm_execute_bind(vm * machine, bytecode * code)
 {
-
+    /* TODO: check this */
+    gc_set_var_ref(machine->collector, machine->stack[machine->sp - 1].addr, gc_alloc_ref(machine->collector, machine->stack[machine->sp].addr));
+    vm_execute_trail(machine, machine->stack[machine->sp - 1].addr);
+    machine->sp = machine->sp - 2;
 }
 
 void vm_execute_son(vm * machine, bytecode * code)
 {
-
+    machine->stack[machine->sp + 1].addr = vm_execute_deref(machine, gc_get_struct_ref(machine->collector, machine->stack[machine->sp].addr, code->son.number));
+    machine->sp++;
 }
 
 void vm_execute_mark(vm * machine, bytecode * code)
@@ -293,6 +344,47 @@ heap_ptr vm_execute_deref(vm * machine, heap_ptr ref)
     } else {
         return ref;
     }
+}
+
+void vm_execute_trail(vm * machine, heap_ptr ref)
+{
+    assert(machine->stack[machine->bp - 2].type == STACK_TYPE_HEAP_PTR);
+
+    if (ref < machine->stack[machine->bp - 2].addr) {
+        machine->tp = machine->tp + 1;
+
+        machine->trail[machine->tp].type = STACK_TYPE_HEAP_PTR;
+        machine->trail[machine->tp].addr = ref;
+    }
+}
+
+void vm_execute_reset(vm * machine, heap_ptr ref_x, heap_ptr ref_y)
+{
+    heap_ptr ref_u;
+    for (ref_u = ref_y; ref_x < ref_u; ref_u--)
+    {
+        /* TODO: check this */
+        gc_set_var_ref(machine->collector, machine->trail[ref_u].addr, gc_alloc_ref(machine->collector, machine->trail[ref_u].addr));
+    }
+}
+
+void vm_execute_backtrack(vm * machine)
+{
+    machine->fp = machine->bp;
+    machine->hp = machine->stack[machine->fp - 2].addr;
+    vm_execute_reset(machine, machine->stack[machine->fp - 3].addr, machine->tp);
+    machine->tp = machine->stack[machine->fp - 3].addr;
+    machine->pc = machine->stack[machine->fp - 5].offset;
+}
+
+char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
+{
+    return 0;
+}
+
+char vm_execute_check_low(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
+{
+    return 0;
 }
 
 int vm_execute(vm * machine, gencode_binary * binary_value)
