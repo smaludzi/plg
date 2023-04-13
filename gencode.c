@@ -280,6 +280,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode * bc_u_struct_ptr;
             bc_u_struct.type = BYTECODE_U_STRUCT;
             bc_u_struct.u_struct.offset = 0;
+            bc_u_struct.u_struct.n = term_list_size(value->terms);
             bc_u_struct.u_struct.predicate_ref = value->predicate_ref;
             bc_u_struct_ptr = gencode_add_bytecode(gen, &bc_u_struct);
             printf("USTRUCT %s/%d A\n", value->name, term_list_size(value->terms));
@@ -433,6 +434,7 @@ void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * re
 
     bytecode bc_call = { 0 };
     bc_call.type = BYTECODE_CALL;
+    bc_call.call.n = term_list_size(value.terms);
     bc_call.call.predicate_ref = value.predicate_ref;
     gencode_add_bytecode(gen, &bc_call);
     printf("CALL %s/%u\n", value.name, term_list_size(value.terms));

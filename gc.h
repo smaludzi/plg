@@ -33,9 +33,21 @@ typedef struct gc_heap
     };
 } gc_heap;
 
+typedef enum gc_stack_type {
+    STACK_TYPE_UNKNOWN = 0,
+    STACK_TYPE_HEAP_PTR = 1,
+    STACK_TYPE_STACK_PTR = 2,
+    STACK_TYPE_PC_OFFSET = 3
+} gc_stack_type;
+
 typedef struct gc_stack
 {
-    heap_ptr addr;
+    gc_stack_type type;
+    union {
+        heap_ptr addr;
+        stack_ptr saddr;
+        pc_offset offset;
+    };
 } gc_stack;
 
 typedef struct gc

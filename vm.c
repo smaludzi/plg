@@ -17,6 +17,7 @@
  */
 #include "vm.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
 
 vm_execute_str vm_execute_op[] = {
@@ -158,6 +159,12 @@ void vm_execute_put_atom(vm * machine, bytecode * code)
 
 void vm_execute_put_struct(vm * machine, bytecode * code)
 {
+    bytecode_print(code);
+    fprintf(stderr, " %u: cannot execute bytecode %s\n", code->addr, bytecode_type_str(code->type));
+}
+
+void vm_execute_put_struct_addr(vm * machine, bytecode * code)
+{
     unsigned int i = 0;
     machine->sp = machine->sp - code->put_struct.n + 1;
     heap_ptr value = gc_alloc_struct(machine->collector, code->put_struct.n, code->put_struct.addr);
@@ -168,11 +175,6 @@ void vm_execute_put_struct(vm * machine, bytecode * code)
     machine->stack[machine->sp].addr = value;
 }
 
-void vm_execute_put_struct_addr(vm * machine, bytecode * code)
-{
-
-}
-
 void vm_execute_u_atom(vm * machine, bytecode * code)
 {
 
@@ -180,7 +182,8 @@ void vm_execute_u_atom(vm * machine, bytecode * code)
 
 void vm_execute_u_struct(vm * machine, bytecode * code)
 {
-
+    bytecode_print(code);
+    fprintf(stderr, " %u: cannot execute bytecode %s\n", code->addr, bytecode_type_str(code->type));
 }
 
 void vm_execute_u_struct_addr(vm * machine, bytecode * code)
@@ -205,17 +208,31 @@ void vm_execute_son(vm * machine, bytecode * code)
 
 void vm_execute_mark(vm * machine, bytecode * code)
 {
+    gc_stack b_entry = { 0 };
+    gc_stack fp_entry = { 0 };
 
+    b_entry.type = STACK_TYPE_PC_OFFSET;
+    b_entry.offset = code->mark.offset;
+
+    fp_entry.type = STACK_TYPE_STACK_PTR;
+    fp_entry.saddr= machine->fp;
+
+    machine->stack[machine->sp + 6] = b_entry;
+    machine->stack[machine->sp + 5] = fp_entry;
+
+    machine->sp = machine->sp + 6;
 }
 
 void vm_execute_call(vm * machine, bytecode * code)
 {
-
+    bytecode_print(code);
+    fprintf(stderr, " %u: cannot execute bytecode %s\n", code->addr, bytecode_type_str(code->type));
 }
 
 void vm_execute_call_addr(vm * machine, bytecode * code)
 {
-
+    machine->fp = machine->sp - code->call.n;
+    machine->pc = code->call.addr;
 }
 
 void vm_execute_push_env(vm * machine, bytecode * code)

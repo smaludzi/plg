@@ -22,6 +22,8 @@
 #ifndef __BYTECODE_H__
 #define __BYTECODE_H__
 
+#include "vm_types.h"
+
 typedef struct clause clause;
 
 typedef enum bytecode_type {
@@ -83,7 +85,7 @@ typedef struct bytecode {
         struct {
             unsigned int n;
             union {
-                unsigned int addr;
+                pc_ptr addr;
                 clause * predicate_ref;
             };
         } put_struct;
@@ -91,41 +93,43 @@ typedef struct bytecode {
             unsigned int index;
         } u_atom;
         struct {
-            int offset;
+            pc_offset offset;
+            unsigned int n;
             union {
-                unsigned int addr;
+                pc_ptr addr;
                 clause * predicate_ref;
             };
         } u_struct;
         struct {
-            int offset;
+            pc_offset offset;
         } up;
         struct {
             unsigned int number;
         } son;
         struct {
-            int offset;
+            pc_offset offset;
         } mark;
         struct {
             unsigned int size;
         } push_env;
         struct {
-            int offset;
+            pc_offset offset;
         } try;
         struct {
+            unsigned int n;
             union {
-                unsigned int addr;
+                pc_ptr addr;
                 clause * predicate_ref;
             };
         } call;
         struct {
-            int offset;
+            pc_offset offset;
         } init;
         struct {
             unsigned int size;
         } halt;
         struct {
-            int offset;
+            pc_offset offset;
         } jump;
     };
 } bytecode;

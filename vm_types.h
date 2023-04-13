@@ -19,52 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef __OBJECT_H__
-#define __OBJECT_H__
+#ifndef __VM_TYPES_H__
+#define __VM_TYPES_H__
 
-#include "vm_types.h"
+typedef unsigned int pc_ptr;
+typedef unsigned int heap_ptr;
+typedef unsigned int heap_size_t;
+typedef int stack_ptr;
+typedef int stack_size_t;
+typedef unsigned int atom_idx_t;
+typedef int pc_offset;
 
-typedef enum object_type
-{
-    OBJECT_UNKNOWN = 0,
-    OBJECT_ATOM = 1,
-    OBJECT_REF = 4,
-    OBJECT_STRUCT = 5,
-} object_type;
-
-typedef struct obj_atom {
-    atom_idx_t idx;
-} obj_atom;
-
-typedef struct obj_ref {
-    heap_ptr ref;
-} obj_ref;
-
-typedef struct obj_struct {
-    heap_size_t size;
-    pc_ptr addr;
-    heap_ptr * refs;
-} obj_struct;
-
-typedef struct object
-{
-    object_type type;
-    union {
-        obj_atom atom_value;
-        obj_ref ref_value;
-        obj_struct struct_value;
-    };
-} object;
-
-object * object_new_atom(atom_idx_t idx);
-object * object_new_anon();
-object * object_new_var();
-object * object_new_ref(heap_ptr ptr_value);
-object * object_new_struct(heap_size_t size, pc_ptr addr);
-
-void object_delete(object * value);
-
-void object_print(object * value);
-const char * object_type_str(object_type type);
-
-#endif /* __OBJECT_H__ */
+#endif /* __VM_TYPES_H__ */
