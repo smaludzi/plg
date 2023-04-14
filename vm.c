@@ -379,12 +379,99 @@ void vm_execute_backtrack(vm * machine)
 
 char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
 {
+    if (ref_u == ref_v)
+    {
+        return 1;
+    }
+    if (gc_get_object_type(machine->collector, ref_u) == OBJECT_REF)
+    {
+        if (gc_get_object_type(machine->collector, ref_v) == OBJECT_REF)
+        {
+            if (ref_u > ref_v)
+            {
+                gc_set_ref_ref(machine->collector, ref_u, ref_v);
+                vm_execute_trail(machine, ref_u);
+                return 1;
+            }
+            else
+            {
+                gc_set_ref_ref(machine->collector, ref_v, ref_u);
+                vm_execute_trail(machine, ref_v);
+                return 1;
+            }
+        }
+        else if (vm_execute_check_low(machine, ref_u, ref_v))
+        {
+            gc_set_ref_ref(machine->collector, ref_u, ref_v);
+            vm_execute_trail(machine, ref_u);
+            return 1;
+        }
+        else
+        {
+            vm_execute_backtrack(machine);
+            return 0;
+        }
+    }
+    if (gc_get_object_type(machine->collector, ref_v) == OBJECT_REF)
+    {
+        if (vm_execute_check_low(machine, ref_v, ref_u))
+        {
+            gc_set_ref_ref(machine->collector, ref_v, ref_u);
+            vm_execute_trail(machine, ref_v);
+            return 1;
+        }
+        else
+        {
+            vm_execute_backtrack(machine);
+            return 0;
+        }
+    }
+    if (gc_get_object_type(machine->collector, ref_u) == OBJECT_ATOM &&
+        gc_get_object_type(machine->collector, ref_v) == OBJECT_ATOM &&
+        gc_get_atom_idx(machine->collector, ref_u) == gc_get_atom_idx(machine->collector, ref_u))
+    {
+        return 1;
+    }
+    if (gc_get_object_type(machine->collector, ref_u) == OBJECT_STRUCT &&
+        gc_get_object_type(machine->collector, ref_v) == OBJECT_STRUCT &&
+        gc_get_struct_addr(machine->collector, ref_u) == gc_get_struct_addr(machine->collector, ref_v))
+    {
+        unsigned int i = 0;
+        unsigned int size = gc_get_struct_size(machine->collector, ref_u);
+        for (i = 0; i < size; i++)
+        {
+            if (!vm_execute_unify(machine,
+                                  vm_execute_deref(machine, gc_get_struct_ref(machine->collector, ref_u, i)),
+                                  vm_execute_deref(machine, gc_get_struct_ref(machine->collector, ref_v, i))))
+            {
+                return 0;
+            }
+        }
+    }
+    vm_execute_backtrack(machine);
     return 0;
 }
 
 char vm_execute_check_low(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
 {
-    return 0;
+    if (ref_u == ref_v)
+    {
+        return 0;
+    }
+    if (gc_get_object_type(machine->collector, ref_v) == OBJECT_STRUCT)
+    {
+        unsigned int i = 0;
+        unsigned int size = gc_get_struct_size(machine->collector, ref_v);
+        for (i = 0; i < size; i++)
+        {
+            if (!vm_execute_check_low(machine, ref_u,
+                                      vm_execute_deref(machine, gc_get_struct_ref(machine->collector, ref_v, i))))
+            {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 
 int vm_execute(vm * machine, gencode_binary * binary_value)
