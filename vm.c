@@ -288,37 +288,77 @@ void vm_execute_call_addr(vm * machine, bytecode * code)
 
 void vm_execute_push_env(vm * machine, bytecode * code)
 {
-
+    machine->sp = machine->fp + code->push_env.size;
 }
 
 void vm_execute_pop_env(vm * machine, bytecode * code)
 {
+    if (machine->bp < machine->fp)
+    {
+        machine->sp = machine->fp - 6;
+    }
 
+    assert(machine->stack[machine->fp - 1].type == STACK_TYPE_STACK_PTR);
+    machine->fp = machine->stack[machine->fp - 1].saddr;
+
+    assert(machine->stack[machine->fp].type == STACK_TYPE_PC_OFFSET);
+    machine->pc = machine->stack[machine->fp].offset;
 }
 
 void vm_execute_set_btp(vm * machine, bytecode * code)
 {
+    machine->stack[machine->fp - 2].type = STACK_TYPE_HEAP_PTR;
+    machine->stack[machine->fp - 2].addr = machine->hp;
 
+    machine->stack[machine->fp - 3].type = STACK_TYPE_STACK_PTR;
+    machine->stack[machine->fp - 3].saddr = machine->tp;
+
+    machine->stack[machine->fp - 4].type = STACK_TYPE_STACK_PTR;
+    machine->stack[machine->fp - 4].saddr = machine->bp;
+
+    machine->bp = machine->fp;
 }
 
 void vm_execute_del_btp(vm * machine, bytecode * code)
 {
-
+    assert(machine->stack[machine->fp - 4].type == STACK_TYPE_STACK_PTR);
+    machine->bp = machine->stack[machine->fp - 4].saddr;
 }
 
 void vm_execute_try(vm * machine, bytecode * code)
 {
+    machine->stack[machine->fp - 5].type = STACK_TYPE_STACK_PTR;
+    machine->stack[machine->fp - 5].offset  = machine->pc;
 
+    machine->pc = code->try.offset;
 }
 
 void vm_execute_init(vm * machine, bytecode * code)
 {
+    machine->sp = machine->fp = machine->bp = 5;
 
+    machine->stack[4].type = STACK_TYPE_HEAP_PTR;
+    machine->stack[4].addr = 0;
+
+    machine->stack[3].type = STACK_TYPE_HEAP_PTR;
+    machine->stack[3].addr = 0;
+
+    machine->stack[2].type = STACK_TYPE_STACK_PTR;
+    machine->stack[2].saddr = -1;
+
+    machine->stack[1].type = STACK_TYPE_STACK_PTR;
+    machine->stack[1].saddr = -1;
+
+    machine->stack[0].type = STACK_TYPE_PC_OFFSET;
+    machine->stack[0].offset = code->init.offset;
 }
 
 void vm_execute_halt(vm * machine, bytecode * code)
 {
-
+    /* TODO: print bindings. where are they ? */
+    /* TODO: backtrack on user's wish */
+    /* code->halt.size; */
+    machine->state = VM_STOP;
 }
 
 void vm_execute_no(vm * machine, bytecode * code)
@@ -328,12 +368,12 @@ void vm_execute_no(vm * machine, bytecode * code)
 
 void vm_execute_jump(vm * machine, bytecode * code)
 {
-
+    machine->pc = machine->pc + code->jump.offset;
 }
 
 void vm_execute_label(vm * machine, bytecode * code)
 {
-
+    /* do nothing machine->pc will be incremented on the next bytecode */
 }
 
 heap_ptr vm_execute_deref(vm * machine, heap_ptr ref)
