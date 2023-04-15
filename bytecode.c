@@ -125,8 +125,8 @@ void bytecode_print_put_struct(bytecode * value)
 
 void bytecode_print_put_struct_addr(bytecode * value)
 {
-    printf("%d: %s addr %u\n", value->addr, bytecode_type_str(value->type),
-           value->put_struct.addr);
+    printf("%d: %s addr %u n %u\n", value->addr, bytecode_type_str(value->type),
+           value->put_struct.addr, value->put_struct.n);
 }
 
 void bytecode_print_u_atom(bytecode * value)
@@ -142,7 +142,7 @@ void bytecode_print_u_struct(bytecode * value)
 
 void bytecode_print_u_struct_addr(bytecode * value)
 {
-    printf("%d: %s addr %u n %u, offset %d\n", value->addr, bytecode_type_str(value->type),
+    printf("%d: %s addr %u n %u offset %d\n", value->addr, bytecode_type_str(value->type),
             value->u_struct.addr, value->u_struct.n, value->u_struct.offset);
 }
 

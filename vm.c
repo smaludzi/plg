@@ -108,6 +108,19 @@ void vm_execute_test()
     }
 }
 
+void vm_execute_print(vm * machine)
+{
+    printf("program counter   pc: %u\n", machine->pc);
+    printf("heap pointer      hp: %u\n", machine->hp);
+    printf("stack pointer     sp: %d\n", machine->sp);
+    printf("frame pointer     fp: %d\n", machine->fp);
+    printf("backtrack pointer bp: %d\n", machine->bp);
+    printf("trail pointer     tp: %d\n", machine->tp);
+    printf("heap_size           : %u\n", machine->heap_size);
+    printf("stack size          : %d\n", machine->stack_size);
+    printf("trail size          : %d\n", machine->trail_size);
+}
+
 void vm_execute_unknown(vm * machine, bytecode * code)
 {
     assert(0);
@@ -197,11 +210,10 @@ void vm_execute_u_atom(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
         {
-            /* TODO: check */
-            gc_set_var_ref(machine->collector, machine->hp, gc_alloc_atom(machine->collector, code->u_atom.idx));
-            gc_set_var_ref(machine->collector, h_ref, gc_alloc_ref(machine->collector, machine->hp));
+            /* NOTE: second version, Fig. 4.17 p. 121 */
+            heap_ptr a_value = gc_alloc_atom(machine->collector, code->u_atom.idx);
+            gc_set_var_ref(machine->collector, h_ref, a_value);
             vm_execute_trail(machine, h_ref);
-            machine->hp++;
         }
         break;
         case OBJECT_STRUCT:
@@ -218,8 +230,8 @@ void vm_execute_u_struct(vm * machine, bytecode * code)
 
 void vm_execute_u_struct_addr(vm * machine, bytecode * code)
 {
-    /* TODO: check */
-    switch(gc_get_object_type(machine->collector, gc_get_ref_ref(machine->collector, machine->stack[machine->sp].addr)))
+    /* NOTE: second version, Fig. 4.21 p.124 */
+    switch(gc_get_object_type(machine->collector, machine->stack[machine->sp].addr))
     {
         case OBJECT_UNKNOWN:
             assert(0);
@@ -240,13 +252,13 @@ void vm_execute_u_struct_addr(vm * machine, bytecode * code)
 void vm_execute_up(vm * machine, bytecode * code)
 {
     machine->sp--;
-    machine->pc = code->up.offset;
+    machine->pc = machine->pc + code->up.offset;
 }
 
 void vm_execute_bind(vm * machine, bytecode * code)
 {
-    /* TODO: check this */
-    gc_set_var_ref(machine->collector, machine->stack[machine->sp - 1].addr, gc_alloc_ref(machine->collector, machine->stack[machine->sp].addr));
+    /* NOTE: second version, Fig 4.13 p. 117 */
+    gc_set_var_ref(machine->collector, machine->stack[machine->sp - 1].addr, machine->stack[machine->sp].addr);
     vm_execute_trail(machine, machine->stack[machine->sp - 1].addr);
     machine->sp = machine->sp - 2;
 }
@@ -330,7 +342,7 @@ void vm_execute_try(vm * machine, bytecode * code)
     machine->stack[machine->fp - 5].type = STACK_TYPE_STACK_PTR;
     machine->stack[machine->fp - 5].offset  = machine->pc;
 
-    machine->pc = code->try.offset;
+    machine->pc = machine->pc + code->try.offset;
 }
 
 void vm_execute_init(vm * machine, bytecode * code)
@@ -359,6 +371,7 @@ void vm_execute_halt(vm * machine, bytecode * code)
     /* TODO: backtrack on user's wish */
     /* code->halt.size; */
     machine->state = VM_STOP;
+    vm_execute_print(machine);
 }
 
 void vm_execute_no(vm * machine, bytecode * code)
@@ -403,17 +416,23 @@ void vm_execute_reset(vm * machine, heap_ptr ref_x, heap_ptr ref_y)
     heap_ptr ref_u;
     for (ref_u = ref_y; ref_x < ref_u; ref_u--)
     {
-        /* TODO: check this */
-        gc_set_var_ref(machine->collector, machine->trail[ref_u].addr, gc_alloc_ref(machine->collector, machine->trail[ref_u].addr));
+        /* NOTE: second version, Lis. p. 130 */
+        gc_set_var_ref(machine->collector, machine->trail[ref_u].addr, machine->trail[ref_u].addr);
     }
 }
 
 void vm_execute_backtrack(vm * machine)
 {
     machine->fp = machine->bp;
+
+    assert(machine->stack[machine->fp - 2].type == STACK_TYPE_HEAP_PTR);
     machine->hp = machine->stack[machine->fp - 2].addr;
+
+    assert(machine->stack[machine->fp - 3].type == STACK_TYPE_STACK_PTR);
     vm_execute_reset(machine, machine->stack[machine->fp - 3].addr, machine->tp);
     machine->tp = machine->stack[machine->fp - 3].addr;
+
+    assert(machine->stack[machine->fp - 5].type == STACK_TYPE_PC_OFFSET);
     machine->pc = machine->stack[machine->fp - 5].offset;
 }
 

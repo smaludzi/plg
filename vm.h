@@ -66,6 +66,7 @@ char vm_execute_check_low(vm * machine, heap_ptr ref_u, heap_ptr ref_v);
 
 int vm_execute(vm * machine, gencode_binary * binary_value);
 void vm_execute_test();
+void vm_execute_print(vm * machine);
 
 void vm_execute_unknown(vm * machine, bytecode * code);
 void vm_execute_pop(vm * machine, bytecode * code);
