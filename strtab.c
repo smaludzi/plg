@@ -231,7 +231,11 @@ void strtab_array_print(char ** strings, unsigned int size)
     {
         if (strings[i] != NULL)
         {
-            printf("string %s\n", strings[i]);
+            printf("%u: %s\n", i, strings[i]);
+        }
+        else
+        {
+            printf("%u: (null)\n", i);
         }
     }
 

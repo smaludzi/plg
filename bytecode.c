@@ -199,7 +199,7 @@ void bytecode_print_del_btp(bytecode * value)
 
 void bytecode_print_try(bytecode * value)
 {
-    printf("%d: %s offset %d\n", value->addr, bytecode_type_str(value->type), value->try.offset);
+    printf("%d: %s addr %d\n", value->addr, bytecode_type_str(value->type), value->try.offset);
 }
 
 void bytecode_print_init(bytecode * value)
