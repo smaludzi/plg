@@ -340,6 +340,18 @@ heap_ptr gc_set_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx, heap_
     return collector->heap[collector->heap_idx][addr].object_value->struct_value.refs[idx] = ref;
 }
 
+void gc_print_ref(gc * collector, heap_ptr addr)
+{
+    assert(collector->size > addr);
+    object_print_str(collector->heap[collector->heap_idx][addr].object_value, NULL, 0);
+}
+
+void gc_print_ref_str(gc * collector, heap_ptr addr, char ** strtab_array, unsigned int strtab_size)
+{
+    assert(collector->size > addr);
+    object_print_str(collector->heap[collector->heap_idx][addr].object_value, strtab_array, strtab_size);
+}
+
 gc_stack * gc_stack_new(stack_size_t size)
 {
     gc_stack * stack = (gc_stack *)malloc(size * sizeof(gc_stack));

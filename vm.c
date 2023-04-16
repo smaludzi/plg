@@ -94,7 +94,7 @@ void vm_delete(vm * machine)
     }
     if (machine->trail != NULL)
     {
-        gc_stack_delete(machine->stack);
+        gc_stack_delete(machine->trail);
     }
     free(machine);
 }
@@ -133,14 +133,27 @@ void vm_execute_pop(vm * machine, bytecode * code)
 
 void vm_execute_put_ref(vm * machine, bytecode * code)
 {
+    assert(machine->stack[machine->fp + code->put_ref.index].type == STACK_TYPE_HEAP_PTR);
+    heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    //entry.addr = gc_alloc_ref(machine->collector, ref_d);
+    entry.addr = ref_d;
+
     machine->sp++;
-    machine->stack[machine->sp].addr = gc_alloc_ref(machine->collector, vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr));
+    machine->stack[machine->sp] = entry;
 }
 
 void vm_execute_put_var(vm * machine, bytecode * code)
 {
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_var(machine->collector);
+
     machine->sp++;
-    machine->stack[machine->fp + code->put_var.index].addr = machine->stack[machine->sp].addr = gc_alloc_var(machine->collector);
+    machine->stack[machine->fp + code->put_var.index] = entry;
+    machine->stack[machine->sp] = entry;
 }
 
 void vm_execute_u_ref(vm * machine, bytecode * code)
@@ -169,14 +182,22 @@ void vm_execute_check(vm * machine, bytecode * code)
 
 void vm_execute_put_anon(vm * machine, bytecode * code)
 {
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_anon(machine->collector);
+
     machine->sp++;
-    machine->stack[machine->sp].addr = gc_alloc_anon(machine->collector);
+    machine->stack[machine->sp] = entry;
 }
 
 void vm_execute_put_atom(vm * machine, bytecode * code)
 {
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_atom(machine->collector, code->put_atom.idx);
+
     machine->sp++;
-    machine->stack[machine->sp].addr = gc_alloc_atom(machine->collector, code->put_atom.idx);
+    machine->stack[machine->sp] = entry;
 }
 
 void vm_execute_put_struct(vm * machine, bytecode * code)
@@ -189,12 +210,16 @@ void vm_execute_put_struct_addr(vm * machine, bytecode * code)
 {
     unsigned int i = 0;
     machine->sp = machine->sp - code->put_struct.n + 1;
-    heap_ptr value = gc_alloc_struct(machine->collector, code->put_struct.n, code->put_struct.addr);
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_struct(machine->collector, code->put_struct.n, code->put_struct.addr);
+
     for (i = 0; i < code->put_struct.n; i++)
     {
-        gc_set_struct_ref(machine->collector, value, i, machine->stack[machine->sp + i].addr);
+        gc_set_struct_ref(machine->collector, entry.addr, i, machine->stack[machine->sp + i].addr);
     }
-    machine->stack[machine->sp].addr = value;
+    machine->stack[machine->sp] = entry;
 }
 
 void vm_execute_u_atom(vm * machine, bytecode * code)
@@ -252,7 +277,7 @@ void vm_execute_u_struct_addr(vm * machine, bytecode * code)
 void vm_execute_up(vm * machine, bytecode * code)
 {
     machine->sp--;
-    machine->pc = machine->pc + code->up.offset;
+    machine->pc = code->up.offset;
 }
 
 void vm_execute_bind(vm * machine, bytecode * code)
@@ -265,6 +290,7 @@ void vm_execute_bind(vm * machine, bytecode * code)
 
 void vm_execute_son(vm * machine, bytecode * code)
 {
+    machine->stack[machine->sp + 1].type = STACK_TYPE_HEAP_PTR;
     machine->stack[machine->sp + 1].addr = vm_execute_deref(machine, gc_get_struct_ref(machine->collector, machine->stack[machine->sp].addr, code->son.number));
     machine->sp++;
 }
@@ -310,23 +336,30 @@ void vm_execute_pop_env(vm * machine, bytecode * code)
         machine->sp = machine->fp - 6;
     }
 
-    assert(machine->stack[machine->fp - 1].type == STACK_TYPE_STACK_PTR);
-    machine->fp = machine->stack[machine->fp - 1].saddr;
-
     assert(machine->stack[machine->fp].type == STACK_TYPE_PC_OFFSET);
     machine->pc = machine->stack[machine->fp].offset;
+
+    assert(machine->stack[machine->fp - 1].type == STACK_TYPE_STACK_PTR);
+    machine->fp = machine->stack[machine->fp - 1].saddr;
 }
 
 void vm_execute_set_btp(vm * machine, bytecode * code)
 {
-    machine->stack[machine->fp - 2].type = STACK_TYPE_HEAP_PTR;
-    machine->stack[machine->fp - 2].addr = machine->hp;
+    gc_stack hp_entry = { 0 };
+    hp_entry.type = STACK_TYPE_HEAP_PTR;
+    hp_entry.addr = machine->hp;
 
-    machine->stack[machine->fp - 3].type = STACK_TYPE_STACK_PTR;
-    machine->stack[machine->fp - 3].saddr = machine->tp;
+    gc_stack tp_entry = { 0 };
+    tp_entry.type = STACK_TYPE_STACK_PTR;
+    tp_entry.saddr = machine->tp;
 
-    machine->stack[machine->fp - 4].type = STACK_TYPE_STACK_PTR;
-    machine->stack[machine->fp - 4].saddr = machine->bp;
+    gc_stack bp_entry = { 0 };
+    bp_entry.type = STACK_TYPE_STACK_PTR;
+    bp_entry.saddr = machine->bp;
+
+    machine->stack[machine->fp - 2] = hp_entry;
+    machine->stack[machine->fp - 3] = tp_entry;
+    machine->stack[machine->fp - 4] = bp_entry;
 
     machine->bp = machine->fp;
 }
@@ -339,37 +372,59 @@ void vm_execute_del_btp(vm * machine, bytecode * code)
 
 void vm_execute_try(vm * machine, bytecode * code)
 {
-    machine->stack[machine->fp - 5].type = STACK_TYPE_STACK_PTR;
-    machine->stack[machine->fp - 5].offset  = machine->pc;
+    gc_stack pc_entry = { 0 };
+    pc_entry.type = STACK_TYPE_PC_OFFSET;
+    pc_entry.offset = machine->pc;
 
-    machine->pc = machine->pc + code->try.offset;
+    machine->stack[machine->fp - 5] = pc_entry;
+    machine->pc = code->try.offset;
+    //machine->pc = machine->pc + code->try.offset;
 }
 
 void vm_execute_init(vm * machine, bytecode * code)
 {
     machine->sp = machine->fp = machine->bp = 5;
 
-    machine->stack[4].type = STACK_TYPE_HEAP_PTR;
-    machine->stack[4].addr = 0;
+    gc_stack zero_heap = { 0 };
+    zero_heap.type = STACK_TYPE_HEAP_PTR;
+    zero_heap.addr = 0;
 
-    machine->stack[3].type = STACK_TYPE_HEAP_PTR;
-    machine->stack[3].addr = 0;
+    gc_stack minus_one_stack = { 0 };
+    minus_one_stack.type = STACK_TYPE_STACK_PTR;
+    minus_one_stack.saddr = -1;
 
-    machine->stack[2].type = STACK_TYPE_STACK_PTR;
-    machine->stack[2].saddr = -1;
+    gc_stack offset = { 0 };
+    offset.type = STACK_TYPE_PC_OFFSET;
+    offset.offset = code->init.offset;
 
-    machine->stack[1].type = STACK_TYPE_STACK_PTR;
-    machine->stack[1].saddr = -1;
-
-    machine->stack[0].type = STACK_TYPE_PC_OFFSET;
-    machine->stack[0].offset = code->init.offset;
+    machine->stack[4] = zero_heap;
+    machine->stack[3] = zero_heap;
+    machine->stack[2] = minus_one_stack;
+    machine->stack[1] = minus_one_stack;
+    machine->stack[0] = offset;
 }
 
 void vm_execute_halt(vm * machine, bytecode * code)
 {
-    /* TODO: print bindings. where are they ? */
+    unsigned int strtab_size = 0;
+    char ** strtab_array = NULL;
+
+    if (machine->binary_value_ref)
+    {
+        strtab_size = machine->binary_value_ref->strtab_size;
+        strtab_array = machine->binary_value_ref->strtab_array;
+    }
+
     /* TODO: backtrack on user's wish */
-    /* code->halt.size; */
+    unsigned int i = 0; 
+    for (i = 0; i < code->halt.size; i++)
+    {
+        heap_ptr addr = machine->stack[machine->fp + 1 + i].addr;
+        gc_print_ref_str(machine->collector,
+                         vm_execute_deref(machine, addr),
+                         strtab_array, strtab_size);
+    }
+
     machine->state = VM_STOP;
     vm_execute_print(machine);
 }
@@ -406,8 +461,11 @@ void vm_execute_trail(vm * machine, heap_ptr ref)
     if (ref < machine->stack[machine->bp - 2].addr) {
         machine->tp = machine->tp + 1;
 
-        machine->trail[machine->tp].type = STACK_TYPE_HEAP_PTR;
-        machine->trail[machine->tp].addr = ref;
+        gc_stack entry  = { 0 };
+        entry.type = STACK_TYPE_HEAP_PTR;
+        entry.addr = ref;
+
+        machine->trail[machine->tp] = entry;
     }
 }
 
@@ -543,6 +601,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
     {
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
+        //printf("exec: %u\n", bc->addr);
         vm_execute_op[bc->type].execute(machine, bc);
     }
 

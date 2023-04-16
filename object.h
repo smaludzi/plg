@@ -65,6 +65,7 @@ object * object_new_struct(heap_size_t size, pc_ptr addr);
 void object_delete(object * value);
 
 void object_print(object * value);
+void object_print_str(object * value, char ** strtab_array, unsigned int strtab_size);
 const char * object_type_str(object_type type);
 
 #endif /* __OBJECT_H__ */

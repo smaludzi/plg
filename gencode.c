@@ -102,7 +102,7 @@ void var_gencode(gencode * gen, var * value, gencode_result * result)
             bc.type = BYTECODE_PUT_REF;
             bc.put_ref.index = value->bound_to->index;
             gencode_add_bytecode(gen, &bc);
-            printf("PUT_REF name %s index %d\n", value->name, value->bound_to->index);
+            /* printf("PUT_REF name %s index %d\n", value->name, value->bound_to->index); */
         }
         break;
         case VAR_TYPE_UNBOUND:
@@ -111,11 +111,11 @@ void var_gencode(gencode * gen, var * value, gencode_result * result)
             bc.type = BYTECODE_PUT_VAR;
             bc.put_ref.index = value->index;
             gencode_add_bytecode(gen, &bc);
-            printf("PUT_VAR name %s index %d\n", value->name, value->index);
+            /* printf("PUT_VAR name %s index %d\n", value->name, value->index); */
         }
         break;
         case VAR_TYPE_UNKNOWN:
-            printf("PUT_VAR_UNKNOWN!!! %d: %s\n", value->line_no, value->name);
+            /* printf("PUT_VAR_UNKNOWN!!! %d: %s\n", value->line_no, value->name); */
             assert(0);
         break;
     }
@@ -131,7 +131,7 @@ void var_unify_gencode(gencode * gen, var * value, gencode_result * result)
             bc.type = BYTECODE_U_REF;
             bc.u_ref.index = value->bound_to->index;
             gencode_add_bytecode(gen, &bc);
-            printf("U_REF name %s index %d\n", value->name, value->bound_to->index);
+            /* printf("U_REF name %s index %d\n", value->name, value->bound_to->index); */
         }
         break;
         case VAR_TYPE_UNBOUND:
@@ -140,11 +140,11 @@ void var_unify_gencode(gencode * gen, var * value, gencode_result * result)
             bc.type = BYTECODE_U_VAR;
             bc.u_var.index = value->index;
             gencode_add_bytecode(gen, &bc);
-            printf("U_VAR name %s index %d\n", value->name, value->index);
+            /* printf("U_VAR name %s index %d\n", value->name, value->index); */
         }
         break;
         case VAR_TYPE_UNKNOWN:
-            printf("PUT_VAR_UNKNOWN!!! %d: %s\n", value->line_no, value->name);
+            /* printf("PUT_VAR_UNKNOWN!!! %d: %s\n", value->line_no, value->name); */
             assert(0);
         break;
     }
@@ -156,7 +156,7 @@ void var_check_gencode(gencode * gen, var * value, gencode_result * result)
     bc.type = BYTECODE_CHECK;
     bc.check.index = value->bound_to->index;
     gencode_add_bytecode(gen, &bc);
-    printf("CHECK name %s index %d\n", value->name, value->bound_to->index);
+    /* printf("CHECK name %s index %d\n", value->name, value->bound_to->index); */
 }
 
 void var_get_unbound_gencode(gencode * gen, var * value, var_list * local_vars)
@@ -215,7 +215,7 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_ANON;
             gencode_add_bytecode(gen, &bc);
-            printf("PUT_ANON _\n");
+            /* printf("PUT_ANON _\n"); */
         }
         break;
         case TERM_TYPE_ATOM:
@@ -224,7 +224,7 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             bc.type = BYTECODE_PUT_ATOM;
             bc.put_atom.idx = strtab_add_string(gen->strtab_value, value->name);
             gencode_add_bytecode(gen, &bc);
-            printf("PUT_ATOM %s\n", value->name);
+            /* printf("PUT_ATOM %s\n", value->name); */
         }
         break;
         case TERM_TYPE_VAR:
@@ -241,7 +241,7 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             bc.put_struct.n = value->terms->size;
             bc.put_struct.predicate_ref = value->predicate_ref;
             gencode_add_bytecode(gen, &bc);
-            printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms));
+            /* printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms)); */
         }
         break;
     }
@@ -259,7 +259,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode bc = { 0 };
             bc.type = BYTECODE_POP;
             gencode_add_bytecode(gen, &bc);
-            printf("POP\n");
+            /* printf("POP\n"); */
         }
         break;
         case TERM_TYPE_ATOM:
@@ -268,7 +268,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bc.type = BYTECODE_U_ATOM;
             bc.u_atom.idx = strtab_add_string(gen->strtab_value, value->name);
             gencode_add_bytecode(gen, &bc);
-            printf("UATOM %s\n", value->name);
+            /* printf("UATOM %s\n", value->name); */
         }
         break;
         case TERM_TYPE_VAR:
@@ -283,7 +283,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bc_u_struct.u_struct.n = term_list_size(value->terms);
             bc_u_struct.u_struct.predicate_ref = value->predicate_ref;
             bc_u_struct_ptr = gencode_add_bytecode(gen, &bc_u_struct);
-            printf("USTRUCT %s/%d A\n", value->name, term_list_size(value->terms));
+            /* printf("USTRUCT %s/%d A\n", value->name, term_list_size(value->terms)); */
 
             term_list_unify_gencode(gen, value->terms, result);
 
@@ -292,14 +292,14 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bc_up.type = BYTECODE_UP;
             bc_up.up.offset = 0;
             bc_up_ptr = gencode_add_bytecode(gen, &bc_up);
-            printf("UP B\n");
+            /* printf("UP B\n"); */
 
             bytecode bc_label_a = { 0 };
             bytecode * bc_label_a_ptr;
             bc_label_a.type = BYTECODE_LABEL;
             bc_label_a_ptr = gencode_add_bytecode(gen, &bc_label_a);
-            bc_u_struct_ptr->u_struct.offset = bc_label_a_ptr->addr - bc_u_struct_ptr->addr;
-            printf("A:\n");
+            bc_u_struct_ptr->u_struct.offset = bc_label_a_ptr->addr;
+            /* printf("A:\n"); */
 
             var_list * bound_vars = var_list_new();
             term_list_get_bound_vars_gencode(gen, value->terms, bound_vars, result);
@@ -310,14 +310,14 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             bytecode bc_bind = { 0 };
             bc_bind.type = BYTECODE_BIND;
             gencode_add_bytecode(gen, &bc_bind);
-            printf("BIND\n");
+            /* printf("BIND\n"); */
 
             bytecode bc_label_b = { 0 };
             bytecode * bc_label_b_ptr;
             bc_label_b.type = BYTECODE_LABEL;
             bc_label_b_ptr = gencode_add_bytecode(gen, &bc_label_b);
-            bc_up_ptr->up.offset = bc_label_b_ptr->addr - bc_up_ptr->addr;
-            printf("B:\n");
+            bc_up_ptr->up.offset = bc_label_b_ptr->addr;
+            /* printf("B:\n"); */
         }
         break;
     }
@@ -383,7 +383,7 @@ void term_list_unify_gencode(gencode * gen, term_list * list, gencode_result * r
         bc.type = BYTECODE_SON;
         bc.son.number = son_number++;
         gencode_add_bytecode(gen, &bc);
-        printf("SON %u\n", bc.son.number);
+        /* printf("SON %u\n", bc.son.number); */
 
         term_unify_gencode(gen, node, result);
         node = node->next;
@@ -425,7 +425,7 @@ void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * re
     bc.type = BYTECODE_MARK;
     bc.mark.offset = 0;
     bc_ptr = gencode_add_bytecode(gen, &bc);
-    printf("MARK B\n");
+    /* printf("MARK B\n"); */
 
     if (value.terms != NULL)
     {
@@ -437,13 +437,13 @@ void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * re
     bc_call.call.n = term_list_size(value.terms);
     bc_call.call.predicate_ref = value.predicate_ref;
     gencode_add_bytecode(gen, &bc_call);
-    printf("CALL %s/%u\n", value.name, term_list_size(value.terms));
+    /* printf("CALL %s/%u\n", value.name, term_list_size(value.terms)); */
 
     bytecode bc_label = { 0 };
     bc_label.type = BYTECODE_LABEL;
     gencode_add_bytecode(gen, &bc_label);
-    bc_ptr->mark.offset = bc_label.addr - bc_ptr->addr;
-    printf("B: ...\n");
+    bc_ptr->mark.offset = bc_label.addr;
+    /* printf("B: ...\n"); */
 }
 
 void goal_unification_gencode(gencode * gen, goal_unification value, gencode_result * result)
@@ -458,7 +458,7 @@ void goal_unification_gencode(gencode * gen, goal_unification value, gencode_res
         bytecode bc = { 0 };
         bc.type = BYTECODE_BIND;
         gencode_add_bytecode(gen, &bc);
-        printf("BIND\n");
+        /* printf("BIND\n"); */
         break;
     }
     case VAR_TYPE_BOUND:
@@ -566,7 +566,7 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
     bc_push_env.type = BYTECODE_PUSH_ENV;
     bc_push_env.push_env.size = local_vars->size;
     gencode_add_bytecode(gen, &bc_push_env);
-    printf("PUSHENV %u\n", local_vars->size);
+    /* printf("PUSHENV %u\n", local_vars->size); */
 
     var_list_delete_null(local_vars);
     goal_list_gencode(gen, value->goals, result);
@@ -574,7 +574,7 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
     bytecode bc_pop_env = { 0 };
     bc_pop_env.type = BYTECODE_POP_ENV;
     gencode_add_bytecode(gen, &bc_pop_env);
-    printf("POPENV\n");
+    /* printf("POPENV\n"); */
 }
 
 void predicate_0_gencode(gencode * gen, clause * value, gencode_result * result)
@@ -596,7 +596,7 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
     bytecode bc_set_btp = { 0 };
     bc_set_btp.type = BYTECODE_SET_BTP;
     gencode_add_bytecode(gen, &bc_set_btp);
-    printf("SETBTP\n");
+    /* printf("SETBTP\n"); */
 
     // allocate one more so it is easy to calculate clause indexes from 1
     bytecode ** try_arr = malloc(sizeof(bytecode *) * (list->size + 1));
@@ -615,7 +615,7 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
             bc_try.type = BYTECODE_TRY;
             bc_try.try.offset = 0;
             try_arr[clause_nbr] = gencode_add_bytecode(gen, &bc_try);
-            printf("TRY A%u\n", clause_nbr);
+            /* printf("TRY A%u\n", clause_nbr); */
 
             clause_nbr++;
         }
@@ -625,7 +625,7 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
     bytecode bc_del_btp = { 0 };
     bc_del_btp.type = BYTECODE_DEL_BTP;
     gencode_add_bytecode(gen, &bc_del_btp);
-    printf("DELBTP\n");
+    /* printf("DELBTP\n"); */
 
     bytecode bc_jump = { 0 };
     bytecode * bc_jump_ptr;
@@ -634,7 +634,7 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
     bc_jump_ptr = gencode_add_bytecode(gen, &bc_jump);
     // cheating so it is easy to generate jumps below
     try_arr[clause_nbr] = bc_jump_ptr;
-    printf("JUMP A%u\n", clause_nbr);
+    /* printf("JUMP A%u\n", clause_nbr); */
 
     clause_nbr = 1;
     node = list->head;
@@ -646,9 +646,10 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
             bytecode * bc_label_ptr;
             bc_label.type = BYTECODE_LABEL;
             bc_last_clause_ptr = bc_label_ptr = gencode_add_bytecode(gen, &bc_label);
-            try_arr[clause_nbr]->try.offset = bc_label_ptr->addr - try_arr[clause_nbr]->addr;
+            try_arr[clause_nbr]->try.offset = bc_label_ptr->addr;
+            //try_arr[clause_nbr]->try.offset = bc_label_ptr->addr; - try_arr[clause_nbr]->addr;
 
-            printf("A%u:\n", clause_nbr);
+            /* printf("A%u:\n", clause_nbr); */
             clause_nbr++;
 
             clause_gencode(gen, node->value, result);
@@ -735,13 +736,13 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     bc_init.type = BYTECODE_INIT;
     bc_init.init.offset = 0;
     bc_init_ptr = gencode_add_bytecode(gen, &bc_init);
-    printf("INIT A\n");
+    /* printf("INIT A\n"); */
 
     bytecode bc_push_env = { 0 };
     bc_push_env.type = BYTECODE_PUSH_ENV;
     bc_push_env.push_env.size = symtab_size_type(value->stab, SYMTAB_VAR);
     gencode_add_bytecode(gen, &bc_push_env);
-    printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR));
+    /* printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR)); */
 
     goal_list_gencode(gen, value->goals, result);
 
@@ -749,19 +750,19 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     bc_halt.type = BYTECODE_HALT;
     bc_halt.halt.size = symtab_size_type(value->stab, SYMTAB_VAR);
     gencode_add_bytecode(gen, &bc_halt);
-    printf("HALT %u\n", symtab_size_type(value->stab, SYMTAB_VAR));
+    /* printf("HALT %u\n", symtab_size_type(value->stab, SYMTAB_VAR)); */
 
     bytecode bc_label = { 0 };
     bytecode * bc_label_ptr;
     bc_label.type = BYTECODE_LABEL;
     bc_label_ptr = gencode_add_bytecode(gen, &bc_label);
-    bc_init_ptr->init.offset = bc_label_ptr->addr - bc_init_ptr->addr;
-    printf("A:\n");
+    bc_init_ptr->init.offset = bc_label_ptr->addr;
+    /* printf("A:\n"); */
 
     bytecode bc_no = { 0 };
     bc_no.type = BYTECODE_NO;
     gencode_add_bytecode(gen, &bc_no);
-    printf("NO\n");
+    /* printf("NO\n"); */
 }
 
 void program_gencode(gencode * gen, program * value, gencode_result * result)

@@ -107,13 +107,29 @@ void object_delete(object * value)
 
 void object_print(object * value)
 {
+    object_print_str(value, NULL, 0);
+}
+
+void object_print_str(object * value, char ** strtab_array, unsigned int strtab_size)
+{
+    if (value == NULL)
+    {
+        return;
+    }
     switch (value->type)
     {
         case OBJECT_UNKNOWN:
             assert(0);
         break;
         case OBJECT_ATOM:
-            printf("%s %u\n", object_type_str(value->type), value->atom_value.idx);
+            if (strtab_array != NULL && (value->atom_value.idx < strtab_size))
+            {
+                printf("%s %u:%s\n", object_type_str(value->type), value->atom_value.idx, strtab_array[value->atom_value.idx]);
+            }
+            else
+            {
+                printf("%s %u\n", object_type_str(value->type), value->atom_value.idx);
+            }
         break;
         case OBJECT_REF:
             printf("%s %u\n", object_type_str(value->type), value->ref_value.ref);

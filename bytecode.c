@@ -163,7 +163,7 @@ void bytecode_print_son(bytecode * value)
 
 void bytecode_print_mark(bytecode * value)
 {
-    printf("%d: %s offset %d\n", value->addr, bytecode_type_str(value->type), value->mark.offset);
+    printf("%d: %s addr %d\n", value->addr, bytecode_type_str(value->type), value->mark.offset);
 }
 
 void bytecode_print_call(bytecode * value)
@@ -204,7 +204,7 @@ void bytecode_print_try(bytecode * value)
 
 void bytecode_print_init(bytecode * value)
 {
-    printf("%d: %s offset %d\n", value->addr, bytecode_type_str(value->type), value->init.offset);
+    printf("%d: %s addr %d\n", value->addr, bytecode_type_str(value->type), value->init.offset);
 }
 
 void bytecode_print_halt(bytecode * value)
@@ -219,7 +219,7 @@ void bytecode_print_no(bytecode * value)
 
 void bytecode_print_jump(bytecode * value)
 {
-    printf("%d: %s index %d\n", value->addr, bytecode_type_str(value->type), value->jump.offset);
+    printf("%d: %s offset %d(%d)\n", value->addr, bytecode_type_str(value->type), value->jump.offset, value->addr + value->jump.offset);
 }
 
 void bytecode_print_label(bytecode * value)

@@ -87,6 +87,9 @@ heap_ptr gc_set_var_ref(gc * collector, heap_ptr addr, heap_ptr ref);
 heap_ptr gc_set_ref_ref(gc * collector, heap_ptr addr, heap_ptr ref);
 heap_ptr gc_set_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx, heap_ptr ref);
 
+void gc_print_ref(gc * collector, heap_ptr addr);
+void gc_print_ref_str(gc * collector, heap_ptr addr, char ** strtab_array, unsigned int strtab_size);
+
 gc_stack * gc_stack_new(stack_size_t size);
 void gc_stack_delete(gc_stack * stack);
 

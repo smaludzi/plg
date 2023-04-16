@@ -81,20 +81,18 @@ int main(int argc, char * argv[])
 	{
 		semcheck_result sem_res = SEMCHECK_SUCCESS;
 		program_semcheck(program_value, &sem_res);
-		program_print(program_value);
 		if (sem_res == SEMCHECK_SUCCESS)
 		{
 			gencode * gen = gencode_new();
 			gencode_result gen_res = GENCODE_SUCCESS;
 			program_gencode(gen, program_value, &gen_res);
-
 			if (gen_res == GENCODE_SUCCESS)
 			{
-				strtab_print(gen->strtab_value);
-				bytecode_list_print(gen->list);
-
 				gencode_binary * binary_value = gencode_binary_new();
 				gencode_binary_generate(binary_value, gen);
+
+				strtab_array_print(binary_value->strtab_array, binary_value->strtab_size);
+				bytecode_list_print(gen->list);
 
 				vm * vm_value = vm_new(256, 64, 64);
 				vm_execute(vm_value, binary_value);
