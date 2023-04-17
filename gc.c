@@ -242,6 +242,27 @@ object_type gc_get_object_type(gc * collector, heap_ptr addr)
     return OBJECT_UNKNOWN;
 }
 
+heap_ptr gc_get_hp(gc * collector)
+{
+    return collector->free[collector->heap_idx];
+}
+
+void gc_reset_hp(gc * collector, heap_ptr new_hp)
+{
+    assert(new_hp < collector->free[collector->heap_idx]);
+    heap_ptr h_ptr;
+    for (h_ptr = new_hp; h_ptr < collector->free[collector->heap_idx]; h_ptr++)
+    {
+        void * object_value;
+        if ((object_value = collector->heap[collector->heap_idx][h_ptr].object_value) != NULL)
+        {
+            object_delete(object_value);
+            collector->heap[collector->heap_idx][h_ptr].object_value = NULL;
+        }
+    }
+    collector->free[collector->heap_idx] = new_hp;
+}
+
 atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr)
 {
     assert(collector->size > addr);

@@ -72,6 +72,8 @@ heap_ptr gc_alloc_ref(gc * collector, heap_ptr ptr_value);
 heap_ptr gc_alloc_struct(gc * collector, heap_size_t size, pc_ptr addr);
 
 object_type gc_get_object_type(gc * collector, heap_ptr addr);
+heap_ptr gc_get_hp(gc * collector);
+void gc_reset_hp(gc * collector, heap_ptr new_hp);
 
 atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr);
 heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr);

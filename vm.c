@@ -112,7 +112,7 @@ void vm_execute_print(vm * machine)
 {
     printf("------------------------\n");
     printf("program counter   pc: %u\n", machine->pc);
-    printf("heap pointer      hp: %u\n", machine->hp);
+    printf("heap pointer      hp: %u\n", gc_get_hp(machine->collector));
     printf("stack pointer     sp: %d\n", machine->sp);
     printf("frame pointer     fp: %d\n", machine->fp);
     printf("backtrack pointer bp: %d\n", machine->bp);
@@ -135,9 +135,10 @@ void vm_execute_pop(vm * machine, bytecode * code)
 void vm_execute_put_ref(vm * machine, bytecode * code)
 {
     assert(machine->stack[machine->fp + code->put_ref.index].type == STACK_TYPE_HEAP_PTR);
-    heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
+    //heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
+    heap_ptr ref_d = machine->stack[machine->fp + code->put_ref.index].addr;
 
-    printf("ref_d %u\n", ref_d);
+    //printf("sp %d fp+index %u ref_d %u\n", machine->sp, machine->fp + code->put_ref.index, ref_d);
 
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
@@ -153,6 +154,8 @@ void vm_execute_put_var(vm * machine, bytecode * code)
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = gc_alloc_var(machine->collector);
+
+    //printf("sp %d ref_d %u\n", machine->sp, entry.addr);
 
     machine->sp++;
     machine->stack[machine->fp + code->put_var.index] = entry;
@@ -228,16 +231,20 @@ void vm_execute_put_struct_addr(vm * machine, bytecode * code)
 void vm_execute_u_atom(vm * machine, bytecode * code)
 {
     heap_ptr h_ref = machine->stack[machine->sp].addr;
-
-    printf("h_ref %u\n", h_ref);
-
+    //printf("sp %d h_ref %u\n", machine->sp, h_ref);
+    //gc_print_ref(machine->collector, h_ref);
     machine->sp--;
     switch (gc_get_object_type(machine->collector, h_ref))
     {
         case OBJECT_UNKNOWN:
+            printf("unknow object %u\n", h_ref);
             assert(0);
         break;
         case OBJECT_ATOM:
+            if (gc_get_atom_idx(machine->collector, h_ref) != code->u_atom.idx)
+            {
+                vm_execute_backtrack(machine);
+            }
         break;
         case OBJECT_REF:
         {
@@ -265,6 +272,7 @@ void vm_execute_u_struct_addr(vm * machine, bytecode * code)
     switch(gc_get_object_type(machine->collector, machine->stack[machine->sp].addr))
     {
         case OBJECT_UNKNOWN:
+            printf("unknow object %u\n", machine->stack[machine->sp].addr);
             assert(0);
         break;
         case OBJECT_ATOM:
@@ -353,7 +361,7 @@ void vm_execute_set_btp(vm * machine, bytecode * code)
 {
     gc_stack hp_entry = { 0 };
     hp_entry.type = STACK_TYPE_HEAP_PTR;
-    hp_entry.addr = machine->hp;
+    hp_entry.addr = gc_get_hp(machine->collector);
 
     gc_stack tp_entry = { 0 };
     tp_entry.type = STACK_TYPE_STACK_PTR;
@@ -421,18 +429,18 @@ void vm_execute_halt(vm * machine, bytecode * code)
         strtab_array = machine->binary_value_ref->strtab_array;
     }
 
-    vm_execute_print(machine);
+    //vm_execute_print(machine);
 
     unsigned int i = 0; 
     for (i = 0; i < code->halt.size; i++)
     {
         heap_ptr addr = machine->stack[machine->fp + 1 + i].addr;
-
-        printf("addr %u(%u)\n", addr, vm_execute_deref(machine, addr));
-
+        //printf("addr %u(%u)\n", addr, vm_execute_deref(machine, addr));
+        //printf("-------\n");
         gc_print_ref_str(machine->collector,
                          vm_execute_deref(machine, addr),
                          strtab_array, strtab_size);
+        //printf("-------\n");
     }
 
     /* TODO: backtrack on user's wish */
@@ -441,7 +449,7 @@ void vm_execute_halt(vm * machine, bytecode * code)
 
 void vm_execute_no(vm * machine, bytecode * code)
 {
-    vm_execute_print(machine);
+    //vm_execute_print(machine);
     printf("no\n");
     machine->state = VM_STOP;
 }
@@ -496,7 +504,9 @@ void vm_execute_backtrack(vm * machine)
     machine->fp = machine->bp;
 
     assert(machine->stack[machine->fp - 2].type == STACK_TYPE_HEAP_PTR);
-    machine->hp = machine->stack[machine->fp - 2].addr;
+    gc_reset_hp(machine->collector, machine->stack[machine->fp - 2].addr);
+
+    //printf("reset hp %u\n", machine->stack[machine->fp - 2].addr);
 
     assert(machine->stack[machine->fp - 3].type == STACK_TYPE_STACK_PTR);
     vm_execute_reset(machine, machine->stack[machine->fp - 3].addr, machine->tp);
@@ -608,7 +618,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
     bytecode * bc = NULL;
     machine->binary_value_ref = binary_value;
 
-    printf("-----------\n");
+    //printf("-----------\n");
 
     machine->state = VM_RUNNING;
     while (machine->state == VM_RUNNING)
@@ -616,7 +626,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
 
-        bytecode_print(bc);
+        //bytecode_print(bc);
 
         vm_execute_op[bc->type].execute(machine, bc);
     }
