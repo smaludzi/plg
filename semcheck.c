@@ -140,7 +140,7 @@ void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_re
             {
                 assert(entry->type == SYMTAB_CLAUSE &&
                        entry->arity == term_arity(value) &&
-                       strcmp(entry->id, value->name));
+                       strcmp(entry->id, value->name) == 0);
                 value->predicate_ref = entry->predicate_value;
             }
             else

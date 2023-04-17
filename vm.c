@@ -427,8 +427,6 @@ void vm_execute_halt(vm * machine, bytecode * code)
         strtab_array = machine->binary_value_ref->strtab_array;
     }
 
-    //vm_execute_print(machine);
-
     unsigned int i = 0; 
     for (i = 0; i < code->halt.size; i++)
     {
@@ -438,8 +436,8 @@ void vm_execute_halt(vm * machine, bytecode * code)
         gc_print_ref_str(machine->collector,
                          vm_execute_deref(machine, addr),
                          strtab_array, strtab_size);
-        //printf("-------\n");
     }
+    printf("-----------------\n");
 
     /* TODO: backtrack on user's wish */
     vm_execute_backtrack(machine);
@@ -564,7 +562,7 @@ char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
     }
     if (gc_get_object_type(machine->collector, ref_u) == OBJECT_ATOM &&
         gc_get_object_type(machine->collector, ref_v) == OBJECT_ATOM &&
-        gc_get_atom_idx(machine->collector, ref_u) == gc_get_atom_idx(machine->collector, ref_u))
+        gc_get_atom_idx(machine->collector, ref_u) == gc_get_atom_idx(machine->collector, ref_v))
     {
         return 1;
     }
@@ -582,6 +580,7 @@ char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
             {
                 return 0;
             }
+            return 1;
         }
     }
     vm_execute_backtrack(machine);
@@ -615,8 +614,6 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
     bytecode * bc = NULL;
     machine->binary_value_ref = binary_value;
 
-    //printf("-----------\n");
-
     machine->state = VM_RUNNING;
     while (machine->state == VM_RUNNING)
     {
@@ -624,7 +621,6 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         machine->pc++;
 
         //bytecode_print(bc);
-
         vm_execute_op[bc->type].execute(machine, bc);
     }
 

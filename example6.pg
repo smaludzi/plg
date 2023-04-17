@@ -1,3 +1,3 @@
-s(X) <= X = s1
-t(X) <= X = t1
+s(X) <= X = hello
+t(X) <= X = world
 <= t(X), s(Y)

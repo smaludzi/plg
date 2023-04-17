@@ -1,3 +1,4 @@
-p <= a(X, Y)
-a(X, Y) <= f(X, X1), g(X1, Y)
-<= a(one, two)
+g(X, Y) <= X = z1, Y = z2
+f(X, Y) <= X = Y
+a(X, Y) <= f(g(a, b), g(a, b)), g(X, Y)
+<= a(X, Y)

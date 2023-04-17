@@ -1,2 +1,3 @@
-grandparent(X,Y) <= parent(X, f(Z)), parent(f(Z), Y), q(a, X, g(X, Y)), X = f(Y, Y)
-<= grandparent(X, Y)
+one(X, Y) <= X = a, Y = b
+one(X, Y) <= X = a, Y = a
+<= one(X, Y), X = Y
