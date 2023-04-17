@@ -135,15 +135,13 @@ void vm_execute_pop(vm * machine, bytecode * code)
 void vm_execute_put_ref(vm * machine, bytecode * code)
 {
     assert(machine->stack[machine->fp + code->put_ref.index].type == STACK_TYPE_HEAP_PTR);
-    //heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
-    heap_ptr ref_d = machine->stack[machine->fp + code->put_ref.index].addr;
+    heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
 
     //printf("sp %d fp+index %u ref_d %u\n", machine->sp, machine->fp + code->put_ref.index, ref_d);
 
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = ref_d;
-    //entry.addr = gc_alloc_ref(machine->collector, ref_d);
 
     machine->sp++;
     machine->stack[machine->sp] = entry;
@@ -479,23 +477,22 @@ void vm_execute_trail(vm * machine, heap_ptr ref)
     assert(machine->stack[machine->bp - 2].type == STACK_TYPE_HEAP_PTR);
 
     if (ref < machine->stack[machine->bp - 2].addr) {
-        machine->tp = machine->tp + 1;
-
         gc_stack entry  = { 0 };
         entry.type = STACK_TYPE_HEAP_PTR;
         entry.addr = ref;
 
+        machine->tp = machine->tp + 1;
         machine->trail[machine->tp] = entry;
     }
 }
 
-void vm_execute_reset(vm * machine, heap_ptr ref_x, heap_ptr ref_y)
+void vm_execute_reset(vm * machine, stack_ptr ref_x, stack_ptr ref_y)
 {
-    heap_ptr ref_u;
+    stack_ptr ref_u;
     for (ref_u = ref_y; ref_x < ref_u; ref_u--)
     {
         /* NOTE: second version, Lis. p. 130 */
-        gc_set_var_ref(machine->collector, machine->trail[ref_u].addr, machine->trail[ref_u].addr);
+        gc_reset_ref(machine->collector, machine->trail[ref_u].addr);
     }
 }
 
@@ -509,8 +506,8 @@ void vm_execute_backtrack(vm * machine)
     //printf("reset hp %u\n", machine->stack[machine->fp - 2].addr);
 
     assert(machine->stack[machine->fp - 3].type == STACK_TYPE_STACK_PTR);
-    vm_execute_reset(machine, machine->stack[machine->fp - 3].addr, machine->tp);
-    machine->tp = machine->stack[machine->fp - 3].addr;
+    vm_execute_reset(machine, machine->stack[machine->fp - 3].saddr, machine->tp);
+    machine->tp = machine->stack[machine->fp - 3].saddr;
 
     assert(machine->stack[machine->fp - 5].type == STACK_TYPE_PC_OFFSET);
     machine->pc = machine->stack[machine->fp - 5].offset;

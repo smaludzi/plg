@@ -1,6 +1,7 @@
 t(X) <= X = b
-p <= q(X), t(X)
-q(X) <= s(X)
-s(X) <= t(X)
+t(X) <= X = a
 s(X) <= X = a
-<= p
+s(X) <= t(X)
+q(X) <= s(X)
+<= q(X), t(X)
+

@@ -1,5 +1,6 @@
 t(X) <= X = t1
 t(X) <= X = t2
 t(X) <= X = t3
-s(Y) <= Y = s0
-<= t(X), s(Y)
+s(X) <= X = t1
+s(X) <= X = t2
+<= t(X), s(X)

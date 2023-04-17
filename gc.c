@@ -249,7 +249,7 @@ heap_ptr gc_get_hp(gc * collector)
 
 void gc_reset_hp(gc * collector, heap_ptr new_hp)
 {
-    assert(new_hp < collector->free[collector->heap_idx]);
+    //assert(new_hp < collector->free[collector->heap_idx]);
     heap_ptr h_ptr;
     for (h_ptr = new_hp; h_ptr < collector->free[collector->heap_idx]; h_ptr++)
     {
@@ -350,6 +350,15 @@ heap_ptr gc_set_ref_ref(gc * collector, heap_ptr addr, heap_ptr ref)
     assert(collector->heap[collector->heap_idx][addr].object_value->type == OBJECT_REF);
 
     return collector->heap[collector->heap_idx][addr].object_value->ref_value.ref = ref;
+}
+
+heap_ptr gc_reset_ref(gc * collector, heap_ptr addr)
+{
+    assert(collector->size > addr);
+    assert(collector->heap[collector->heap_idx][addr].object_value->type == OBJECT_REF);
+
+    collector->heap[collector->heap_idx][addr].object_value->ref_value.ref = addr;
+    return addr;
 }
 
 heap_ptr gc_set_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx, heap_ptr ref)

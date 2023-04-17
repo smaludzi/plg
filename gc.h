@@ -87,6 +87,7 @@ atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx);
 heap_ptr gc_set_anon_ref(gc * collector, heap_ptr addr, heap_ptr ref);
 heap_ptr gc_set_var_ref(gc * collector, heap_ptr addr, heap_ptr ref);
 heap_ptr gc_set_ref_ref(gc * collector, heap_ptr addr, heap_ptr ref);
+heap_ptr gc_reset_ref(gc * collector, heap_ptr addr);
 heap_ptr gc_set_struct_ref(gc * collector, heap_ptr addr, heap_size_t idx, heap_ptr ref);
 
 void gc_print_ref(gc * collector, heap_ptr addr);

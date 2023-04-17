@@ -59,7 +59,7 @@ void vm_delete(vm * machine);
 
 heap_ptr vm_execute_deref(vm * machine, heap_ptr ref);
 void vm_execute_trail(vm * machine, heap_ptr ref);
-void vm_execute_reset(vm * machine, heap_ptr ref_x, heap_ptr ref_y);
+void vm_execute_reset(vm * machine, stack_ptr ref_x, stack_ptr ref_y);
 void vm_execute_backtrack(vm *machine);
 char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v);
 char vm_execute_check_low(vm * machine, heap_ptr ref_u, heap_ptr ref_v);
