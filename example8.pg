@@ -1,0 +1,10 @@
+
+edge(X, Y) <= X = a, Y = b
+edge(X, Y) <= X = b, Y = a
+edge(X, Y) <= X = c, Y = c
+
+reachable(X, Y) <= X = Y
+reachable(X, Y) <= edge(X, Z), reachable(Z, Y)
+
+<= reachable(X, Y)
+

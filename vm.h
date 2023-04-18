@@ -99,4 +99,6 @@ void vm_execute_no(vm * machine, bytecode * code);
 void vm_execute_jump(vm * machine, bytecode * code);
 void vm_execute_label(vm * machine, bytecode * code);
 
+const char * vm_state_to_str(vm_state state);
+
 #endif /* __VM_H__ */

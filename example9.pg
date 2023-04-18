@@ -1,0 +1,13 @@
+
+isLiar(X, Y) <= X = true, Y = lie
+isLiar(X, Y) <= X = lie, Y = true
+
+bothLie(X, Y, Z) <= X = true, Y = lie, Z = lie
+bothLie(X, Y, Z) <= X = lie, Y = lie, Z = true
+bothLie(X, Y, Z) <= X = lie, Y = true, Z = lie
+bothLie(X, Y, Z) <= X = lie, Y = true, Z = true
+
+findLiar(P, T, F) <= isLiar(P, T), isLiar(T, F), bothLie(F, P, T)
+
+<= findLiar(Peter, Thomas, Frank)
+

@@ -120,6 +120,7 @@ void vm_execute_print(vm * machine)
     printf("heap_size           : %u\n", machine->heap_size);
     printf("stack size          : %d\n", machine->stack_size);
     printf("trail size          : %d\n", machine->trail_size);
+    printf("state               : %s\n", vm_state_to_str(machine->state));
 }
 
 void vm_execute_unknown(vm * machine, bytecode * code)
@@ -622,11 +623,18 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
 
         //bytecode_print(bc);
         vm_execute_op[bc->type].execute(machine, bc);
+
+        if (machine->sp > machine->stack_size - 20)
+        {
+            printf("out of memory\n");
+            machine->state = VM_ERROR;
+        }
     }
 
     if (machine->state == VM_ERROR)
     {
         // print machine error state
+        vm_execute_print(machine);
         return 1;
     }
     else if (machine->state == VM_STOP)
@@ -635,4 +643,15 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
     }
 
     return 1;
+}
+
+const char * vm_state_to_str(vm_state state)
+{
+    switch (state)
+    {
+        case VM_RUNNING: return "VM_RUNNING";
+        case VM_ERROR: return "VM_ERROR";
+        case VM_STOP: return "VM_STOP";
+    }
+    return "VM_UNKNOWN";
 }

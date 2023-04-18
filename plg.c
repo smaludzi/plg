@@ -94,7 +94,7 @@ int main(int argc, char * argv[])
 				//strtab_array_print(binary_value->strtab_array, binary_value->strtab_size);
 				//bytecode_list_print(gen->list);
 
-				vm * vm_value = vm_new(256, 64, 64);
+				vm * vm_value = vm_new(256, 256, 256);
 				vm_execute(vm_value, binary_value);
 				vm_delete(vm_value);
 

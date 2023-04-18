@@ -1,0 +1,4 @@
+t(X) <= X = true
+f(X) <= X = a
+<= f(a), t(X)
+
