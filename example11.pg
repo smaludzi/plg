@@ -1,0 +1,4 @@
+t(X) <= X = true
+f(X, Y) <= X = x, Y = y
+g(X) <= f(x, y)
+<= g(X), X = f(x, y), t(Z)

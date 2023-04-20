@@ -135,6 +135,11 @@ void vm_execute_pop(vm * machine, bytecode * code)
 
 void vm_execute_put_ref(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+
     assert(machine->stack[machine->fp + code->put_ref.index].type == STACK_TYPE_HEAP_PTR);
     heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
 
@@ -150,9 +155,19 @@ void vm_execute_put_ref(vm * machine, bytecode * code)
 
 void vm_execute_put_var(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = gc_alloc_var(machine->collector);
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
 
     //printf("sp %d ref_d %u\n", machine->sp, entry.addr);
 
@@ -187,9 +202,19 @@ void vm_execute_check(vm * machine, bytecode * code)
 
 void vm_execute_put_anon(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = gc_alloc_anon(machine->collector);
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
 
     machine->sp++;
     machine->stack[machine->sp] = entry;
@@ -197,9 +222,19 @@ void vm_execute_put_anon(vm * machine, bytecode * code)
 
 void vm_execute_put_atom(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = gc_alloc_atom(machine->collector, code->put_atom.idx);
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
 
     machine->sp++;
     machine->stack[machine->sp] = entry;
@@ -219,6 +254,12 @@ void vm_execute_put_struct_addr(vm * machine, bytecode * code)
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = gc_alloc_struct(machine->collector, code->put_struct.n, code->put_struct.addr);
+
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
 
     for (i = 0; i < code->put_struct.n; i++)
     {
@@ -249,6 +290,12 @@ void vm_execute_u_atom(vm * machine, bytecode * code)
         {
             /* NOTE: second version, Fig. 4.17 p. 121 */
             heap_ptr a_value = gc_alloc_atom(machine->collector, code->u_atom.idx);
+            if (a_value == 0)
+            {
+                machine->state = VM_ERROR_OUT_OF_MEMORY;
+                return;
+            }
+
             gc_set_ref_ref(machine->collector, h_ref, a_value);
             vm_execute_trail(machine, h_ref);
         }
@@ -267,7 +314,7 @@ void vm_execute_u_struct(vm * machine, bytecode * code)
 
 void vm_execute_u_struct_addr(vm * machine, bytecode * code)
 {
-    /* NOTE: second version, Fig. 4.21 p.124 */
+    /* NOTE: third version, Fig. 4.21 p.124 */
     switch(gc_get_object_type(machine->collector, machine->stack[machine->sp].addr))
     {
         case OBJECT_UNKNOWN:
@@ -283,6 +330,13 @@ void vm_execute_u_struct_addr(vm * machine, bytecode * code)
         }
         break;
         case OBJECT_STRUCT:
+        {
+            if (!(gc_get_struct_addr(machine->collector, machine->stack[machine->sp].addr) == code->u_struct.addr &&
+                  gc_get_struct_size(machine->collector, machine->stack[machine->sp].addr) == code->u_struct.n))
+            {
+                vm_execute_backtrack(machine);
+            }
+        }
         break;
     }
 }
@@ -296,13 +350,18 @@ void vm_execute_up(vm * machine, bytecode * code)
 void vm_execute_bind(vm * machine, bytecode * code)
 {
     /* NOTE: second version, Fig 4.13 p. 117 */
-    gc_set_var_ref(machine->collector, machine->stack[machine->sp - 1].addr, machine->stack[machine->sp].addr);
+    gc_set_ref_ref(machine->collector, machine->stack[machine->sp - 1].addr, machine->stack[machine->sp].addr);
     vm_execute_trail(machine, machine->stack[machine->sp - 1].addr);
     machine->sp = machine->sp - 2;
 }
 
 void vm_execute_son(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+    
     machine->stack[machine->sp + 1].type = STACK_TYPE_HEAP_PTR;
     machine->stack[machine->sp + 1].addr = vm_execute_deref(machine, gc_get_struct_ref(machine->collector, machine->stack[machine->sp].addr, code->son.number));
     machine->sp++;
@@ -310,6 +369,11 @@ void vm_execute_son(vm * machine, bytecode * code)
 
 void vm_execute_mark(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+
     gc_stack b_entry = { 0 };
     gc_stack fp_entry = { 0 };
 
@@ -339,6 +403,11 @@ void vm_execute_call_addr(vm * machine, bytecode * code)
 
 void vm_execute_push_env(vm * machine, bytecode * code)
 {
+    if (!vm_execute_check_size(machine, machine->fp + code->push_env.size, machine->tp))
+    {
+        return;
+    }
+
     machine->sp = machine->fp + code->push_env.size;
 }
 
@@ -432,8 +501,6 @@ void vm_execute_halt(vm * machine, bytecode * code)
     for (i = 0; i < code->halt.size; i++)
     {
         heap_ptr addr = machine->stack[machine->fp + 1 + i].addr;
-        //printf("addr %u(%u)\n", addr, vm_execute_deref(machine, addr));
-        //printf("-------\n");
         gc_print_ref_str(machine->collector,
                          vm_execute_deref(machine, addr),
                          strtab_array, strtab_size);
@@ -473,6 +540,11 @@ heap_ptr vm_execute_deref(vm * machine, heap_ptr ref)
 
 void vm_execute_trail(vm * machine, heap_ptr ref)
 {
+    if (!vm_execute_check_size(machine, machine->sp, machine->tp + 1))
+    {
+        return;
+    }
+
     assert(machine->stack[machine->bp - 2].type == STACK_TYPE_HEAP_PTR);
 
     if (ref < machine->stack[machine->bp - 2].addr) {
@@ -610,10 +682,26 @@ char vm_execute_check_low(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
     return 1;
 }
 
+char vm_execute_check_size(vm * machine, stack_size_t new_stack_size, stack_size_t new_trail_size)
+{
+    char size_ok = 1;
+
+    if (new_stack_size >= machine->stack_size ||
+        new_trail_size >= machine->trail_size)
+    {
+        size_ok = 0;
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+    }
+
+    return size_ok;
+}
+
 int vm_execute(vm * machine, gencode_binary * binary_value)
 {
     bytecode * bc = NULL;
     machine->binary_value_ref = binary_value;
+
+    printf("------------\n");
 
     machine->state = VM_RUNNING;
     while (machine->state == VM_RUNNING)
@@ -621,17 +709,12 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
 
-        //bytecode_print(bc);
+        bytecode_print(bc);
         vm_execute_op[bc->type].execute(machine, bc);
-
-        if (machine->sp > machine->stack_size - 20)
-        {
-            printf("out of memory\n");
-            machine->state = VM_ERROR;
-        }
     }
 
-    if (machine->state == VM_ERROR)
+    if (machine->state == VM_ERROR ||
+        machine->state == VM_ERROR_OUT_OF_MEMORY)
     {
         // print machine error state
         vm_execute_print(machine);
@@ -652,6 +735,7 @@ const char * vm_state_to_str(vm_state state)
         case VM_RUNNING: return "VM_RUNNING";
         case VM_ERROR: return "VM_ERROR";
         case VM_STOP: return "VM_STOP";
+        case VM_ERROR_OUT_OF_MEMORY: return "VM_ERROR_OUT_OF_MEMORY";
     }
     return "VM_UNKNOWN";
 }

@@ -28,6 +28,7 @@
 #include "strtab.h"
 #include "vm.h"
 
+extern int parse_result;
 extern int yyparse(program ** program_value);
 
 void scan()
@@ -75,9 +76,10 @@ int main(int argc, char * argv[])
 
 	program * program_value = NULL;
 
+	parse_result = 0;
 	yyparse(&program_value);
 
-	if (program_value != NULL)
+	if (parse_result == 0 && program_value != NULL)
 	{
 		semcheck_result sem_res = SEMCHECK_SUCCESS;
 		program_semcheck(program_value, &sem_res);
@@ -91,8 +93,8 @@ int main(int argc, char * argv[])
 				gencode_binary * binary_value = gencode_binary_new();
 				gencode_binary_generate(binary_value, gen);
 
-				//strtab_array_print(binary_value->strtab_array, binary_value->strtab_size);
-				//bytecode_list_print(gen->list);
+				strtab_array_print(binary_value->strtab_array, binary_value->strtab_size);
+				bytecode_list_print(gen->list);
 
 				vm * vm_value = vm_new(256, 256, 256);
 				vm_execute(vm_value, binary_value);
@@ -102,6 +104,9 @@ int main(int argc, char * argv[])
 			}
 			gencode_delete(gen);
 		}
+	}
+	if (program_value != NULL)
+	{
 		program_delete(program_value);
 	}
 

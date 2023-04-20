@@ -24,10 +24,14 @@
 #include "program.h"
 #include "term.h"
 
+int parse_result;
+
 int yyerror(program ** plg, char * str)
 {
+  parse_result = 1;
+
 	fprintf(stderr, "%s\n", str);
-	return 0;
+	return 1;
 }
 
 int yylex(token * tokp)

@@ -26,7 +26,8 @@ typedef enum vm_state
 {
     VM_STOP = 0,
     VM_RUNNING = 1,
-    VM_ERROR = 2
+    VM_ERROR = 2,
+    VM_ERROR_OUT_OF_MEMORY = 3
 } vm_state;
 
 typedef struct vm {
@@ -63,6 +64,7 @@ void vm_execute_reset(vm * machine, stack_ptr ref_x, stack_ptr ref_y);
 void vm_execute_backtrack(vm *machine);
 char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v);
 char vm_execute_check_low(vm * machine, heap_ptr ref_u, heap_ptr ref_v);
+char vm_execute_check_size(vm * machine, stack_size_t new_stack_size, stack_size_t new_trail_size);
 
 int vm_execute(vm * machine, gencode_binary * binary_value);
 void vm_execute_test();
