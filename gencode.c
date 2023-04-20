@@ -374,7 +374,7 @@ void term_list_gencode(gencode * gen, term_list * list, gencode_result * result)
 
 void term_list_unify_gencode(gencode * gen, term_list * list, gencode_result * result)
 {
-    unsigned int son_number = 1;
+    unsigned int son_number = 0;
 
     term * node = list->head;
     while (node != NULL)

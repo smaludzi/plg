@@ -93,8 +93,8 @@ int main(int argc, char * argv[])
 				gencode_binary * binary_value = gencode_binary_new();
 				gencode_binary_generate(binary_value, gen);
 
-				strtab_array_print(binary_value->strtab_array, binary_value->strtab_size);
-				bytecode_list_print(gen->list);
+				//strtab_array_print(binary_value->strtab_array, binary_value->strtab_size);
+				//bytecode_list_print(gen->list);
 
 				vm * vm_value = vm_new(256, 256, 256);
 				vm_execute(vm_value, binary_value);

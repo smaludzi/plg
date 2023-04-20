@@ -326,7 +326,7 @@ void vm_execute_u_struct_addr(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
         {
-            machine->pc = code->u_struct.addr;
+            machine->pc = code->u_struct.offset;
         }
         break;
         case OBJECT_STRUCT:
@@ -709,7 +709,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
 
-        bytecode_print(bc);
+        //bytecode_print(bc);
         vm_execute_op[bc->type].execute(machine, bc);
     }
 

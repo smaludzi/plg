@@ -208,15 +208,19 @@ void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unificatio
     var_list * freevars = var_list_new();
 
     var_semcheck(stab, freevars, value->variable, result);
-    term_semcheck(stab, freevars, value->term_value, result);
+    var_list_enumerate(freevars, stab->count + 1);
+    var_list_add_to_symtab(stab, freevars, result);
 
+    var_list_delete_null(freevars);
+
+    freevars = var_list_new();
+    term_semcheck(stab, freevars, value->term_value, result);
     if (var_list_size(freevars) > 0)
     {
         *result = SEMCHECK_FAILURE;
         fprintf(stderr, "%d: found free variables in goal unification\n", goal_value->line_no);
         var_list_print(freevars);
     }
-
     var_list_delete_null(freevars);
 }
 
