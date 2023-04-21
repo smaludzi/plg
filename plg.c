@@ -31,6 +31,7 @@
 extern int parse_result;
 extern int yyparse(program ** program_value);
 
+#if 0
 void scan()
 {
 	token tok;
@@ -62,6 +63,7 @@ void scan()
 		}
 	}
 }
+#endif
 
 int main(int argc, char * argv[])
 {

@@ -19,6 +19,7 @@
  */
 %{
 #include <stdio.h>
+#include <stdarg.h>
 #include "scanner.h"
 #include "unify_term.h"
 #include "program.h"
@@ -26,17 +27,21 @@
 
 int parse_result;
 
-int yyerror(program ** plg, char * str)
+int yyerror(program ** plg, char * str, ...)
 {
+  va_list args;
   parse_result = 1;
 
-	fprintf(stderr, "%s\n", str);
+  va_start(args, str);
+  fprintf(stderr, "%d: ", line_no); vfprintf(stderr, str, args); fprintf(stderr, "\n");
+  va_end(args);
+
 	return 1;
 }
 
 int yylex(token * tokp)
 {
-	return lex_scan(tokp);
+  return lex_scan(tokp);
 }
 
 %}
@@ -86,6 +91,12 @@ var: TOK_VAR
      {
          $$ = var_new($1);
          $$->line_no = $<line_no>1;
+     }
+     | error
+     {
+         $$ = NULL;
+         yyerror(NULL, "incorrect variable, found '%s' instead", yylval.val.string_val);
+         yyclearin;
      }
 ;
 

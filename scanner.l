@@ -44,36 +44,42 @@ SPECIAL   [.,()=]
     }
     
 	"_" {
+		tokp->type = TOK_ANON;
 		tokp->line_no = line_no;
 		tokp->val.string_val = (char *)strdup(yytext);
 		return TOK_ANON;
 	}
 
     "<=" {
+		tokp->type = TOK_ARR;
 		tokp->line_no = line_no;
 		tokp->val.string_val = (char *)yytext;
 		return TOK_ARR;
 	}
 
     ":-" {
+		tokp->type = TOK_IMPL;
     	tokp->line_no = line_no;
     	tokp->val.string_val = (char *)yytext;
     	return TOK_IMPL;
     }
     
     "?-" {
+		tokp->type = TOK_QUERY;
     	tokp->line_no = line_no;
     	tokp->val.string_val = (char *)yytext;
     	return TOK_QUERY;
     }
 
 	[A-Z]({ID}|{DIGIT})* {
+		tokp->type = TOK_VAR;
 		tokp->line_no = line_no;
 		tokp->val.string_val = (char *)strdup(yytext);
 		return TOK_VAR;
 	}
 	
     [a-z]({ID}|{DIGIT})*	{
+		tokp->type = TOK_ATOM;
     	tokp->line_no = line_no;
     	tokp->val.string_val = (char *)strdup(yytext);
 		return TOK_ATOM;
