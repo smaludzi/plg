@@ -56,6 +56,9 @@ extern FILE * yyin;
 extern int lex_scan(token * tokp);
 extern int yylex_destroy();
 
+extern const char * token_to_str(token * tokp);
+extern void token_delete(token * tokp);
+
 #define YYSTYPE token
 #define YY_DECL int lex_scan(token * tokp)
 

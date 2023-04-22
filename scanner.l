@@ -24,6 +24,32 @@
 
 unsigned int line_no = 1;
 
+extern void token_delete(token * tokp)
+{
+	switch (tokp->type)
+	{
+		case TOK_ANON:
+		case TOK_VAR:
+		case TOK_ATOM:
+			free(tokp->val.string_val);
+		break;
+	}
+}
+
+const char * token_to_str(token * tokp)
+{
+	switch (tokp->type)
+	{
+		case TOK_ANON: return tokp->val.string_val;
+		case TOK_ARR: return tokp->val.string_val;
+		case TOK_IMPL: return tokp->val.string_val;
+		case TOK_QUERY: return tokp->val.string_val;
+		case TOK_VAR: return tokp->val.string_val;
+		case TOK_ATOM: return tokp->val.string_val;
+	}
+	return "unknown";
+}
+
 %}
 
 DIGIT     [0-9]

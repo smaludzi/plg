@@ -74,6 +74,8 @@ int yylex(token * tokp)
 
 %destructor { if ($$) free($$); } TOK_ATOM
 %destructor { if ($$) free($$); } TOK_VAR
+%destructor { if ($$) var_delete($$); } var
+%destructor { if ($$) var_list_delete($$); } vars
 %destructor { if ($$) term_delete($$); } term
 %destructor { if ($$) term_list_delete($$); } terms
 %destructor { if ($$) goal_delete($$); } goal
@@ -95,7 +97,8 @@ var: TOK_VAR
      | error
      {
          $$ = NULL;
-         yyerror(NULL, "incorrect variable, found '%s' instead", yylval.val.string_val);
+         yyerror(NULL, "incorrect variable, found '%s' instead", token_to_str(&yylval));
+         token_delete(&yylval);
          yyclearin;
      }
 ;
