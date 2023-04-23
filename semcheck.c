@@ -95,23 +95,28 @@ void var_list_add_symtab_semcheck(symtab * stab, var_list * list, semcheck_resul
     }
 }
 
+void var_add_to_symtab(symtab * stab, var * var_value, semcheck_result * result)
+{
+    symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
+    if (entry != NULL)
+    {
+        var_value->bound_to = entry->var_value;
+    }
+    else
+    {
+        symtab_add_var(stab, var_value);
+    }
+}
+
 void var_list_add_to_symtab(symtab * stab, var_list * freevars, semcheck_result * result)
 {
     var_node * node = freevars->head;
     while (node != NULL)
     {
         var * var_value = node->value;
-        if (var_value)
+        if (var_value != NULL)
         {
-            symtab_entry * entry = symtab_lookup(stab, var_value->name, SYMTAB_LOOKUP_LOCAL);
-            if (entry != NULL)
-            {
-                var_value->bound_to = entry->var_value;
-            }
-            else
-            {
-                symtab_add_var(stab, var_value);
-            }
+            var_add_to_symtab(stab, var_value, result);
         }
         node = node->next;
     }
@@ -177,6 +182,89 @@ void term_list_semcheck(symtab * stab, var_list * freevars, term_list * list, se
     }    
 }
 
+void var_get_vars_semcheck(symtab * stab, var * value)
+{
+    symtab_entry * entry = symtab_lookup(stab, value->name, SYMTAB_LOOKUP_LOCAL);
+    if (entry == NULL)
+    {
+        symtab_add_var(stab, value);
+    }
+}
+
+void var_list_get_vars_semcheck(symtab * stab, var_list * list)
+{
+    var_node * node = list->head;
+    while (node != NULL)
+    {
+        var * var_value = node->value;
+        if (var_value != NULL)
+        {
+            var_get_vars_semcheck(stab, var_value);
+        }
+        node = node->next;
+    }
+}
+
+void term_get_vars_semcheck(symtab * stab, term * value)
+{
+    switch (value->type)
+    {
+        case TERM_TYPE_UNKNOWN:
+        break;
+        case TERM_TYPE_ANON:
+        break;
+        case TERM_TYPE_ATOM:
+        break;
+        case TERM_TYPE_VAR:
+            var_get_vars_semcheck(stab, value->var_value);
+        break;
+        case TERM_TYPE_TERM:
+            term_list_get_vars_semcheck(stab, value->terms);
+        break;
+    }
+}
+
+void term_list_get_vars_semcheck(symtab * stab, term_list * list)
+{
+    term * node = list->head;
+    while (node != NULL)
+    {
+        term_get_vars_semcheck(stab, node);
+        node = node->next;
+    }
+}
+
+void goal_get_vars_semcheck(symtab * stab, goal * value)
+{
+    switch (value->type)
+    {
+        case GOAL_TYPE_UNKNOW:
+        break;
+        case GOAL_TYPE_LITERAL:
+        {
+            term_list_get_vars_semcheck(stab, value->literal.terms);
+        }
+        break;
+        case GOAL_TYPE_UNIFICATION:
+        {
+            var_get_vars_semcheck(stab, value->unification.variable);
+            term_get_vars_semcheck(stab, value->unification.term_value);
+        }
+        break;
+        case GOAL_TYPE_CUT:
+        break;
+    }
+}
+
+void goal_list_get_vars_from_semcheck(symtab * stab, goal * from_goal)
+{
+    while (from_goal != NULL)
+    {
+        goal_get_vars_semcheck(stab, from_goal);
+        from_goal = from_goal->next;
+    }
+}
+
 void goal_literal_semcheck(symtab * stab, goal * goal_value, goal_literal * value, semcheck_result * result)
 {
     symtab_entry * entry = symtab_lookup_arity(stab, value->name, term_list_arity(value->terms), SYMTAB_LOOKUP_GLOBAL);
@@ -224,7 +312,22 @@ void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unificatio
     var_list_delete_null(freevars);
 }
 
-void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)
+void goal_cut_semcheck(clause * clause_value, goal * goal_value, goal_cut * value, semcheck_result * result)
+{
+    value->predicate_ref = clause_value;
+
+    symtab * stab = symtab_new(32, NULL);
+    goal_list_get_vars_from_semcheck(stab, goal_value);
+    value->local_vars = stab->count;
+    symtab_delete(stab);
+
+    if (clause_value != NULL)
+    {
+        clause_value->with_cut = 1;
+    }
+}
+
+void goal_semcheck(symtab * stab, clause * clause_value, goal * value, semcheck_result * result)
 {
     switch (value->type)
     {
@@ -238,6 +341,11 @@ void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)
             goal_unification_semcheck(stab, value, &value->unification, result);
             break;
         }
+        case GOAL_TYPE_CUT:
+        {
+            goal_cut_semcheck(clause_value, value, &value->cut, result);
+            break;
+        }
         case GOAL_TYPE_UNKNOW:
         {
             assert(0);
@@ -245,12 +353,12 @@ void goal_semcheck(symtab * stab, goal * value, semcheck_result * result)
     }
 }
 
-void goal_list_semcheck(symtab * stab, goal_list * list, semcheck_result * result)
+void goal_list_semcheck(symtab * stab, clause * clause_value, goal_list * list, semcheck_result * result)
 {
     goal * node = list->head;
     while (node != NULL)
     {
-        goal_semcheck(stab, node, result);
+        goal_semcheck(stab, clause_value, node, result);
         node = node->next;
     }
 }
@@ -290,7 +398,7 @@ void clause_semcheck(symtab * stab, clause * value, semcheck_result * result)
     {
         var_list_add_symtab_semcheck(value->stab, value->vars, result);
     }
-    goal_list_semcheck(value->stab, value->goals, result);
+    goal_list_semcheck(value->stab, value, value->goals, result);
     if (value->vars != NULL)
     {
         clause_enumerate_vars(value->stab, var_list_size(value->vars) + 1);
@@ -316,7 +424,7 @@ void query_semcheck(symtab * stab, query * value, semcheck_result * result)
     {
         value->stab = symtab_new(16, stab);
     }
-    goal_list_semcheck(value->stab, value->goals, result);
+    goal_list_semcheck(value->stab, NULL, value->goals, result);
 }
 
 void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck_result * result)

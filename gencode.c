@@ -418,7 +418,7 @@ void goal_literal_get_local_vars_gencode(gencode * gen, goal_literal value, var_
     }
 }
 
-void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * result)
+void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * result)
 {
     bytecode bc = { 0 };
     bytecode * bc_ptr;
@@ -427,15 +427,15 @@ void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * re
     bc_ptr = gencode_add_bytecode(gen, &bc);
     /* printf("MARK B\n"); */
 
-    if (value.terms != NULL)
+    if (value->terms != NULL)
     {
-        term_list_gencode(gen, value.terms, result);
+        term_list_gencode(gen, value->terms, result);
     }
 
     bytecode bc_call = { 0 };
     bc_call.type = BYTECODE_CALL;
-    bc_call.call.n = term_list_size(value.terms);
-    bc_call.call.predicate_ref = value.predicate_ref;
+    bc_call.call.n = term_list_size(value->terms);
+    bc_call.call.predicate_ref = value->predicate_ref;
     gencode_add_bytecode(gen, &bc_call);
     /* printf("CALL %s/%u\n", value.name, term_list_size(value.terms)); */
 
@@ -446,14 +446,14 @@ void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * re
     /* printf("B: ...\n"); */
 }
 
-void goal_unification_gencode(gencode * gen, goal_unification value, gencode_result * result)
+void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result)
 {
-    switch (value.variable->type)
+    switch (value->variable->type)
     {
     case VAR_TYPE_UNBOUND:
     {
-        var_gencode(gen, value.variable, result);
-        term_gencode(gen, value.term_value, result);
+        var_gencode(gen, value->variable, result);
+        term_gencode(gen, value->term_value, result);
 
         bytecode bc = { 0 };
         bc.type = BYTECODE_BIND;
@@ -463,15 +463,27 @@ void goal_unification_gencode(gencode * gen, goal_unification value, gencode_res
     }
     case VAR_TYPE_BOUND:
     {
-        var_gencode(gen, value.variable, result);
-        term_unify_gencode(gen, value.term_value, result);
+        var_gencode(gen, value->variable, result);
+        term_unify_gencode(gen, value->term_value, result);
         break;
     }
     default:
-        var_gencode(gen, value.variable, result);
-        term_gencode(gen, value.term_value, result);
+        var_gencode(gen, value->variable, result);
+        term_gencode(gen, value->term_value, result);
         assert(0);
     }
+}
+
+void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result)
+{
+    bytecode prune_bc = { 0 };
+    prune_bc.type = BYTECODE_PRUNE;
+    gencode_add_bytecode(gen, &prune_bc);
+
+    bytecode push_env_bc = { 0 };
+    push_env_bc.type = BYTECODE_PUSH_ENV;
+    push_env_bc.push_env.size = value->local_vars;
+    gencode_add_bytecode(gen, &push_env_bc);
 }
 
 void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_vars)
@@ -484,6 +496,11 @@ void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_v
             break;
         }
         case GOAL_TYPE_UNIFICATION:
+        {
+            var_get_unbound_gencode(gen, value->unification.variable, local_vars);
+            break;
+        }
+        case GOAL_TYPE_CUT:
         {
             /* not possible to get local variables */
             break;
@@ -501,12 +518,17 @@ void goal_gencode(gencode * gen, goal * value, gencode_result * result)
     {
         case GOAL_TYPE_LITERAL:
         {
-            goal_literal_gencode(gen, value->literal, result);
+            goal_literal_gencode(gen, &value->literal, result);
             break;
         }
         case GOAL_TYPE_UNIFICATION:
         {
-            goal_unification_gencode(gen, value->unification, result);
+            goal_unification_gencode(gen, &value->unification, result);
+            break;
+        }
+        case GOAL_TYPE_CUT:
+        {
+            goal_cut_gencode(gen, &value->cut, result);
             break;
         }
         case GOAL_TYPE_UNKNOW:
@@ -583,6 +605,13 @@ void predicate_0_gencode(gencode * gen, clause * value, gencode_result * result)
     bc.type = BYTECODE_LABEL;
     gencode_add_bytecode(gen, &bc);
     value->addr = bc.addr;
+
+    if (value->with_cut)
+    {
+        bytecode bc = { 0 };
+        bc.type = BYTECODE_SET_CUT;
+        gencode_add_bytecode(gen, &bc);
+    }
 
     clause_gencode(gen, value, result);
 }
@@ -743,6 +772,11 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     bc_push_env.push_env.size = symtab_size_type(value->stab, SYMTAB_VAR);
     gencode_add_bytecode(gen, &bc_push_env);
     /* printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR)); */
+
+    // bytecode bc_set_cut = { 0 };
+    // bc_set_cut.type = BYTECODE_SET_CUT;
+    // gencode_add_bytecode(gen, &bc_set_cut);
+    /* printf("SET_CUT\n"); */
 
     goal_list_gencode(gen, value->goals, result);
 

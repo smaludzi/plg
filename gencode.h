@@ -75,8 +75,9 @@ void term_list_get_local_vars_gencode(gencode * gen, term_list * list, var_list 
 void term_list_get_bound_vars_gencode(gencode * gen, term_list * list, var_list * bound_vars, gencode_result * result);
 void goal_list_get_local_vars_gencode(gencode * gen, goal_list * list, var_list * local_vars);
 void goal_literal_get_local_vars_gencode(gencode * gen, goal_literal value, var_list * local_vars);
-void goal_literal_gencode(gencode * gen, goal_literal value, gencode_result * result);
-void goal_unification_gencode(gencode * gen, goal_unification value, gencode_result * result);
+void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * result);
+void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result);
+void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result);
 void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_vars);
 void goal_gencode(gencode * gen, goal * value, gencode_result * result);
 void goal_list_gencode(gencode * gen, goal_list * list, gencode_result * result);

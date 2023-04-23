@@ -28,6 +28,7 @@ typedef struct clause {
     symtab * stab;
     unsigned int line_no;
     char gencode;
+    char with_cut;
     unsigned int addr;
 } clause;
 

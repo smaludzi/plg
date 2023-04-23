@@ -26,7 +26,8 @@ typedef struct clause clause;
 typedef enum goal_type { 
     GOAL_TYPE_UNKNOW,
     GOAL_TYPE_LITERAL,
-    GOAL_TYPE_UNIFICATION
+    GOAL_TYPE_UNIFICATION,
+    GOAL_TYPE_CUT
 } goal_type;
 
 typedef struct goal_literal {
@@ -40,11 +41,17 @@ typedef struct goal_unification {
     term * term_value;
 } goal_unification;
 
+typedef struct goal_cut {
+    clause * predicate_ref;
+    unsigned int local_vars;
+} goal_cut;
+
 typedef struct goal {
     goal_type type;
     union {
         goal_literal literal;
         goal_unification unification;
+        goal_cut cut;
     };
     unsigned int line_no;
     struct goal * next;
@@ -57,6 +64,7 @@ typedef struct goal_list {
 
 goal * goal_new_literal(char * name, term_list * terms);
 goal * goal_new_unification(var * variable, term * term_value);
+goal * goal_new_cut();
 void goal_delete(goal * value);
 void goal_print(goal * value);
 

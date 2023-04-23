@@ -97,6 +97,13 @@ SPECIAL   [.,()=]
     	return TOK_QUERY;
     }
 
+    "!" {
+		tokp->type = TOK_CUT;
+    	tokp->line_no = line_no;
+    	tokp->val.string_val = (char *)yytext;
+    	return TOK_CUT;
+    }
+
 	[A-Z]({ID}|{DIGIT})* {
 		tokp->type = TOK_VAR;
 		tokp->line_no = line_no;

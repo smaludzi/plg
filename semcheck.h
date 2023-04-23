@@ -37,16 +37,25 @@ void var_semcheck(symtab * stab, var_list * freevars, var * value, semcheck_resu
 void var_add_symtab_semcheck(symtab * stab, var * value, semcheck_result * result);
 void var_list_enumerate(var_list * list, unsigned int start);
 void var_list_add_symtab_semcheck(symtab * stab, var_list * list, semcheck_result * result);
+void var_add_to_symtab(symtab * stab, var * var_value, semcheck_result * result);
 void var_list_add_to_symtab(symtab * stab, var_list * freevars, semcheck_result * result);
 
 void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_result * result);
 void term_is_variable_semcheck(term * value, semcheck_result * result);
 void term_list_semcheck(symtab * stab, var_list * freevars, term_list * list, semcheck_result * result);
 
+void var_get_vars_semcheck(symtab * stab, var * value);
+void var_list_get_vars_semcheck(symtab * stab, var_list * list);
+void term_get_vars_semcheck(symtab * stab, term * value);
+void term_list_get_vars_semcheck(symtab * stab, term_list * list);
+void goal_list_get_vars_from_semcheck(symtab * stab, goal * from_goal);
+
 void goal_literal_semcheck(symtab * stab, goal * goal_value, goal_literal * value, semcheck_result * result);
 void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unification * value, semcheck_result * result);
-void goal_semcheck(symtab * stab, goal * value, semcheck_result * result);
-void goal_list_semcheck(symtab * stab, goal_list * list, semcheck_result * result);
+void goal_cut_semcheck(clause * clause_value, goal * goal_value, goal_cut * value, semcheck_result * result);
+void goal_semcheck(symtab * stab, clause * clause_value, goal * value, semcheck_result * result);
+void goal_get_vars_semcheck(symtab * stab, goal * value);
+void goal_list_semcheck(symtab * stab, clause * clause_value, goal_list * list, semcheck_result * result);
 
 void clause_enumerate_vars(symtab * stab, unsigned int start);
 void clause_semcheck(symtab * stab, clause * value, semcheck_result * result);

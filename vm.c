@@ -46,6 +46,8 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_SET_BTP, vm_execute_set_btp },
     { BYTECODE_DEL_BTP, vm_execute_del_btp },
     { BYTECODE_TRY, vm_execute_try },
+    { BYTECODE_PRUNE, vm_execute_prune },
+    { BYTECODE_SET_CUT, vm_execute_set_cut },
     { BYTECODE_INIT, vm_execute_init },
     { BYTECODE_HALT, vm_execute_halt },
     { BYTECODE_NO, vm_execute_no },
@@ -143,8 +145,6 @@ void vm_execute_put_ref(vm * machine, bytecode * code)
     assert(machine->stack[machine->fp + code->put_ref.index].type == STACK_TYPE_HEAP_PTR);
     heap_ptr ref_d = vm_execute_deref(machine, machine->stack[machine->fp + code->put_ref.index].addr);
 
-    //printf("sp %d fp+index %u ref_d %u\n", machine->sp, machine->fp + code->put_ref.index, ref_d);
-
     gc_stack entry = { 0 };
     entry.type = STACK_TYPE_HEAP_PTR;
     entry.addr = ref_d;
@@ -168,8 +168,6 @@ void vm_execute_put_var(vm * machine, bytecode * code)
         machine->state = VM_ERROR_OUT_OF_MEMORY;
         return;
     }
-
-    //printf("sp %d ref_d %u\n", machine->sp, entry.addr);
 
     machine->sp++;
     machine->stack[machine->fp + code->put_var.index] = entry;
@@ -271,8 +269,6 @@ void vm_execute_put_struct_addr(vm * machine, bytecode * code)
 void vm_execute_u_atom(vm * machine, bytecode * code)
 {
     heap_ptr h_ref = machine->stack[machine->sp].addr;
-    //printf("sp %d h_ref %u\n", machine->sp, h_ref);
-    //gc_print_ref(machine->collector, h_ref);
     machine->sp--;
     switch (gc_get_object_type(machine->collector, h_ref))
     {
@@ -471,7 +467,21 @@ void vm_execute_try(vm * machine, bytecode * code)
 
     machine->stack[machine->fp - 5] = pc_entry;
     machine->pc = code->try.offset;
-    //machine->pc = machine->pc + code->try.offset;
+}
+
+void vm_execute_prune(vm * machine, bytecode * code)
+{
+    assert(machine->stack[machine->fp - 4].type == STACK_TYPE_STACK_PTR);
+    machine->bp = machine->stack[machine->fp - 4].saddr;
+}
+
+void vm_execute_set_cut(vm * machine, bytecode * code)
+{
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_STACK_PTR;
+    entry.saddr = machine->bp;
+
+    machine->stack[machine->fp - 4] = entry;
 }
 
 void vm_execute_init(vm * machine, bytecode * code)
@@ -597,8 +607,6 @@ void vm_execute_backtrack(vm * machine)
 
     assert(machine->stack[machine->fp - 2].type == STACK_TYPE_HEAP_SIZE);
     gc_reset_hp(machine->collector, machine->stack[machine->fp - 2].addr);
-
-    //printf("reset hp %u\n", machine->stack[machine->fp - 2].addr);
 
     assert(machine->stack[machine->fp - 3].type == STACK_TYPE_STACK_PTR);
     vm_execute_reset(machine, machine->stack[machine->fp - 3].saddr, machine->tp);

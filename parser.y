@@ -60,6 +60,7 @@ int yylex(token * tokp)
 %token <val.string_val> TOK_VAR
 %token <val.string_val> TOK_IMPL
 %token <val.string_val> TOK_QUERY
+%token <val.string_val> TOK_CUT
 
 %type <val.var_val> var
 %type <val.vars_val> vars
@@ -173,6 +174,11 @@ goal: TOK_ATOM
     | var '=' term
       {
           $$ = goal_new_unification($1, $3);
+          $$->line_no = $<line_no>1;
+      }
+    | TOK_CUT
+      {
+          $$ = goal_new_cut();
           $$->line_no = $<line_no>1;
       }
 ;

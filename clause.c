@@ -30,6 +30,7 @@ clause * clause_new(char * name, var_list * vars, goal_list * goals)
     value->goals = goals;
     value->stab = NULL;
     value->gencode = 0;
+    value->with_cut = 0;
     value->addr = 0;
 
     return value;
