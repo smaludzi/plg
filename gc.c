@@ -109,25 +109,32 @@ void gc_mark(gc * collector, heap_ptr addr)
     }
 }
 
-void gc_run(gc * collector, gc_stack * omfalos, stack_ptr stack_size)
+void gc_run(
+    gc * collector,
+    gc_stack * omfalos, stack_ptr stack_size,
+    gc_stack * trail, stack_ptr trail_size)
 {
     // mark reachable objects
     stack_ptr si;
-    for (si = 0; si < stack_size; si++)
+    for (si = 0; si <= stack_size; si++)
     {
-        gc_mark(collector, omfalos[si].addr);
+        if (omfalos[si].type == STACK_TYPE_HEAP_PTR)
+        {
+            gc_mark(collector, omfalos[si].addr);
+        }
     }
     // move reachable objects
     heap_size_t mi;
     unsigned int curr_mem = collector->heap_idx;
     unsigned int next_mem = 1 - curr_mem; 
+
     for (mi = 0; mi < collector->free[curr_mem]; mi++)
     {
         if (collector->heap[curr_mem][mi].mark == 1)
         {   // move object from one side to other
-            collector->heap[next_mem][collector->free[next_mem]].object_value = collector->heap[curr_mem][mi].object_value;
-            collector->heap[curr_mem][mi].back_ptr = collector->free[next_mem];
             collector->heap[curr_mem][mi].mark = 0;
+            collector->heap[next_mem][collector->free[next_mem]] = collector->heap[curr_mem][mi];
+            collector->heap[curr_mem][mi].back_ptr = collector->free[next_mem];
             collector->free[next_mem]++;
         }
         else
@@ -171,10 +178,22 @@ void gc_run(gc * collector, gc_stack * omfalos, stack_ptr stack_size)
         }
     }
     // change addresses in stack
-    for (si = 0; si < stack_size; si++)
+    for (si = 0; si <= stack_size; si++)
     {
-        heap_ptr * ref_ptr = &(omfalos[si].addr);
-        *ref_ptr = collector->heap[curr_mem][*ref_ptr].back_ptr;
+        if (omfalos[si].type == STACK_TYPE_HEAP_PTR)
+        {
+            heap_ptr * ref_ptr = &(omfalos[si].addr);
+            *ref_ptr = collector->heap[curr_mem][*ref_ptr].back_ptr;
+        }
+    }
+    // change addresses in trail
+    for (si = 0; si <= trail_size; si++)
+    {
+        if (trail[si].type == STACK_TYPE_HEAP_PTR)
+        {
+            heap_ptr * ref_ptr = &(trail[si].addr);
+            *ref_ptr = collector->heap[curr_mem][*ref_ptr].back_ptr;
+        }
     }
     // reset unused memory
     for (mi = 0; mi < collector->free[curr_mem]; mi++)
@@ -261,6 +280,7 @@ void gc_reset_hp(gc * collector, heap_ptr new_hp)
         if ((object_value = collector->heap[collector->heap_idx][h_ptr].object_value) != NULL)
         {
             object_delete(object_value);
+            collector->heap[collector->heap_idx][h_ptr].mark = 0;
             collector->heap[collector->heap_idx][h_ptr].object_value = NULL;
         }
     }

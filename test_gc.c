@@ -127,10 +127,12 @@ void test_six()
 
     heap_ptr ref1 = gc_alloc_ref(collector, struct1);
 
+    stack[0].type = STACK_TYPE_HEAP_PTR;
     stack[0].addr = ref1;
+    stack[1].type = STACK_TYPE_HEAP_PTR;
     stack[1].addr = struct1;
 
-    gc_run(collector, stack, 2);
+    gc_run(collector, stack, 1, NULL, -1);
 
     assert(gc_get_ref_ref(collector, stack[0].addr) == stack[1].addr);
     assert(gc_get_struct_size(collector, stack[1].addr) == 2);
@@ -157,11 +159,13 @@ void test_seven()
     heap_ptr ref1 = gc_alloc_ref(collector, struct1);
     gc_alloc_anon(collector);
 
+    stack[0].type = STACK_TYPE_HEAP_PTR;
     stack[0].addr = ref1;
+    stack[1].type = STACK_TYPE_HEAP_PTR;
     stack[1].addr = struct1;
 
     assert(collector->free[collector->heap_idx] == 8);
-    gc_run(collector, stack, 2);
+    gc_run(collector, stack, 1, NULL, -1);
     assert(collector->free[collector->heap_idx] == 5);
 
     assert(gc_get_ref_ref(collector, stack[0].addr) == stack[1].addr);
@@ -189,17 +193,19 @@ void test_eight()
     gc_alloc_anon(collector);
     heap_ptr ref1 = gc_alloc_ref(collector, struct1);
 
+    stack[0].type = STACK_TYPE_HEAP_PTR;
     stack[0].addr = ref1;
+    stack[1].type = STACK_TYPE_HEAP_PTR;
     stack[1].addr = struct1;
 
     assert(collector->heap_idx == 0);
     assert(collector->free[collector->heap_idx] == 8);
 
-    gc_run(collector, stack, 2);
+    gc_run(collector, stack, 1, NULL, -1);
     assert(collector->heap_idx == 1);
     assert(collector->free[collector->heap_idx] == 5);
 
-    gc_run(collector, stack, 2);
+    gc_run(collector, stack, 1, NULL, -1);
     assert(collector->heap_idx == 0);
     assert(collector->free[collector->heap_idx] == 5);
 

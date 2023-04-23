@@ -36,8 +36,9 @@ typedef struct gc_heap
 typedef enum gc_stack_type {
     STACK_TYPE_UNKNOWN = 0,
     STACK_TYPE_HEAP_PTR = 1,
-    STACK_TYPE_STACK_PTR = 2,
-    STACK_TYPE_PC_OFFSET = 3
+    STACK_TYPE_HEAP_SIZE = 2,
+    STACK_TYPE_STACK_PTR = 3,
+    STACK_TYPE_PC_OFFSET = 4,
 } gc_stack_type;
 
 typedef struct gc_stack
@@ -62,7 +63,9 @@ gc * gc_new(heap_size_t size);
 void gc_delete(gc * collector);
 
 void gc_mark(gc * collector, heap_size_t addr);
-void gc_run(gc * collector, gc_stack * omfalos, stack_ptr stack_size);
+void gc_run(gc * collector,
+            gc_stack * omfalos, stack_ptr stack_size,
+            gc_stack * trail, stack_ptr trail_size);
 
 heap_ptr gc_alloc_any(gc * collector, object * value);
 heap_ptr gc_alloc_atom(gc * collector, atom_idx_t idx);

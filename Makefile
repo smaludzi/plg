@@ -63,7 +63,8 @@ clean:
 	rm -f plg $(OBJECTS) $(SCAN_PAR)
 
 rmcore:
-	rm core*
+	rm -f core*
+	rm -f vgcore*
 
 %.c:  %.y
 	$(YACC) $< -o $@

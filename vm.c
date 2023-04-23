@@ -369,13 +369,14 @@ void vm_execute_son(vm * machine, bytecode * code)
 
 void vm_execute_mark(vm * machine, bytecode * code)
 {
-    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    if (!vm_execute_check_size(machine, machine->sp + 6, machine->tp))
     {
         return;
     }
 
     gc_stack b_entry = { 0 };
     gc_stack fp_entry = { 0 };
+    gc_stack zero_entry = { 0 };
 
     b_entry.type = STACK_TYPE_PC_OFFSET;
     b_entry.offset = code->mark.offset;
@@ -385,6 +386,10 @@ void vm_execute_mark(vm * machine, bytecode * code)
 
     machine->stack[machine->sp + 6] = b_entry;
     machine->stack[machine->sp + 5] = fp_entry;
+    machine->stack[machine->sp + 4] = zero_entry;
+    machine->stack[machine->sp + 3] = zero_entry;
+    machine->stack[machine->sp + 2] = zero_entry;
+    machine->stack[machine->sp + 1] = zero_entry;
 
     machine->sp = machine->sp + 6;
 }
@@ -408,6 +413,12 @@ void vm_execute_push_env(vm * machine, bytecode * code)
         return;
     }
 
+    gc_stack zero_entry = { 0 };
+    for (stack_ptr sp = machine->sp + 1; sp <= machine->fp + (stack_ptr)code->push_env.size; sp++)
+    {
+        machine->stack[sp] = zero_entry;
+    }
+
     machine->sp = machine->fp + code->push_env.size;
 }
 
@@ -428,7 +439,7 @@ void vm_execute_pop_env(vm * machine, bytecode * code)
 void vm_execute_set_btp(vm * machine, bytecode * code)
 {
     gc_stack hp_entry = { 0 };
-    hp_entry.type = STACK_TYPE_HEAP_PTR;
+    hp_entry.type = STACK_TYPE_HEAP_SIZE;
     hp_entry.addr = gc_get_hp(machine->collector);
 
     gc_stack tp_entry = { 0 };
@@ -467,9 +478,15 @@ void vm_execute_init(vm * machine, bytecode * code)
 {
     machine->sp = machine->fp = machine->bp = 5;
 
+    gc_stack zero_entry = { 0 };
+
     gc_stack zero_heap = { 0 };
     zero_heap.type = STACK_TYPE_HEAP_PTR;
     zero_heap.addr = 0;
+
+    gc_stack zero_size = { 0 };
+    zero_size.type = STACK_TYPE_HEAP_SIZE;
+    zero_size.addr = 0;
 
     gc_stack minus_one_stack = { 0 };
     minus_one_stack.type = STACK_TYPE_STACK_PTR;
@@ -479,8 +496,9 @@ void vm_execute_init(vm * machine, bytecode * code)
     offset.type = STACK_TYPE_PC_OFFSET;
     offset.offset = code->init.offset;
 
+    machine->stack[5] = zero_entry;
     machine->stack[4] = zero_heap;
-    machine->stack[3] = zero_heap;
+    machine->stack[3] = zero_size;
     machine->stack[2] = minus_one_stack;
     machine->stack[1] = minus_one_stack;
     machine->stack[0] = offset;
@@ -497,6 +515,7 @@ void vm_execute_halt(vm * machine, bytecode * code)
         strtab_array = machine->binary_value_ref->strtab_array;
     }
 
+    // print result
     unsigned int i = 0; 
     for (i = 0; i < code->halt.size; i++)
     {
@@ -509,6 +528,11 @@ void vm_execute_halt(vm * machine, bytecode * code)
 
     /* TODO: backtrack on user's wish */
     vm_execute_backtrack(machine);
+
+    // run garbage collector
+    // TODO: write a test which will cause memory reclaim
+    // gc_run(machine->collector,
+    //        machine->stack, machine->sp, machine->trail, machine->tp);
 }
 
 void vm_execute_no(vm * machine, bytecode * code)
@@ -545,7 +569,7 @@ void vm_execute_trail(vm * machine, heap_ptr ref)
         return;
     }
 
-    assert(machine->stack[machine->bp - 2].type == STACK_TYPE_HEAP_PTR);
+    assert(machine->stack[machine->bp - 2].type == STACK_TYPE_HEAP_SIZE);
 
     if (ref < machine->stack[machine->bp - 2].addr) {
         gc_stack entry  = { 0 };
@@ -571,7 +595,7 @@ void vm_execute_backtrack(vm * machine)
 {
     machine->fp = machine->bp;
 
-    assert(machine->stack[machine->fp - 2].type == STACK_TYPE_HEAP_PTR);
+    assert(machine->stack[machine->fp - 2].type == STACK_TYPE_HEAP_SIZE);
     gc_reset_hp(machine->collector, machine->stack[machine->fp - 2].addr);
 
     //printf("reset hp %u\n", machine->stack[machine->fp - 2].addr);
@@ -709,7 +733,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
 
-        //bytecode_print(bc);
+        // bytecode_print(bc);
         vm_execute_op[bc->type].execute(machine, bc);
     }
 
