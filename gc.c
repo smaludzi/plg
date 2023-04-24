@@ -268,7 +268,6 @@ heap_ptr gc_get_hp(gc * collector)
 
 void gc_reset_hp(gc * collector, heap_ptr new_hp)
 {
-    //assert(new_hp < collector->free[collector->heap_idx]);
     if (new_hp >= collector->free[collector->heap_idx])
     {
         return;

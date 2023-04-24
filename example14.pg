@@ -1,4 +1,4 @@
 t(X) <= X = true
 f(X, Y) <= X = _, Y = _
 g(X, Y, Z) <= Z = f(X, Y)
-<= g(x, y, Z), Z = f(a, y), t(T)
+<= g(x, y, Z), Z = f(x, y), t(T)

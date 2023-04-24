@@ -53,8 +53,7 @@ goal * goal_new_cut()
     goal * value = malloc(sizeof(goal));
 
     value->type = GOAL_TYPE_CUT;
-    value->cut.predicate_ref = NULL;
-    value->cut.local_vars = 0;
+    value->cut.symtab_ref = NULL;
     value->line_no = 0;
     value->next = NULL;
 
@@ -127,10 +126,6 @@ void goal_print(goal * value)
         case GOAL_TYPE_CUT:
         {
             printf("goal cut\n");
-            if (value->cut.predicate_ref != NULL)
-            {
-                clause_print(value->cut.predicate_ref);
-            }
         }
         break;
         case GOAL_TYPE_UNKNOW:

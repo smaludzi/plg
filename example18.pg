@@ -1,0 +1,8 @@
+f(X) <= X = a
+f(X) <= X = b
+f(X) <= X = c
+g(X, Y) <= f(X), !, f(Y)
+g(X, Y) <= X = a, Y = b
+     <= g(X, Y)
+
+

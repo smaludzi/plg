@@ -23,6 +23,7 @@ query * query_new(goal_list * goals)
     query * value = malloc(sizeof(query));
     value->goals = goals;
     value->stab = NULL;
+    value->with_cut = 0;
     return value;
 }
 

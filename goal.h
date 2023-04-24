@@ -22,6 +22,7 @@
 #include "term.h"
 
 typedef struct clause clause;
+typedef struct symtab symtab;
 
 typedef enum goal_type { 
     GOAL_TYPE_UNKNOW,
@@ -42,8 +43,7 @@ typedef struct goal_unification {
 } goal_unification;
 
 typedef struct goal_cut {
-    clause * predicate_ref;
-    unsigned int local_vars;
+    symtab * symtab_ref;
 } goal_cut;
 
 typedef struct goal {

@@ -52,10 +52,10 @@ void goal_list_get_vars_from_semcheck(symtab * stab, goal * from_goal);
 
 void goal_literal_semcheck(symtab * stab, goal * goal_value, goal_literal * value, semcheck_result * result);
 void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unification * value, semcheck_result * result);
-void goal_cut_semcheck(clause * clause_value, goal * goal_value, goal_cut * value, semcheck_result * result);
-void goal_semcheck(symtab * stab, clause * clause_value, goal * value, semcheck_result * result);
+void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result);
+void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result * result);
 void goal_get_vars_semcheck(symtab * stab, goal * value);
-void goal_list_semcheck(symtab * stab, clause * clause_value, goal_list * list, semcheck_result * result);
+void goal_list_semcheck(symtab * stab, char * with_cut, goal_list * list, semcheck_result * result);
 
 void clause_enumerate_vars(symtab * stab, unsigned int start);
 void clause_semcheck(symtab * stab, clause * value, semcheck_result * result);

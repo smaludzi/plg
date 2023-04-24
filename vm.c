@@ -489,6 +489,8 @@ void vm_execute_init(vm * machine, bytecode * code)
     machine->sp = machine->fp = machine->bp = 5;
 
     gc_stack zero_entry = { 0 };
+    zero_entry.type = STACK_TYPE_PC_OFFSET;
+    zero_entry.offset = 0;
 
     gc_stack zero_heap = { 0 };
     zero_heap.type = STACK_TYPE_HEAP_PTR;
@@ -597,7 +599,10 @@ void vm_execute_reset(vm * machine, stack_ptr ref_x, stack_ptr ref_y)
     for (ref_u = ref_y; ref_x < ref_u; ref_u--)
     {
         /* NOTE: second version, Lis. p. 130 */
-        gc_reset_ref(machine->collector, machine->trail[ref_u].addr);
+        if (gc_get_object_type(machine->collector, machine->trail[ref_u].addr) == OBJECT_REF)
+        {
+            gc_reset_ref(machine->collector, machine->trail[ref_u].addr);
+        }
     }
 }
 

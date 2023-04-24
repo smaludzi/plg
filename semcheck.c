@@ -312,22 +312,13 @@ void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unificatio
     var_list_delete_null(freevars);
 }
 
-void goal_cut_semcheck(clause * clause_value, goal * goal_value, goal_cut * value, semcheck_result * result)
+void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result)
 {
-    value->predicate_ref = clause_value;
-
-    symtab * stab = symtab_new(32, NULL);
-    goal_list_get_vars_from_semcheck(stab, goal_value);
-    value->local_vars = stab->count;
-    symtab_delete(stab);
-
-    if (clause_value != NULL)
-    {
-        clause_value->with_cut = 1;
-    }
+    value->symtab_ref = stab;
+    *with_cut = 1;
 }
 
-void goal_semcheck(symtab * stab, clause * clause_value, goal * value, semcheck_result * result)
+void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result * result)
 {
     switch (value->type)
     {
@@ -343,7 +334,7 @@ void goal_semcheck(symtab * stab, clause * clause_value, goal * value, semcheck_
         }
         case GOAL_TYPE_CUT:
         {
-            goal_cut_semcheck(clause_value, value, &value->cut, result);
+            goal_cut_semcheck(stab, with_cut, value, &value->cut, result);
             break;
         }
         case GOAL_TYPE_UNKNOW:
@@ -353,12 +344,12 @@ void goal_semcheck(symtab * stab, clause * clause_value, goal * value, semcheck_
     }
 }
 
-void goal_list_semcheck(symtab * stab, clause * clause_value, goal_list * list, semcheck_result * result)
+void goal_list_semcheck(symtab * stab, char * with_cut, goal_list * list, semcheck_result * result)
 {
     goal * node = list->head;
     while (node != NULL)
     {
-        goal_semcheck(stab, clause_value, node, result);
+        goal_semcheck(stab, with_cut, node, result);
         node = node->next;
     }
 }
@@ -398,7 +389,7 @@ void clause_semcheck(symtab * stab, clause * value, semcheck_result * result)
     {
         var_list_add_symtab_semcheck(value->stab, value->vars, result);
     }
-    goal_list_semcheck(value->stab, value, value->goals, result);
+    goal_list_semcheck(value->stab, &value->with_cut, value->goals, result);
     if (value->vars != NULL)
     {
         clause_enumerate_vars(value->stab, var_list_size(value->vars) + 1);
@@ -424,7 +415,7 @@ void query_semcheck(symtab * stab, query * value, semcheck_result * result)
     {
         value->stab = symtab_new(16, stab);
     }
-    goal_list_semcheck(value->stab, NULL, value->goals, result);
+    goal_list_semcheck(value->stab, &value->with_cut, value->goals, result);
 }
 
 void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck_result * result)

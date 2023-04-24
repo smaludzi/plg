@@ -482,7 +482,7 @@ void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result)
 
     bytecode push_env_bc = { 0 };
     push_env_bc.type = BYTECODE_PUSH_ENV;
-    push_env_bc.push_env.size = value->local_vars;
+    push_env_bc.push_env.size = symtab_size_type(value->symtab_ref, SYMTAB_VAR);
     gencode_add_bytecode(gen, &push_env_bc);
 }
 
@@ -773,10 +773,13 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     gencode_add_bytecode(gen, &bc_push_env);
     /* printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR)); */
 
-    // bytecode bc_set_cut = { 0 };
-    // bc_set_cut.type = BYTECODE_SET_CUT;
-    // gencode_add_bytecode(gen, &bc_set_cut);
-    /* printf("SET_CUT\n"); */
+    if (value->with_cut)
+    {
+        bytecode bc_set_cut = { 0 };
+        bc_set_cut.type = BYTECODE_SET_CUT;
+        gencode_add_bytecode(gen, &bc_set_cut);
+        /* printf("SET_CUT\n"); */
+    }
 
     goal_list_gencode(gen, value->goals, result);
 

@@ -24,6 +24,7 @@
 typedef struct query {
     goal_list * goals;
     symtab * stab;
+    char with_cut;
     unsigned int line_no;
 } query;
 
