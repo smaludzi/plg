@@ -252,6 +252,7 @@ void goal_get_vars_semcheck(symtab * stab, goal * value)
         }
         break;
         case GOAL_TYPE_CUT:
+        case GOAL_TYPE_FAIL:
         break;
     }
 }
@@ -335,6 +336,10 @@ void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result
         case GOAL_TYPE_CUT:
         {
             goal_cut_semcheck(stab, with_cut, value, &value->cut, result);
+            break;
+        }
+        case GOAL_TYPE_FAIL:
+        {
             break;
         }
         case GOAL_TYPE_UNKNOW:

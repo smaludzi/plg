@@ -1,0 +1,5 @@
+true(X) <= X = _
+q(X) <= X = x
+notQ(X) <= q(X), !, fail
+notQ(X) <= X = _
+    <= X = a, notQ(X), true(X)

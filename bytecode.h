@@ -54,6 +54,7 @@ typedef enum bytecode_type {
     BYTECODE_TRY,
     BYTECODE_PRUNE,
     BYTECODE_SET_CUT,
+    BYTECODE_FAIL,
     BYTECODE_INIT,
     BYTECODE_HALT,
     BYTECODE_NO,
@@ -182,6 +183,7 @@ void bytecode_print_del_btp(bytecode * value);
 void bytecode_print_try(bytecode * value);
 void bytecode_print_prune(bytecode * value);
 void bytecode_print_set_cut(bytecode * value);
+void bytecode_print_fail(bytecode * value);
 void bytecode_print_init(bytecode * value);
 void bytecode_print_halt(bytecode * value);
 void bytecode_print_no(bytecode * value);

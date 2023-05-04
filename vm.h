@@ -97,6 +97,7 @@ void vm_execute_del_btp(vm * machine, bytecode * code);
 void vm_execute_try(vm * machine, bytecode * code);
 void vm_execute_prune(vm * machine, bytecode * code);
 void vm_execute_set_cut(vm * machine, bytecode * code);
+void vm_execute_fail(vm * machine, bytecode * code);
 void vm_execute_init(vm * machine, bytecode * code);
 void vm_execute_halt(vm * machine, bytecode * code);
 void vm_execute_no(vm * machine, bytecode * code);

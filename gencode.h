@@ -78,6 +78,7 @@ void goal_literal_get_local_vars_gencode(gencode * gen, goal_literal value, var_
 void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * result);
 void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result);
 void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result);
+void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result);
 void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_vars);
 void goal_gencode(gencode * gen, goal * value, gencode_result * result);
 void goal_list_gencode(gencode * gen, goal_list * list, gencode_result * result);

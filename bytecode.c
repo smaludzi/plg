@@ -53,6 +53,7 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_TRY, bytecode_print_try },
     { BYTECODE_PRUNE, bytecode_print_prune },
     { BYTECODE_SET_CUT, bytecode_print_set_cut },
+    { BYTECODE_FAIL, bytecode_print_fail },
     { BYTECODE_INIT, bytecode_print_init },
     { BYTECODE_HALT, bytecode_print_halt },
     { BYTECODE_NO, bytecode_print_no },
@@ -214,6 +215,11 @@ void bytecode_print_set_cut(bytecode * value)
     printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
 }
 
+void bytecode_print_fail(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
 void bytecode_print_init(bytecode * value)
 {
     printf("%d: %s addr %d\n", value->addr, bytecode_type_str(value->type), value->init.offset);
@@ -284,6 +290,7 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_TRY: return "BYTECODE_TRY";
         case BYTECODE_PRUNE: return "BYTECODE_PRUNE";
         case BYTECODE_SET_CUT: return "BYTECODE_SET_CUT";
+        case BYTECODE_FAIL: return "BYTECODE_FAIL";
         case BYTECODE_JUMP: return "BYTECODE_JUMP";
         case BYTECODE_INIT: return "BYTECODE_INIT";
         case BYTECODE_HALT: return "BYTECODE_HALT";

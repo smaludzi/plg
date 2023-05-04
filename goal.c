@@ -60,6 +60,18 @@ goal * goal_new_cut()
     return value;
 }
 
+goal * goal_new_fail(char * name)
+{
+    goal * value = malloc(sizeof(goal));
+
+    value->type = GOAL_TYPE_FAIL;
+    value->fail.name = name;
+    value->line_no = 0;
+    value->next = NULL;
+
+    return value;
+}
+
 void goal_delete(goal * value)
 {
     switch (value->type)
@@ -85,6 +97,12 @@ void goal_delete(goal * value)
             }
         break;
         case GOAL_TYPE_CUT:
+        break;
+        case GOAL_TYPE_FAIL:
+            if (value->fail.name)
+            {
+                free(value->fail.name);
+            }
         break;
         case GOAL_TYPE_UNKNOW:
             assert(0);
@@ -126,6 +144,11 @@ void goal_print(goal * value)
         case GOAL_TYPE_CUT:
         {
             printf("goal cut\n");
+        }
+        break;
+        case GOAL_TYPE_FAIL:
+        {
+            printf("goal fail\n");
         }
         break;
         case GOAL_TYPE_UNKNOW:

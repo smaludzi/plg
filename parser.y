@@ -61,6 +61,7 @@ int yylex(token * tokp)
 %token <val.string_val> TOK_IMPL
 %token <val.string_val> TOK_QUERY
 %token <val.string_val> TOK_CUT
+%token <val.string_val> TOK_FAIL
 
 %type <val.var_val> var
 %type <val.vars_val> vars
@@ -179,6 +180,11 @@ goal: TOK_ATOM
     | TOK_CUT
       {
           $$ = goal_new_cut();
+          $$->line_no = $<line_no>1;
+      }
+    | TOK_FAIL
+      {
+          $$ = goal_new_fail($1);
           $$->line_no = $<line_no>1;
       }
 ;

@@ -31,6 +31,7 @@ extern void token_delete(token * tokp)
 		case TOK_ANON:
 		case TOK_VAR:
 		case TOK_ATOM:
+		case TOK_FAIL:
 			free(tokp->val.string_val);
 		break;
 	}
@@ -103,6 +104,13 @@ SPECIAL   [.,()=]
     	tokp->val.string_val = (char *)yytext;
     	return TOK_CUT;
     }
+
+	"fail" {
+		tokp->type = TOK_FAIL;
+		tokp->line_no = line_no;
+		tokp->val.string_val = (char *)strdup(yytext);
+		return TOK_FAIL;
+	}
 
 	[A-Z]({ID}|{DIGIT})* {
 		tokp->type = TOK_VAR;

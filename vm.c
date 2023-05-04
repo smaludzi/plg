@@ -48,6 +48,7 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_TRY, vm_execute_try },
     { BYTECODE_PRUNE, vm_execute_prune },
     { BYTECODE_SET_CUT, vm_execute_set_cut },
+    { BYTECODE_FAIL, vm_execute_fail },
     { BYTECODE_INIT, vm_execute_init },
     { BYTECODE_HALT, vm_execute_halt },
     { BYTECODE_NO, vm_execute_no },
@@ -482,6 +483,11 @@ void vm_execute_set_cut(vm * machine, bytecode * code)
     entry.saddr = machine->bp;
 
     machine->stack[machine->fp - 4] = entry;
+}
+
+void vm_execute_fail(vm * machine, bytecode * code)
+{
+    vm_execute_backtrack(machine);
 }
 
 void vm_execute_init(vm * machine, bytecode * code)

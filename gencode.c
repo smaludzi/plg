@@ -486,6 +486,13 @@ void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result)
     gencode_add_bytecode(gen, &push_env_bc);
 }
 
+void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result)
+{
+    bytecode bc = { 0 };
+    bc.type = BYTECODE_FAIL;
+    gencode_add_bytecode(gen, &bc);
+}
+
 void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_vars)
 {
     switch (value->type)
@@ -501,6 +508,7 @@ void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_v
             break;
         }
         case GOAL_TYPE_CUT:
+        case GOAL_TYPE_FAIL:
         {
             /* not possible to get local variables */
             break;
@@ -529,6 +537,11 @@ void goal_gencode(gencode * gen, goal * value, gencode_result * result)
         case GOAL_TYPE_CUT:
         {
             goal_cut_gencode(gen, &value->cut, result);
+            break;
+        }
+        case GOAL_TYPE_FAIL:
+        {
+            goal_fail_gencode(gen, value, result);
             break;
         }
         case GOAL_TYPE_UNKNOW:
