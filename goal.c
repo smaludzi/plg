@@ -112,6 +112,15 @@ void goal_delete(goal * value)
     free(value);
 }
 
+char goal_is_last(goal * value)
+{
+    if (value->next == NULL)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 void goal_print(goal * value)
 {
     if (value == NULL)

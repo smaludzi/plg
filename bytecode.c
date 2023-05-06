@@ -44,8 +44,11 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_BIND, bytecode_print_bind },
     { BYTECODE_SON, bytecode_print_son },
     { BYTECODE_MARK, bytecode_print_mark },
+    { BYTECODE_LAST_MARK, bytecode_print_last_mark },
     { BYTECODE_CALL, bytecode_print_call },
     { BYTECODE_CALL_ADDR, bytecode_print_call_addr },
+    { BYTECODE_LAST_CALL, bytecode_print_last_call },
+    { BYTECODE_LAST_CALL_ADDR, bytecode_print_last_call_addr },
     { BYTECODE_PUSH_ENV, bytecode_print_push_env },
     { BYTECODE_POP_ENV, bytecode_print_pop_env },
     { BYTECODE_SET_BTP, bytecode_print_set_btp },
@@ -169,6 +172,11 @@ void bytecode_print_mark(bytecode * value)
     printf("%d: %s addr %d\n", value->addr, bytecode_type_str(value->type), value->mark.offset);
 }
 
+void bytecode_print_last_mark(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
 void bytecode_print_call(bytecode * value)
 {
     printf("%d: %s %s/%u\n", value->addr, bytecode_type_str(value->type),
@@ -178,6 +186,19 @@ void bytecode_print_call(bytecode * value)
 void bytecode_print_call_addr(bytecode * value)
 {
     printf("%d: %s addr %u n %u\n", value->addr, bytecode_type_str(value->type), value->call.addr, value->call.n);
+}
+
+void bytecode_print_last_call(bytecode * value)
+{
+    printf("%d: %s %s/%u size %u\n", value->addr, bytecode_type_str(value->type),
+           value->last_call.predicate_ref->name, clause_arity(value->last_call.predicate_ref),
+           value->last_call.size);
+}
+
+void bytecode_print_last_call_addr(bytecode * value)
+{
+    printf("%d: %s addr %u n %u size %u\n", value->addr, bytecode_type_str(value->type),
+           value->last_call.addr, value->last_call.n, value->last_call.size);
 }
 
 void bytecode_print_push_env(bytecode * value)
@@ -281,8 +302,11 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_BIND: return "BYTECODE_BIND";
         case BYTECODE_SON: return "BYTECODE_SON";
         case BYTECODE_MARK: return "BYTECODE_MARK";
+        case BYTECODE_LAST_MARK: return "BYTECODE_LAST_MARK";
         case BYTECODE_CALL: return "BYTECODE_CALL";
         case BYTECODE_CALL_ADDR: return "BYTECODE_CALL_ADDR";
+        case BYTECODE_LAST_CALL: return "BYTECODE_LAST_CALL";
+        case BYTECODE_LAST_CALL_ADDR: return "BYTECODE_LAST_CALL_ADDR";
         case BYTECODE_PUSH_ENV: return "BYTECODE_PUSH_ENV";
         case BYTECODE_POP_ENV: return "BYTECODE_POP_ENV";
         case BYTECODE_SET_BTP: return "BYTECODE_SET_BTP";
@@ -351,16 +375,24 @@ void bytecode_list_set_addr(bytecode_list * list)
             value->type = BYTECODE_PUT_STRUCT_ADDR;
             unsigned int addr = value->put_struct.predicate_ref->addr;
             value->put_struct.addr = addr;
-        } else if (value->type == BYTECODE_U_STRUCT)
+        }
+        else if (value->type == BYTECODE_U_STRUCT)
         {
             value->type = BYTECODE_U_STRUCT_ADDR;
             unsigned int addr = value->u_struct.predicate_ref->addr;
             value->u_struct.addr = addr;
-        } else if (value->type == BYTECODE_CALL)
+        }
+        else if (value->type == BYTECODE_CALL)
         {
             value->type = BYTECODE_CALL_ADDR;
             unsigned int addr = value->call.predicate_ref->addr;
             value->call.addr = addr;
+        }
+        else if (value->type == BYTECODE_LAST_CALL)
+        {
+            value->type = BYTECODE_LAST_CALL_ADDR;
+            unsigned int addr = value->last_call.predicate_ref->addr;
+            value->last_call.addr = addr;
         }
 
         node = node->next;

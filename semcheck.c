@@ -30,6 +30,21 @@ void var_is_bound_semcheck(symtab * stab, var * value, semcheck_result * result)
     }
 }
 
+void var_get_unbound_semcheck(var * value, var_list * local_vars)
+{
+    switch (value->type)
+    {
+        case VAR_TYPE_BOUND:
+        break;
+        case VAR_TYPE_UNBOUND:
+            var_list_add_end(local_vars, value);
+        break;
+        case VAR_TYPE_UNKNOWN:
+            assert(0);
+        break;
+    }
+}
+
 void var_semcheck(symtab * stab, var_list * freevars, var * value, semcheck_result * result)
 {
     if (stab == NULL)
@@ -224,12 +239,41 @@ void term_get_vars_semcheck(symtab * stab, term * value)
     }
 }
 
+void term_get_local_vars_semcheck(term * value, var_list * local_vars)
+{    switch (value->type)
+    {
+        case TERM_TYPE_UNKNOWN:
+            assert(0);
+        break;
+        case TERM_TYPE_ANON:
+        break;
+        case TERM_TYPE_ATOM:
+        break;
+        case TERM_TYPE_VAR:
+            var_get_unbound_semcheck(value->var_value, local_vars);
+        break;
+        case TERM_TYPE_TERM:
+            term_list_get_local_vars_semcheck(value->terms, local_vars);
+        break;
+    }
+}
+
 void term_list_get_vars_semcheck(symtab * stab, term_list * list)
 {
     term * node = list->head;
     while (node != NULL)
     {
         term_get_vars_semcheck(stab, node);
+        node = node->next;
+    }
+}
+
+void term_list_get_local_vars_semcheck(term_list * list, var_list * local_vars)
+{
+    term * node = list->head;
+    while (node != NULL)
+    {
+        term_get_local_vars_semcheck(node, local_vars);
         node = node->next;
     }
 }
@@ -254,6 +298,41 @@ void goal_get_vars_semcheck(symtab * stab, goal * value)
         case GOAL_TYPE_CUT:
         case GOAL_TYPE_FAIL:
         break;
+    }
+}
+
+void goal_literal_get_local_vars_semcheck(goal_literal value, var_list * local_vars)
+{
+    if (value.terms != NULL)
+    {
+        term_list_get_local_vars_semcheck(value.terms, local_vars);
+    }
+}
+
+void goal_get_local_vars_semcheck(goal * value, var_list * local_vars)
+{
+    switch (value->type)
+    {
+        case GOAL_TYPE_LITERAL:
+        {
+            goal_literal_get_local_vars_semcheck(value->literal, local_vars);
+            break;
+        }
+        case GOAL_TYPE_UNIFICATION:
+        {
+            var_get_unbound_semcheck(value->unification.variable, local_vars);
+            break;
+        }
+        case GOAL_TYPE_CUT:
+        case GOAL_TYPE_FAIL:
+        {
+            /* not possible to get local variables */
+            break;
+        }
+        case GOAL_TYPE_UNKNOW:
+        {
+            assert(0);
+        }
     }
 }
 
@@ -349,6 +428,16 @@ void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result
     }
 }
 
+void goal_list_get_local_vars_semcheck(goal_list * list, var_list * local_vars)
+{
+    goal * node = list->head;
+    while (node != NULL)
+    {
+        goal_get_local_vars_semcheck(node, local_vars);
+        node = node->next;
+    }
+}
+
 void goal_list_semcheck(symtab * stab, char * with_cut, goal_list * list, semcheck_result * result)
 {
     goal * node = list->head;
@@ -380,6 +469,19 @@ void clause_enumerate_vars(symtab * stab, unsigned int start)
     }
 }
 
+void clause_head_get_local_vars_semcheck(var_list * vars, var_list * local_vars)
+{
+    var_node * node = vars->head;
+    while (node != NULL)
+    {
+        if (node->value != NULL)
+        {
+            var_list_add_end(local_vars, node->value);
+        }
+        node = node->next;
+    }
+}
+
 void clause_semcheck(symtab * stab, clause * value, semcheck_result * result)
 {
     if (value->stab == NULL)
@@ -394,10 +496,18 @@ void clause_semcheck(symtab * stab, clause * value, semcheck_result * result)
     {
         var_list_add_symtab_semcheck(value->stab, value->vars, result);
     }
-    goal_list_semcheck(value->stab, &value->with_cut, value->goals, result);
+    if (value->goals != NULL)
+    {
+        goal_list_semcheck(value->stab, &value->with_cut, value->goals, result);
+    }
     if (value->vars != NULL)
     {
         clause_enumerate_vars(value->stab, var_list_size(value->vars) + 1);
+        clause_head_get_local_vars_semcheck(value->vars, value->local_vars);
+    }
+    if (value->goals != NULL)
+    {
+        goal_list_get_local_vars_semcheck(value->goals, value->local_vars);
     }
 }
 
@@ -435,6 +545,11 @@ void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck
             if (entry == NULL)
             {
                 symtab_add_predicate(stab, value);
+                value->predicate_ref = value;
+            }
+            else
+            {
+                value->predicate_ref = entry->predicate_value;
             }
         }
         node = node->next;

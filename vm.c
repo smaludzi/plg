@@ -39,8 +39,11 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_BIND, vm_execute_bind },
     { BYTECODE_SON, vm_execute_son },
     { BYTECODE_MARK, vm_execute_mark },
+    { BYTECODE_LAST_MARK, vm_execute_last_mark },
     { BYTECODE_CALL, vm_execute_call },
     { BYTECODE_CALL_ADDR, vm_execute_call_addr },
+    { BYTECODE_LAST_CALL, vm_execute_last_call },
+    { BYTECODE_LAST_CALL_ADDR, vm_execute_last_call_addr },
     { BYTECODE_PUSH_ENV, vm_execute_push_env },
     { BYTECODE_POP_ENV, vm_execute_pop_env },
     { BYTECODE_SET_BTP, vm_execute_set_btp },
@@ -391,16 +394,79 @@ void vm_execute_mark(vm * machine, bytecode * code)
     machine->sp = machine->sp + 6;
 }
 
+void vm_execute_last_mark(vm * machine, bytecode * code)
+{
+    if (!vm_execute_check_size(machine, machine->sp + 6, machine->tp))
+    {
+        return;
+    }
+
+    if (machine->fp <= machine->bp)
+    {
+        machine->sp = machine->sp + 6;
+        machine->stack[machine->sp] = machine->stack[machine->fp];
+
+        gc_stack fp_entry = { 0 };
+        fp_entry.type = STACK_TYPE_STACK_PTR;
+        fp_entry.saddr= machine->fp;
+
+        machine->stack[machine->sp - 1] = fp_entry;
+    }
+}
+
 void vm_execute_call(vm * machine, bytecode * code)
 {
     bytecode_print(code);
     fprintf(stderr, " %u: cannot execute bytecode %s\n", code->addr, bytecode_type_str(code->type));
+    assert(0);
 }
 
 void vm_execute_call_addr(vm * machine, bytecode * code)
 {
     machine->fp = machine->sp - code->call.n;
     machine->pc = code->call.addr;
+}
+
+void vm_execute_last_call(vm * machine, bytecode * code)
+{
+    bytecode_print(code);
+    fprintf(stderr, " %u: cannot execute bytecode %s\n", code->addr, bytecode_type_str(code->type));
+    assert(0);
+}
+
+void vm_execute_last_call_addr(vm * machine, bytecode * code)
+{
+    if (machine->fp <= machine->bp)
+    {
+        // call q/h
+        machine->fp = machine->sp - code->last_call.n;
+        machine->pc = code->last_call.addr;
+    }
+    else
+    {
+        // slide size (down) h (variables)
+        if (code->last_call.size > 0)
+        {
+            if (code->last_call.n == 0)
+            {
+                machine->sp = machine->sp - code->last_call.size;
+            }
+            else
+            {
+                unsigned int i;
+                machine->sp = machine->sp - code->last_call.size - code->last_call.n;
+
+                for (i = 0; i < code->last_call.n; i++)
+                {
+                    machine->sp++;
+                    machine->stack[machine->sp] =
+                        machine->stack[machine->sp + code->last_call.size];
+                }
+            }
+        }
+        // jump q/h
+        machine->pc = code->last_call.addr;
+    }
 }
 
 void vm_execute_push_env(vm * machine, bytecode * code)
@@ -550,7 +616,7 @@ void vm_execute_halt(vm * machine, bytecode * code)
     // run garbage collector
     // TODO: write a test which will cause memory reclaim
     // gc_run(machine->collector,
-    //        machine->stack, machine->sp, machine->trail, machine->tp);
+    //       machine->stack, machine->sp, machine->trail, machine->tp);
 }
 
 void vm_execute_no(vm * machine, bytecode * code)

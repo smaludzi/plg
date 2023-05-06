@@ -159,21 +159,6 @@ void var_check_gencode(gencode * gen, var * value, gencode_result * result)
     /* printf("CHECK name %s index %d\n", value->name, value->bound_to->index); */
 }
 
-void var_get_unbound_gencode(gencode * gen, var * value, var_list * local_vars)
-{
-    switch (value->type)
-    {
-        case VAR_TYPE_BOUND:
-        break;
-        case VAR_TYPE_UNBOUND:
-            var_list_add_end(local_vars, value);
-        break;
-        case VAR_TYPE_UNKNOWN:
-            assert(0);
-        break;
-    }
-}
-
 void var_get_bound_vars_gencode(gencode * gen, var * value, var_list * bound_vars, gencode_result * result)
 {
     switch (value->type)
@@ -323,25 +308,6 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
     }
 }
 
-void term_get_local_vars_gencode(gencode * gen, term * value, var_list * local_vars)
-{    switch (value->type)
-    {
-        case TERM_TYPE_UNKNOWN:
-            assert(0);
-        break;
-        case TERM_TYPE_ANON:
-        break;
-        case TERM_TYPE_ATOM:
-        break;
-        case TERM_TYPE_VAR:
-            var_get_unbound_gencode(gen, value->var_value, local_vars);
-        break;
-        case TERM_TYPE_TERM:
-            term_list_get_local_vars_gencode(gen, value->terms, local_vars);
-        break;
-    }
-}
-
 void term_get_bound_vars_gencode(gencode * gen, term * value, var_list * bound_vars, gencode_result * result)
 {
     switch (value->type)
@@ -390,16 +356,6 @@ void term_list_unify_gencode(gencode * gen, term_list * list, gencode_result * r
     }
 }
 
-void term_list_get_local_vars_gencode(gencode * gen, term_list * list, var_list * local_vars)
-{
-    term * node = list->head;
-    while (node != NULL)
-    {
-        term_get_local_vars_gencode(gen, node, local_vars);
-        node = node->next;
-    }
-}
-
 void term_list_get_bound_vars_gencode(gencode * gen, term_list * list, var_list * bound_vars, gencode_result * result)
 {
     term * node = list->head;
@@ -407,14 +363,6 @@ void term_list_get_bound_vars_gencode(gencode * gen, term_list * list, var_list 
     {
         term_get_bound_vars_gencode(gen, node, bound_vars, result);
         node = node->next;
-    }
-}
-
-void goal_literal_get_local_vars_gencode(gencode * gen, goal_literal value, var_list * local_vars)
-{
-    if (value.terms != NULL)
-    {
-        term_list_get_local_vars_gencode(gen, value.terms, local_vars);
     }
 }
 
@@ -444,6 +392,37 @@ void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * 
     gencode_add_bytecode(gen, &bc_label);
     bc_ptr->mark.offset = bc_label.addr;
     /* printf("B: ...\n"); */
+}
+
+char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value)
+{
+    return (clause_value != NULL &&
+            goal_value != NULL &&
+            goal_is_last(goal_value) &&
+            strcmp(clause_value->name, goal_value->literal.name) == 0 &&
+            var_list_size(clause_value->vars) == term_list_size(goal_value->literal.terms));
+    /* TODO: check if comparing
+             clause_value->predicate_ref == goal_value->literal.predicate_ref
+             is sufficient */
+}
+
+void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_literal * value, gencode_result * result)
+{
+    bytecode bc_lm = { 0 };
+    bc_lm.type = BYTECODE_LAST_MARK;
+    gencode_add_bytecode(gen, &bc_lm);
+
+    if (value->terms != NULL)
+    {
+        term_list_gencode(gen, value->terms, result);
+    }
+
+    bytecode bc_lc = { 0 };
+    bc_lc.type = BYTECODE_LAST_CALL;
+    bc_lc.last_call.size = var_list_size(clause_value->local_vars);
+    bc_lc.last_call.n = term_list_size(value->terms);
+    bc_lc.last_call.predicate_ref = value->predicate_ref;
+    gencode_add_bytecode(gen, &bc_lc);
 }
 
 void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result)
@@ -493,40 +472,20 @@ void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result)
     gencode_add_bytecode(gen, &bc);
 }
 
-void goal_get_local_vars_gencode(gencode * gen, goal * value, var_list * local_vars)
+void goal_gencode(gencode * gen, clause * clause_value, goal * value, gencode_result * result)
 {
     switch (value->type)
     {
         case GOAL_TYPE_LITERAL:
         {
-            goal_literal_get_local_vars_gencode(gen, value->literal, local_vars);
-            break;
-        }
-        case GOAL_TYPE_UNIFICATION:
-        {
-            var_get_unbound_gencode(gen, value->unification.variable, local_vars);
-            break;
-        }
-        case GOAL_TYPE_CUT:
-        case GOAL_TYPE_FAIL:
-        {
-            /* not possible to get local variables */
-            break;
-        }
-        case GOAL_TYPE_UNKNOW:
-        {
-            assert(0);
-        }
-    }
-}
-
-void goal_gencode(gencode * gen, goal * value, gencode_result * result)
-{
-    switch (value->type)
-    {
-        case GOAL_TYPE_LITERAL:
-        {
-            goal_literal_gencode(gen, &value->literal, result);
+            if (goal_is_last_literal_opt_gencode(clause_value, value))
+            {
+                goal_last_literal_gencode(gen, clause_value, &value->literal, result);
+            }
+            else
+            {
+                goal_literal_gencode(gen, &value->literal, result);
+            }
             break;
         }
         case GOAL_TYPE_UNIFICATION:
@@ -551,22 +510,12 @@ void goal_gencode(gencode * gen, goal * value, gencode_result * result)
     }
 }
 
-void goal_list_get_local_vars_gencode(gencode * gen, goal_list * list, var_list * local_vars)
+void goal_list_gencode(gencode * gen, clause * clause_value, goal_list * list, gencode_result * result)
 {
     goal * node = list->head;
     while (node != NULL)
     {
-        goal_get_local_vars_gencode(gen, node, local_vars);
-        node = node->next;
-    }
-}
-
-void goal_list_gencode(gencode * gen, goal_list * list, gencode_result * result)
-{
-    goal * node = list->head;
-    while (node != NULL)
-    {
-        goal_gencode(gen, node, result);
+        goal_gencode(gen, clause_value, node, result);
         node = node->next;
     }
 }
@@ -586,25 +535,13 @@ void clause_head_get_local_vars_gencode(gencode * gen, var_list * vars, var_list
 
 void clause_gencode(gencode * gen, clause * value, gencode_result * result)
 {
-    var_list * local_vars = var_list_new();
-
-    if (value->vars != NULL)
-    {
-        clause_head_get_local_vars_gencode(gen, value->vars, local_vars);
-    }
-    if (value->goals != NULL)
-    {
-        goal_list_get_local_vars_gencode(gen, value->goals, local_vars);
-    }
-
     bytecode bc_push_env = { 0 };
     bc_push_env.type = BYTECODE_PUSH_ENV;
-    bc_push_env.push_env.size = local_vars->size;
+    bc_push_env.push_env.size = var_list_size(value->local_vars);
     gencode_add_bytecode(gen, &bc_push_env);
     /* printf("PUSHENV %u\n", local_vars->size); */
 
-    var_list_delete_null(local_vars);
-    goal_list_gencode(gen, value->goals, result);
+    goal_list_gencode(gen, value, value->goals, result);
 
     bytecode bc_pop_env = { 0 };
     bc_pop_env.type = BYTECODE_POP_ENV;
@@ -794,7 +731,7 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
         /* printf("SET_CUT\n"); */
     }
 
-    goal_list_gencode(gen, value->goals, result);
+    goal_list_gencode(gen, NULL, value->goals, result);
 
     bytecode bc_halt = { 0 };
     bc_halt.type = BYTECODE_HALT;

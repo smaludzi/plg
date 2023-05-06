@@ -27,11 +27,14 @@ clause * clause_new(char * name, var_list * vars, goal_list * goals)
 
     value->name = name;
     value->vars = vars;
+    value->local_vars = var_list_new();
     value->goals = goals;
     value->stab = NULL;
+    value->predicate_ref = NULL;
     value->gencode = 0;
     value->with_cut = 0;
     value->addr = 0;
+    value->line_no = 0;
 
     return value;
 }
@@ -45,6 +48,10 @@ void clause_delete(clause * value)
     if (value->vars)
     {
         var_list_delete(value->vars);
+    }
+    if (value->local_vars)
+    {
+        var_list_delete_null(value->local_vars);
     }
     if (value->goals)
     {

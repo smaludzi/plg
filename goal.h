@@ -73,6 +73,7 @@ goal * goal_new_unification(var * variable, term * term_value);
 goal * goal_new_cut();
 goal * goal_new_fail(char * name);
 void goal_delete(goal * value);
+char goal_is_last(goal * value);
 void goal_print(goal * value);
 
 goal_list * goal_list_new();

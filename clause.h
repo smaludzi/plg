@@ -24,12 +24,14 @@
 typedef struct clause {
     char * name;
     var_list * vars;
+    var_list * local_vars;
     goal_list * goals;
     symtab * stab;
-    unsigned int line_no;
+    struct clause * predicate_ref;
     char gencode;
     char with_cut;
     unsigned int addr;
+    unsigned int line_no;
 } clause;
 
 typedef struct clause_node {

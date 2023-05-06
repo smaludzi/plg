@@ -45,8 +45,11 @@ typedef enum bytecode_type {
     BYTECODE_BIND,
     BYTECODE_SON,
     BYTECODE_MARK,
+    BYTECODE_LAST_MARK,
     BYTECODE_CALL,
     BYTECODE_CALL_ADDR,
+    BYTECODE_LAST_CALL,
+    BYTECODE_LAST_CALL_ADDR,
     BYTECODE_PUSH_ENV,
     BYTECODE_POP_ENV,
     BYTECODE_SET_BTP,
@@ -126,6 +129,14 @@ typedef struct bytecode {
             };
         } call;
         struct {
+            unsigned int size;
+            unsigned int n;
+            union {
+                pc_ptr addr;
+                clause * predicate_ref;
+            };
+        } last_call;
+        struct {
             pc_offset offset;
         } init;
         struct {
@@ -174,8 +185,11 @@ void bytecode_print_up(bytecode * value);
 void bytecode_print_bind(bytecode * value);
 void bytecode_print_son(bytecode * value);
 void bytecode_print_mark(bytecode * value);
+void bytecode_print_last_mark(bytecode * value);
 void bytecode_print_call(bytecode * value);
 void bytecode_print_call_addr(bytecode * value);
+void bytecode_print_last_call(bytecode * value);
+void bytecode_print_last_call_addr(bytecode * value);
 void bytecode_print_push_env(bytecode * value);
 void bytecode_print_pop_env(bytecode * value);
 void bytecode_print_set_btp(bytecode * value);

@@ -1,0 +1,12 @@
+true(X) <= X = true
+
+edge(X, Y) <= X = a, Y = b
+edge(X, Y) <= X = b, Y = c
+edge(X, Y) <= X = c, Y = d
+edge(X, Y) <= X = d, Y = e
+edge(X, Y) <= X = e, Y = f
+
+reachable(X, Y) <= X = Y
+reachable(X, Y) <= edge(X, Z), reachable(Z, Y)
+
+<= reachable(a, f), true(X)
