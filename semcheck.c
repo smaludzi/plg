@@ -394,7 +394,6 @@ void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unificatio
 
 void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result)
 {
-    value->symtab_ref = stab;
     *with_cut = 1;
 }
 

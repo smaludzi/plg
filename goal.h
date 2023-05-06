@@ -44,7 +44,6 @@ typedef struct goal_unification {
 } goal_unification;
 
 typedef struct goal_cut {
-    symtab * symtab_ref;
 } goal_cut;
 
 typedef struct goal_fail {

@@ -53,7 +53,6 @@ goal * goal_new_cut()
     goal * value = malloc(sizeof(goal));
 
     value->type = GOAL_TYPE_CUT;
-    value->cut.symtab_ref = NULL;
     value->line_no = 0;
     value->next = NULL;
 

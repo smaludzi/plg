@@ -396,14 +396,14 @@ void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * 
 
 char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value)
 {
+    /* TODO: check if comparing
+             clause_value->predicate_ref == goal_value->literal.predicate_ref
+             is sufficient */
     return (clause_value != NULL &&
             goal_value != NULL &&
             goal_is_last(goal_value) &&
             strcmp(clause_value->name, goal_value->literal.name) == 0 &&
             var_list_size(clause_value->vars) == term_list_size(goal_value->literal.terms));
-    /* TODO: check if comparing
-             clause_value->predicate_ref == goal_value->literal.predicate_ref
-             is sufficient */
 }
 
 void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_literal * value, gencode_result * result)
@@ -453,7 +453,7 @@ void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_r
     }
 }
 
-void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result)
+void goal_cut_gencode(gencode * gen, unsigned int local_vars, goal_cut * value, gencode_result * result)
 {
     bytecode prune_bc = { 0 };
     prune_bc.type = BYTECODE_PRUNE;
@@ -461,7 +461,7 @@ void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result)
 
     bytecode push_env_bc = { 0 };
     push_env_bc.type = BYTECODE_PUSH_ENV;
-    push_env_bc.push_env.size = symtab_size_type(value->symtab_ref, SYMTAB_VAR);
+    push_env_bc.push_env.size = local_vars;
     gencode_add_bytecode(gen, &push_env_bc);
 }
 
@@ -472,7 +472,7 @@ void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result)
     gencode_add_bytecode(gen, &bc);
 }
 
-void goal_gencode(gencode * gen, clause * clause_value, goal * value, gencode_result * result)
+void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result)
 {
     switch (value->type)
     {
@@ -495,7 +495,7 @@ void goal_gencode(gencode * gen, clause * clause_value, goal * value, gencode_re
         }
         case GOAL_TYPE_CUT:
         {
-            goal_cut_gencode(gen, &value->cut, result);
+            goal_cut_gencode(gen, local_vars, &value->cut, result);
             break;
         }
         case GOAL_TYPE_FAIL:
@@ -510,12 +510,12 @@ void goal_gencode(gencode * gen, clause * clause_value, goal * value, gencode_re
     }
 }
 
-void goal_list_gencode(gencode * gen, clause * clause_value, goal_list * list, gencode_result * result)
+void goal_list_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal_list * list, gencode_result * result)
 {
     goal * node = list->head;
     while (node != NULL)
     {
-        goal_gencode(gen, clause_value, node, result);
+        goal_gencode(gen, clause_value, local_vars, node, result);
         node = node->next;
     }
 }
@@ -535,13 +535,15 @@ void clause_head_get_local_vars_gencode(gencode * gen, var_list * vars, var_list
 
 void clause_gencode(gencode * gen, clause * value, gencode_result * result)
 {
+    unsigned int local_vars = var_list_size(value->local_vars);
+
     bytecode bc_push_env = { 0 };
     bc_push_env.type = BYTECODE_PUSH_ENV;
-    bc_push_env.push_env.size = var_list_size(value->local_vars);
+    bc_push_env.push_env.size = local_vars;
     gencode_add_bytecode(gen, &bc_push_env);
     /* printf("PUSHENV %u\n", local_vars->size); */
 
-    goal_list_gencode(gen, value, value->goals, result);
+    goal_list_gencode(gen, value, local_vars, value->goals, result);
 
     bytecode bc_pop_env = { 0 };
     bc_pop_env.type = BYTECODE_POP_ENV;
@@ -717,9 +719,11 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
     bc_init_ptr = gencode_add_bytecode(gen, &bc_init);
     /* printf("INIT A\n"); */
 
+    unsigned int local_vars = symtab_size_type(value->stab, SYMTAB_VAR);
+
     bytecode bc_push_env = { 0 };
     bc_push_env.type = BYTECODE_PUSH_ENV;
-    bc_push_env.push_env.size = symtab_size_type(value->stab, SYMTAB_VAR);
+    bc_push_env.push_env.size = local_vars;
     gencode_add_bytecode(gen, &bc_push_env);
     /* printf("PUSHENV %u\n", symtab_size_type(value->stab, SYMTAB_VAR)); */
 
@@ -731,11 +735,11 @@ void query_gencode(gencode * gen, query * value, gencode_result * result)
         /* printf("SET_CUT\n"); */
     }
 
-    goal_list_gencode(gen, NULL, value->goals, result);
+    goal_list_gencode(gen, NULL, local_vars, value->goals, result);
 
     bytecode bc_halt = { 0 };
     bc_halt.type = BYTECODE_HALT;
-    bc_halt.halt.size = symtab_size_type(value->stab, SYMTAB_VAR);
+    bc_halt.halt.size = local_vars;
     gencode_add_bytecode(gen, &bc_halt);
     /* printf("HALT %u\n", symtab_size_type(value->stab, SYMTAB_VAR)); */
 

@@ -74,10 +74,10 @@ void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * 
 char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value);
 void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_literal * value, gencode_result * result);
 void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result);
-void goal_cut_gencode(gencode * gen, goal_cut * value, gencode_result * result);
+void goal_cut_gencode(gencode * gen, unsigned int local_vars, goal_cut * value, gencode_result * result);
 void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result);
-void goal_gencode(gencode * gen, clause * clause_value, goal * value, gencode_result * result);
-void goal_list_gencode(gencode * gen, clause * clause_value, goal_list * list, gencode_result * result);
+void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result);
+void goal_list_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal_list * list, gencode_result * result);
 void clause_gencode(gencode * gen, clause * value, gencode_result * result);
 void predicate_0_gencode(gencode * gen, clause * value, gencode_result * result);
 void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * result);
