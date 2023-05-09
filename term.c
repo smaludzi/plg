@@ -23,9 +23,16 @@
 #include "term.h"
 #include "var.h"
 
-term * term_new(term_type type, char * name)
+term * term_new_basic(term_type type, char * name)
 {
-	return term_new_list(type, name, NULL);
+	term * value = malloc(sizeof(term));
+
+	value->type = type;
+	value->t_basic.name = name;
+	value->predicate_ref = NULL;
+	value->next = NULL;
+
+	return value;
 }
 
 term * term_new_var(term_type type, var * var_value)
@@ -33,16 +40,14 @@ term * term_new_var(term_type type, var * var_value)
 	term * value = malloc(sizeof(term));
 
 	value->type = type;
-	value->name = NULL;
-	value->terms = NULL;
-	value->var_value = var_value;
+	value->t_var.value = var_value;
 	value->predicate_ref = NULL;
 	value->next = NULL;
 
 	return value;
 }
 
-term * term_new_list(term_type type, char * name, term_list * terms)
+term * term_new_struct(term_type type, char * name, term_list * terms)
 {
 	term * t;
 	
@@ -53,9 +58,8 @@ term * term_new_list(term_type type, char * name, term_list * terms)
 	}
 	
 	t->type = type;
-	t->name = name;
-	t->terms = terms;
-	t->var_value = NULL;
+	t->t_struct.name = name;
+	t->t_struct.terms = terms;
 	t->predicate_ref = NULL;
 	t->next = NULL;
 	
@@ -64,17 +68,36 @@ term * term_new_list(term_type type, char * name, term_list * terms)
 
 void term_delete(term * t)
 {
-	if (t->name)
+	switch (t->type)
 	{
-		free(t->name);
-	}
-	if (t->terms)
-	{
-		term_list_delete(t->terms);
-	}
-	if (t->var_value)
-	{
-		var_delete(t->var_value);
+		case TERM_TYPE_UNKNOWN:
+			assert(0);
+		break;
+		case TERM_TYPE_ANON:
+		case TERM_TYPE_ATOM:
+		case TERM_TYPE_LIST_EMPTY:
+			if (t->t_var.value)
+			{
+				free(t->t_var.value);
+			}
+		break;
+		case TERM_TYPE_VAR:
+			if (t->t_var.value)
+			{
+				var_delete(t->t_var.value);
+			}
+		break;
+		case TERM_TYPE_LIST:
+		case TERM_TYPE_STRUCT:
+			if (t->t_struct.name)
+			{
+				free(t->t_struct.name);
+			}
+			if (t->t_struct.terms)
+			{
+				term_list_delete(t->t_struct.terms);
+			}
+		break;
 	}
 	free(t);
 }
@@ -87,7 +110,9 @@ unsigned int term_arity(term * t)
 		case TERM_TYPE_ANON: return 0;
 		case TERM_TYPE_ATOM: return 0;
 		case TERM_TYPE_VAR: return 0;
-		case TERM_TYPE_TERM: return term_list_size(t->terms);
+		case TERM_TYPE_STRUCT: return term_list_size(t->t_struct.terms);
+		case TERM_TYPE_LIST_EMPTY: return 0;
+		case TERM_TYPE_LIST: return 2;
 	}
 	return 0;
 }
@@ -115,17 +140,21 @@ void term_print_rec(term * t)
 		printf("term unknown\n");
 		break;
     case TERM_TYPE_ANON:
-		printf("term %s\n", t->name);
+		printf("term %s\n", t->t_basic.name);
 		break;
 	case TERM_TYPE_ATOM:
-    	printf("term %s\n", t->name);
+    	printf("term %s\n", t->t_basic.name);
 		break;
 	case TERM_TYPE_VAR:
-		var_print(t->var_value);
+		var_print(t->t_var.value);
 		break;
-	case TERM_TYPE_TERM:
-		printf("term %s/%u\n", t->name, t->terms->size);
-		term_list_print_rec(t->terms);
+	case TERM_TYPE_LIST:
+	case TERM_TYPE_STRUCT:
+		printf("term %s/%u\n", t->t_struct.name, term_list_size(t->t_struct.terms));
+		term_list_print_rec(t->t_struct.terms);
+		break;
+	case TERM_TYPE_LIST_EMPTY:
+		printf("term empty list\n");
 		break;
 	}
 }
@@ -212,7 +241,9 @@ char * term_type_to_str(term_type value)
 		case TERM_TYPE_ANON: return "TERM_TYPE_ANON";
 		case TERM_TYPE_ATOM: return "TERM_TYPE_ATOM";
 		case TERM_TYPE_VAR: return "TERM_TYPE_VAR";
-		case TERM_TYPE_TERM: return "TERM_TYPE_TERM";
+		case TERM_TYPE_STRUCT: return "TERM_TYPE_STRUCT";
+		case TERM_TYPE_LIST_EMPTY: return "TERM_TYPE_LIST_EMPTY";
+		case TERM_TYPE_LIST: return "TERM_TYPE_LIST";
 	}
 	return "TERM_TYPE_UNKNOWN";
 }

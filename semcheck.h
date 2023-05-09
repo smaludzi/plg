@@ -73,6 +73,7 @@ void clause_list_semcheck(symtab * stab, clause_list * list, semcheck_result * r
 
 void query_semcheck(symtab * stab, query * value, semcheck_result * result);
 
+void program_add_clause_semcheck(symtab * stab, clause * value, semcheck_result * result);
 void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck_result * result);
 void program_semcheck(program * value, semcheck_result * result);
 

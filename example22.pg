@@ -1,0 +1,3 @@
+print(P) <= P = _
+head(L, H, T) <= L = [ H | T ]
+    <= head([ a | [ b | [] ] ], H, T), print(H)

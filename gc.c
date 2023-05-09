@@ -402,7 +402,32 @@ void gc_print_ref(gc * collector, heap_ptr addr)
 void gc_print_ref_str(gc * collector, heap_ptr addr, char ** strtab_array, unsigned int strtab_size)
 {
     assert(collector->size > addr);
-    object_print_str(collector->heap[collector->heap_idx][addr].object_value, strtab_array, strtab_size);
+
+    switch (collector->heap[collector->heap_idx][addr].object_value->type)
+    {
+        case OBJECT_UNKNOWN:
+            printf("%s\n", object_type_str(OBJECT_UNKNOWN));
+        break;
+        case OBJECT_ATOM:
+            object_print_str(collector->heap[collector->heap_idx][addr].object_value, strtab_array, strtab_size);
+        break;
+        case OBJECT_REF:
+            if (addr != collector->heap[collector->heap_idx][addr].object_value->ref_value.ref)
+            {
+                gc_print_ref_str(collector, collector->heap[collector->heap_idx][addr].object_value->ref_value.ref, strtab_array, strtab_size);
+            }
+        break;
+        case OBJECT_STRUCT:
+        {
+            unsigned int i = 0;
+            printf("%s/%u\n", object_type_str(OBJECT_STRUCT), collector->heap[collector->heap_idx][addr].object_value->struct_value.size);
+            for (i = 0; i < collector->heap[collector->heap_idx][addr].object_value->struct_value.size; i++)
+            {
+                gc_print_ref_str(collector, collector->heap[collector->heap_idx][addr].object_value->struct_value.refs[i], strtab_array, strtab_size);
+            }
+        }
+        break;
+    }
 }
 
 gc_stack * gc_stack_new(stack_size_t size)

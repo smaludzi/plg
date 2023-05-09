@@ -90,7 +90,6 @@ void object_delete(object * value)
             assert(0);
         break;
         case OBJECT_ATOM:
-        break;
         case OBJECT_REF:
         break;
         case OBJECT_STRUCT:
@@ -137,11 +136,11 @@ void object_print_str(object * value, char ** strtab_array, unsigned int strtab_
         case OBJECT_STRUCT:
         {
             unsigned int i;
-            printf("%s %u\n", object_type_str(value->type), value->struct_value.size);
+            printf("%s %u ", object_type_str(value->type), value->struct_value.size);
             for (i = 0; i < value->struct_value.size; i++) {
                 printf("%u ", value->struct_value.refs[i]);
             }
-            if (value->struct_value.size > 0) printf("\n");
+            printf("\n");
         }
         break;
     }
@@ -158,5 +157,3 @@ const char * object_type_str(object_type type)
     }
     return "OBJECT_UNKNOWN";
 }
-
-

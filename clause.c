@@ -70,7 +70,7 @@ unsigned int clause_arity(clause * value)
     {
         return 0;
     }
-    return value->vars->size;
+    return var_list_size(value->vars);
 }
 
 void clause_print(clause * value)

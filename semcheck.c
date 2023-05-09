@@ -151,25 +151,29 @@ void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_re
             /* Atom. It is fine */
         break;
         case TERM_TYPE_VAR:
-            var_semcheck(stab, freevars, value->var_value, result);
+            var_semcheck(stab, freevars, value->t_var.value, result);
         break;
-        case TERM_TYPE_TERM:
+        case TERM_TYPE_LIST:
+        case TERM_TYPE_STRUCT:
         {
-            symtab_entry * entry = symtab_lookup_arity(stab, value->name, term_arity(value), SYMTAB_LOOKUP_GLOBAL);
+            symtab_entry * entry = symtab_lookup_arity(stab, value->t_struct.name, term_arity(value), SYMTAB_LOOKUP_GLOBAL);
             if (entry != NULL)
             {
                 assert(entry->type == SYMTAB_CLAUSE &&
                        entry->arity == term_arity(value) &&
-                       strcmp(entry->id, value->name) == 0);
+                       strcmp(entry->id, value->t_struct.name) == 0);
                 value->predicate_ref = entry->predicate_value;
             }
             else
             {
                 *result = SEMCHECK_FAILURE;
-                fprintf(stderr, "%u: unknown predicate '%s/%u'\n", value->line_no, value->name, term_arity(value));
+                fprintf(stderr, "%u: unknown predicate '%s/%u'\n", value->line_no, value->t_struct.name, term_arity(value));
             }
-            term_list_semcheck(stab, freevars, value->terms, result);
+            term_list_semcheck(stab, freevars, value->t_struct.terms, result);
         }
+        break;
+        case TERM_TYPE_LIST_EMPTY:
+            /* Empty list is fine */
         break;
     }
 }
@@ -182,7 +186,7 @@ void term_is_variable_semcheck(term * value, semcheck_result * result)
     }
     if (value->type != TERM_TYPE_VAR)
     {
-        fprintf(stderr, "%u: term %s '%s' is not variable\n", value->line_no, term_type_to_str(value->type), value->name);
+        fprintf(stderr, "%u: term %s is not variable\n", value->line_no, term_type_to_str(value->type));
         *result = SEMCHECK_FAILURE;
     }
 }
@@ -231,10 +235,13 @@ void term_get_vars_semcheck(symtab * stab, term * value)
         case TERM_TYPE_ATOM:
         break;
         case TERM_TYPE_VAR:
-            var_get_vars_semcheck(stab, value->var_value);
+            var_get_vars_semcheck(stab, value->t_var.value);
         break;
-        case TERM_TYPE_TERM:
-            term_list_get_vars_semcheck(stab, value->terms);
+        case TERM_TYPE_LIST:
+        case TERM_TYPE_STRUCT:
+            term_list_get_vars_semcheck(stab, value->t_struct.terms);
+        break;
+        case TERM_TYPE_LIST_EMPTY:
         break;
     }
 }
@@ -250,10 +257,13 @@ void term_get_local_vars_semcheck(term * value, var_list * local_vars)
         case TERM_TYPE_ATOM:
         break;
         case TERM_TYPE_VAR:
-            var_get_unbound_semcheck(value->var_value, local_vars);
+            var_get_unbound_semcheck(value->t_var.value, local_vars);
         break;
-        case TERM_TYPE_TERM:
-            term_list_get_local_vars_semcheck(value->terms, local_vars);
+        case TERM_TYPE_LIST:
+        case TERM_TYPE_STRUCT:
+            term_list_get_local_vars_semcheck(value->t_struct.terms, local_vars);
+        break;
+        case TERM_TYPE_LIST_EMPTY:
         break;
     }
 }
@@ -532,6 +542,20 @@ void query_semcheck(symtab * stab, query * value, semcheck_result * result)
     goal_list_semcheck(value->stab, &value->with_cut, value->goals, result);
 }
 
+void program_add_clause_semcheck(symtab * stab, clause * value, semcheck_result * result)
+{
+    symtab_entry * entry = symtab_lookup_arity(stab, value->name, clause_arity(value), SYMTAB_LOOKUP_GLOBAL);
+    if (entry == NULL)
+    {
+        symtab_add_predicate(stab, value);
+        value->predicate_ref = value;
+    }
+    else
+    {
+        value->predicate_ref = entry->predicate_value;
+    }
+}
+
 void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck_result * result)
 {
     clause_node * node = list->head;
@@ -540,16 +564,7 @@ void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck
         clause * value = node->value;
         if (value != NULL)
         {
-            symtab_entry * entry = symtab_lookup_arity(stab, value->name, clause_arity(value), SYMTAB_LOOKUP_GLOBAL);
-            if (entry == NULL)
-            {
-                symtab_add_predicate(stab, value);
-                value->predicate_ref = value;
-            }
-            else
-            {
-                value->predicate_ref = entry->predicate_value;
-            }
+            program_add_clause_semcheck(stab, value, result);
         }
         node = node->next;
     }
@@ -557,6 +572,7 @@ void program_add_predicates_semcheck(symtab * stab, clause_list * list, semcheck
 
 void program_semcheck(program * value, semcheck_result * result)
 {
+    program_add_clause_semcheck(value->stab, value->list_clause, result);
     if (value->clausies != NULL)
     {
         program_add_predicates_semcheck(value->stab, value->clausies, result);

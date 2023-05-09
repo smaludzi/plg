@@ -24,6 +24,7 @@
 
 typedef struct program {
     symtab * stab;
+    clause * list_clause;
     clause_list * clausies;
     query * query_value;
 } program;

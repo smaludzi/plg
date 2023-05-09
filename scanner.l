@@ -55,7 +55,7 @@ const char * token_to_str(token * tokp)
 
 DIGIT     [0-9]
 ID	      [a-zA-Z_]
-SPECIAL   [.,()=]
+SPECIAL   [.,()=|\[\]]
 
 %option pointer
 %option noyylineno

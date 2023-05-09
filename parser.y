@@ -20,6 +20,7 @@
 %{
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include "scanner.h"
 #include "unify_term.h"
 #include "program.h"
@@ -124,22 +125,36 @@ term: var
       }
     | TOK_ATOM
       {
-          $$ = term_new(TERM_TYPE_ATOM, $1);
+          $$ = term_new_basic(TERM_TYPE_ATOM, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ANON
       {
-          $$ = term_new(TERM_TYPE_ANON, $1);
+          $$ = term_new_basic(TERM_TYPE_ANON, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' ')'
       {
-      	  $$ = term_new(TERM_TYPE_ATOM, $1);
+      	  $$ = term_new_struct(TERM_TYPE_ATOM, $1, NULL);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM '(' terms ')'
       {
-      	  $$ = term_new_list(TERM_TYPE_TERM, $1, $3);
+      	  $$ = term_new_struct(TERM_TYPE_STRUCT, $1, $3);
+          $$->line_no = $<line_no>1;
+      }
+    | '[' ']'
+      {
+          $$ = term_new_basic(TERM_TYPE_LIST_EMPTY, strdup("[]"));
+          $$->line_no = $<line_no>1;
+      }
+    | '[' term '|' term ']'
+      {
+          term_list * terms = term_list_new();
+          term_list_add_end(terms, $2);
+          term_list_add_end(terms, $4);
+
+          $$ = term_new_struct(TERM_TYPE_LIST, strdup("[|]"), terms);
           $$->line_no = $<line_no>1;
       }
 ;

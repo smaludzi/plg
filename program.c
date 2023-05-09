@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <stdlib.h>
+#include <string.h>
 #include "program.h"
 #include "clause.h"
 
@@ -23,7 +24,14 @@ program * program_new(clause_list * clausies, query * query_value)
 {
     program * value = malloc(sizeof(program));
 
+    var_list * vars = var_list_new();
+    var_list_add_end(vars, var_new(strdup("X")));
+    var_list_add_end(vars, var_new(strdup("Y")));
+
+    clause * list_clause = clause_new(strdup("[|]"), vars, NULL);
+
     value->stab = symtab_new(32, NULL);
+    value->list_clause = list_clause;
     value->clausies = clausies;
     value->query_value = query_value;
 
@@ -35,6 +43,10 @@ void program_delete(program * value)
     if (value->stab)
     {
         symtab_delete(value->stab);
+    }
+    if (value->list_clause)
+    {
+        clause_delete(value->list_clause);
     }
     if (value->clausies)
     {

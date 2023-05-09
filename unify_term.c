@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "hash.h"
+#include "var.h"
 #include "unify.h"
 #include "unify_term.h"
 
@@ -39,7 +40,7 @@ char terms_consistent(term * term1, term * term2)
 	
 	if (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_ATOM)
 	{
-		if (strcmp(term1->name, term2->name) != 0)
+		if (strcmp(term1->t_basic.name, term2->t_basic.name) != 0)
 		{
 			return 0;
 		}
@@ -51,24 +52,24 @@ char terms_consistent(term * term1, term * term2)
 	else if ((term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_VAR)  ||
 	         (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_VAR)  ||
 	         (term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_ATOM) ||
-	         (term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_VAR)  ||
-	         (term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_TERM))
+	         (term1->type == TERM_TYPE_STRUCT && term2->type == TERM_TYPE_VAR)  ||
+	         (term1->type == TERM_TYPE_VAR  && term2->type == TERM_TYPE_STRUCT))
 	{
 		return 1;
 	}
-	else if (term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_TERM)
+	else if (term1->type == TERM_TYPE_STRUCT && term2->type == TERM_TYPE_STRUCT)
 	{	
-			if (strcmp(term1->name, term2->name) != 0)
+			if (strcmp(term1->t_struct.name, term2->t_struct.name) != 0)
 			{
 				return 0;
 			}
-			if (term_list_size(term1->terms) != term_list_size(term2->terms))
+			if (term_list_size(term1->t_struct.terms) != term_list_size(term2->t_struct.terms))
 			{
 				return 0;
 			}
 			
-			term * iter1 = term1->terms->head;
-			term * iter2 = term2->terms->head;
+			term * iter1 = term1->t_struct.terms->head;
+			term * iter2 = term2->t_struct.terms->head;
 			while (!iter1 && !iter2)
 			{
 				if (terms_consistent(iter1, iter2) == 0)
@@ -168,8 +169,8 @@ multi_equation * create_multi_equation(term * term1, term * term2, hash * symbol
 	multi_term * mult;
 	
 	if ((term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_VAR) ||
-	    (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_TERM) ||
-	    (term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_VAR) ||
+	    (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_STRUCT) ||
+	    (term1->type == TERM_TYPE_STRUCT && term2->type == TERM_TYPE_VAR) ||
 	    (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_ATOM) ||
 	    (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_VAR))
 	{
@@ -209,27 +210,38 @@ multi_term * create_multi_term(term * term1, term * term2, hash * symbol_table)
 	term * iter1;
 	term * iter2;
 
-	if (!(term1->type == TERM_TYPE_TERM ||
+	if (!(term1->type == TERM_TYPE_STRUCT ||
 	      term1->type == TERM_TYPE_ATOM ||
 	      term2->type == TERM_TYPE_ATOM))
 	{
 		return NULL;
 	}
 
-	multi = multi_term_new(term1->name, NULL);
-	
-	iter1 = term1->terms->head;
-	iter2 = term2->terms->head;
-	while (!iter1 && !iter2)
+	if (term1->type == TERM_TYPE_STRUCT)
 	{
-		temp_mult_eq * mult;
+		multi = multi_term_new(term1->t_struct.name, NULL);
+	}
+	else if (term1->type == TERM_TYPE_ATOM)
+	{
+		multi = multi_term_new(term1->t_basic.name, NULL);
+	}
 	
-		mult = create_temp_mult_eq(iter1, iter2, symbol_table);
-			
-		multi->args = temp_mult_eq_node_new(mult, multi->args);
-	
-		iter1 = iter1->next;
-		iter2 = iter2->next;
+	if (term1->type == TERM_TYPE_STRUCT &&
+	    term2->type == TERM_TYPE_STRUCT)
+	{
+		iter1 = term1->t_struct.terms->head;
+		iter2 = term2->t_struct.terms->head;
+		while (!iter1 && !iter2)
+		{
+			temp_mult_eq * mult;
+		
+			mult = create_temp_mult_eq(iter1, iter2, symbol_table);
+				
+			multi->args = temp_mult_eq_node_new(mult, multi->args);
+		
+			iter1 = iter1->next;
+			iter2 = iter2->next;
+		}
 	}
 
 	return multi;
@@ -240,14 +252,14 @@ multi_term * create_multi_term_single(term * term1, hash * symbol_table)
 	multi_term * multi;
 	term * iter1;
 
-	if (term1->type != TERM_TYPE_TERM && term1->type != TERM_TYPE_ATOM)
+	if (term1->type != TERM_TYPE_STRUCT && term1->type != TERM_TYPE_ATOM)
 	{
 		return NULL;
 	}
 
-	multi = multi_term_new(term1->name, NULL);
+	multi = multi_term_new(term1->t_struct.name, NULL);
 	
-	iter1 = term1->terms->head;	
+	iter1 = term1->t_struct.terms->head;
 	while (!iter1)
 	{
 		temp_mult_eq * mult;
@@ -271,11 +283,11 @@ temp_mult_eq * create_temp_mult_eq(term * term1, term * term2, hash * symbol_tab
 	{
 		S = variable_queue_new();
 		
-		if (strcmp(term1->name, term2->name) == 0)
+		if (strcmp(term1->t_var.value->name, term2->t_var.value->name) == 0)
 		{
 			variable * var;
 			
-			var = hash_search(symbol_table, term1->name);
+			var = hash_search(symbol_table, term1->t_var.value->name);
 			variable_inc_mult_eq_counter(var, 1);
 		
 			variable_queue_add_var(S, var);
@@ -284,44 +296,44 @@ temp_mult_eq * create_temp_mult_eq(term * term1, term * term2, hash * symbol_tab
 		{
 			variable * var;
 			
-			var = hash_search(symbol_table, term1->name);
+			var = hash_search(symbol_table, term1->t_var.value->name);
 			variable_inc_mult_eq_counter(var, 1);
 		
 			variable_queue_add_var(S, var);
 			
-			var = hash_search(symbol_table, term2->name);
+			var = hash_search(symbol_table, term2->t_var.value->name);
 			variable_inc_mult_eq_counter(var, 1);
 			
 			variable_queue_add_var(S, var);
 		}
 	}
-	else if ((term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_TERM) ||
+	else if ((term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_STRUCT) ||
 	         (term1->type == TERM_TYPE_VAR && term2->type == TERM_TYPE_ATOM))
 	{
 		variable * var;		
 		S = variable_queue_new();
 		
-		var = hash_search(symbol_table, term1->name);
+		var = hash_search(symbol_table, term1->t_var.value->name);
 		variable_inc_mult_eq_counter(var, 1);
 		
 		variable_queue_add_var(S, var);
 		
 		M = create_multi_term_single(term2, symbol_table);
 	}
-	else if ((term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_VAR) ||
+	else if ((term1->type == TERM_TYPE_STRUCT && term2->type == TERM_TYPE_VAR) ||
 	         (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_VAR))
 	{
 		variable * var;
 		S = variable_queue_new();
 		
-		var = hash_search(symbol_table, term2->name);
+		var = hash_search(symbol_table, term2->t_var.value->name);
 		variable_inc_mult_eq_counter(var, 1);
 		
 		variable_queue_add_var(S, var);
 		
 		M = create_multi_term_single(term1, symbol_table);
 	}
-	else if ((term1->type == TERM_TYPE_TERM && term2->type == TERM_TYPE_TERM) ||
+	else if ((term1->type == TERM_TYPE_STRUCT && term2->type == TERM_TYPE_STRUCT) ||
 	         (term1->type == TERM_TYPE_ATOM && term2->type == TERM_TYPE_ATOM))
 	{
 		M = create_multi_term(term1, term2, symbol_table);
@@ -343,12 +355,12 @@ temp_mult_eq * create_temp_mult_eq_single(term * term1, hash * symbol_table)
 		variable * var;
 		S = variable_queue_new();
 		
-		var = hash_search(symbol_table, term1->name);
+		var = hash_search(symbol_table, term1->t_var.value->name);
 		variable_inc_mult_eq_counter(var, 1);
 		
 		variable_queue_add_var(S, var);
 	}
-	else if (term1->type == TERM_TYPE_TERM ||
+	else if (term1->type == TERM_TYPE_STRUCT ||
 	         term1->type == TERM_TYPE_ATOM)
 	{
 		M = create_multi_term_single(term1, symbol_table);
@@ -369,19 +381,19 @@ void symbol_table_add_variable(hash * symbol_table, term * term1)
 	{
 		char c;
 		
-		c = hash_contains(symbol_table, term1->name);
+		c = hash_contains(symbol_table, term1->t_var.value->name);
 		if (c == 0)
 		{
-			variable * var = variable_new(term1->name);
+			variable * var = variable_new(term1->t_var.value->name);
 		
-			hash_insert(symbol_table, term1->name, var);
+			hash_insert(symbol_table, term1->t_var.value->name, var);
 		}
 	}
-	else if (term1->type == TERM_TYPE_TERM)
+	else if (term1->type == TERM_TYPE_STRUCT)
 	{
 		term * iter;
 		
-		iter = term1->terms->head;
+		iter = term1->t_struct.terms->head;
 		while (iter != NULL)
 		{
 			symbol_table_add_variable(symbol_table, iter);

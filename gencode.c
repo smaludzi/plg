@@ -207,26 +207,36 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
         {
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_ATOM;
-            bc.put_atom.idx = strtab_add_string(gen->strtab_value, value->name);
+            bc.put_atom.idx = strtab_add_string(gen->strtab_value, value->t_basic.name);
             gencode_add_bytecode(gen, &bc);
             /* printf("PUT_ATOM %s\n", value->name); */
         }
         break;
         case TERM_TYPE_VAR:
         {
-            var_gencode(gen, value->var_value, result);
+            var_gencode(gen, value->t_var.value, result);
         }
         break;
-        case TERM_TYPE_TERM:
+        case TERM_TYPE_LIST:
+        case TERM_TYPE_STRUCT:
         {
-            term_list_gencode(gen, value->terms, result);
+            term_list_gencode(gen, value->t_struct.terms, result);
 
             bytecode bc = { 0 };
             bc.type = BYTECODE_PUT_STRUCT;
-            bc.put_struct.n = value->terms->size;
+            bc.put_struct.n = term_list_size(value->t_struct.terms);
             bc.put_struct.predicate_ref = value->predicate_ref;
             gencode_add_bytecode(gen, &bc);
             /* printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms)); */
+        }
+        break;
+        case TERM_TYPE_LIST_EMPTY:
+        {
+            bytecode bc = { 0 };
+            bc.type = BYTECODE_PUT_ATOM;
+            bc.put_atom.idx = strtab_add_string(gen->strtab_value, value->t_basic.name);
+            gencode_add_bytecode(gen, &bc);
+            /* printf("PUT_EMPTY_LIST\n"); */
         }
         break;
     }
@@ -247,30 +257,32 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             /* printf("POP\n"); */
         }
         break;
+        case TERM_TYPE_LIST_EMPTY:
         case TERM_TYPE_ATOM:
         {
             bytecode bc = { 0 };
             bc.type = BYTECODE_U_ATOM;
-            bc.u_atom.idx = strtab_add_string(gen->strtab_value, value->name);
+            bc.u_atom.idx = strtab_add_string(gen->strtab_value, value->t_basic.name);
             gencode_add_bytecode(gen, &bc);
             /* printf("UATOM %s\n", value->name); */
         }
         break;
         case TERM_TYPE_VAR:
-            var_unify_gencode(gen, value->var_value, result);
+            var_unify_gencode(gen, value->t_var.value, result);
         break;
-        case TERM_TYPE_TERM:
+        case TERM_TYPE_LIST:
+        case TERM_TYPE_STRUCT:
         {
             bytecode bc_u_struct = { 0 };
             bytecode * bc_u_struct_ptr;
             bc_u_struct.type = BYTECODE_U_STRUCT;
             bc_u_struct.u_struct.offset = 0;
-            bc_u_struct.u_struct.n = term_list_size(value->terms);
+            bc_u_struct.u_struct.n = term_list_size(value->t_struct.terms);
             bc_u_struct.u_struct.predicate_ref = value->predicate_ref;
             bc_u_struct_ptr = gencode_add_bytecode(gen, &bc_u_struct);
             /* printf("USTRUCT %s/%d A\n", value->name, term_list_size(value->terms)); */
 
-            term_list_unify_gencode(gen, value->terms, result);
+            term_list_unify_gencode(gen, value->t_struct.terms, result);
 
             bytecode bc_up = { 0 };
             bytecode * bc_up_ptr;
@@ -287,7 +299,7 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             /* printf("A:\n"); */
 
             var_list * bound_vars = var_list_new();
-            term_list_get_bound_vars_gencode(gen, value->terms, bound_vars, result);
+            term_list_get_bound_vars_gencode(gen, value->t_struct.terms, bound_vars, result);
             var_list_check_gencode(gen, bound_vars, result);
             var_list_delete_null(bound_vars);
             term_gencode(gen, value, result);
@@ -316,14 +328,15 @@ void term_get_bound_vars_gencode(gencode * gen, term * value, var_list * bound_v
             assert(0);
         break;
         case TERM_TYPE_ANON:
-        break;
         case TERM_TYPE_ATOM:
+        case TERM_TYPE_LIST_EMPTY:
         break;
         case TERM_TYPE_VAR:
-            var_get_bound_vars_gencode(gen, value->var_value, bound_vars, result);
+            var_get_bound_vars_gencode(gen, value->t_var.value, bound_vars, result);
         break;
-        case TERM_TYPE_TERM:
-            term_list_get_bound_vars_gencode(gen, value->terms, bound_vars, result);
+        case TERM_TYPE_LIST:
+        case TERM_TYPE_STRUCT:
+            term_list_get_bound_vars_gencode(gen, value->t_struct.terms, bound_vars, result);
         break;
     }
 }
@@ -397,7 +410,9 @@ void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * 
 char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value)
 {
     /* TODO: check if comparing
-             clause_value->predicate_ref == goal_value->literal.predicate_ref
+             (clause_value != NULL &&
+              goal_is_last(goal_value) &&
+              clause_value->predicate_ref == goal_value->literal.predicate_ref)
              is sufficient */
     return (clause_value != NULL &&
             goal_value != NULL &&
