@@ -91,6 +91,9 @@ void gc_mark(gc * collector, heap_ptr addr)
         case OBJECT_ATOM:
             collector->heap[collector->heap_idx][addr].mark = 1;
         break;
+        case OBJECT_INT:
+            collector->heap[collector->heap_idx][addr].mark = 1;
+        break;
         case OBJECT_REF:
             collector->heap[collector->heap_idx][addr].mark = 1;
             gc_mark(collector, collector->heap[collector->heap_idx][addr].object_value->ref_value.ref);
@@ -157,6 +160,8 @@ void gc_run(
                     assert(0);
                 break;
                 case OBJECT_ATOM:
+                break;
+                case OBJECT_INT:
                 break;
                 case OBJECT_REF:
                 {
@@ -227,6 +232,11 @@ heap_ptr gc_alloc_atom(gc * collector, atom_idx_t idx)
     return gc_alloc_any(collector, object_new_atom(idx));
 }
 
+heap_ptr gc_alloc_int(gc * collector, int value)
+{
+    return gc_alloc_any(collector, object_new_int(value));
+}
+
 heap_ptr gc_alloc_anon(gc * collector)
 {
     heap_ptr value = gc_alloc_any(collector, object_new_anon());
@@ -292,6 +302,14 @@ atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr)
     assert(collector->heap[collector->heap_idx][addr].object_value->type == OBJECT_ATOM);
 
     return collector->heap[collector->heap_idx][addr].object_value->atom_value.idx;
+}
+
+int gc_get_int_value(gc * collector, heap_ptr addr)
+{
+    assert(collector->size > addr);
+    assert(collector->heap[collector->heap_idx][addr].object_value->type == OBJECT_INT);
+
+    return collector->heap[collector->heap_idx][addr].object_value->int_value.value;
 }
 
 heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr)
@@ -409,6 +427,9 @@ void gc_print_ref_str(gc * collector, heap_ptr addr, char ** strtab_array, unsig
             printf("%s\n", object_type_str(OBJECT_UNKNOWN));
         break;
         case OBJECT_ATOM:
+            object_print_str(collector->heap[collector->heap_idx][addr].object_value, strtab_array, strtab_size);
+        break;
+        case OBJECT_INT:
             object_print_str(collector->heap[collector->heap_idx][addr].object_value, strtab_array, strtab_size);
         break;
         case OBJECT_REF:

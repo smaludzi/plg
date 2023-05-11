@@ -1,0 +1,5 @@
+true(T) <= T = true
+a(X, Y) <= X = _, Y = _
+value(X) <= X = a(123, b)
+   <= X = a(123, b), value(X), true(T)
+

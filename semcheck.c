@@ -175,6 +175,9 @@ void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_re
         case TERM_TYPE_LIST_EMPTY:
             /* Empty list is fine */
         break;
+        case TERM_TYPE_INT:
+            /* Int is fine */
+        break;
     }
 }
 
@@ -243,11 +246,14 @@ void term_get_vars_semcheck(symtab * stab, term * value)
         break;
         case TERM_TYPE_LIST_EMPTY:
         break;
+        case TERM_TYPE_INT:
+        break;
     }
 }
 
 void term_get_local_vars_semcheck(term * value, var_list * local_vars)
-{    switch (value->type)
+{   
+    switch (value->type)
     {
         case TERM_TYPE_UNKNOWN:
             assert(0);
@@ -264,6 +270,8 @@ void term_get_local_vars_semcheck(term * value, var_list * local_vars)
             term_list_get_local_vars_semcheck(value->t_struct.terms, local_vars);
         break;
         case TERM_TYPE_LIST_EMPTY:
+        break;
+        case TERM_TYPE_INT:
         break;
     }
 }

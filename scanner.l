@@ -54,6 +54,7 @@ const char * token_to_str(token * tokp)
 %}
 
 DIGIT     [0-9]
+HEX_DIGIT [0-9a-fA-F]
 ID	      [a-zA-Z_]
 SPECIAL   [.,()=|\[\]]
 
@@ -119,13 +120,29 @@ SPECIAL   [.,()=|\[\]]
 		return TOK_VAR;
 	}
 	
-    [a-z]({ID}|{DIGIT})*	{
+    [a-z]({ID}|{DIGIT})* {
 		tokp->type = TOK_ATOM;
     	tokp->line_no = line_no;
     	tokp->val.string_val = (char *)strdup(yytext);
 		return TOK_ATOM;
 	}
-    
+
+	{DIGIT}+ {
+		int result;
+		tokp->line_no = line_no;
+		sscanf(yytext, "%d", &result);
+		tokp->val.int_val = result;
+		return TOK_INT;
+	}
+
+	0x{HEX_DIGIT}+|0X{HEX_DIGIT}+ {
+		int result;
+		tokp->line_no = line_no;
+		sscanf(yytext, "%x", &result);
+		tokp->val.int_val = result;
+		return TOK_INT;
+	}
+
     {SPECIAL} {
     	tokp->line_no = line_no;
      	tokp->val.char_val = yytext[0];

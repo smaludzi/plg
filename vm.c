@@ -30,9 +30,11 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_CHECK, vm_execute_check },
     { BYTECODE_PUT_ANON, vm_execute_put_anon },
     { BYTECODE_PUT_ATOM, vm_execute_put_atom },
+    { BYTECODE_PUT_INT, vm_execute_put_int },
     { BYTECODE_PUT_STRUCT, vm_execute_put_struct },
     { BYTECODE_PUT_STRUCT_ADDR, vm_execute_put_struct_addr },
     { BYTECODE_U_ATOM, vm_execute_u_atom },
+    { BYTECODE_U_INT, vm_execute_u_int },
     { BYTECODE_U_STRUCT, vm_execute_u_struct },
     { BYTECODE_U_STRUCT_ADDR, vm_execute_u_struct_addr },
     { BYTECODE_UP, vm_execute_up },
@@ -242,6 +244,26 @@ void vm_execute_put_atom(vm * machine, bytecode * code)
     machine->stack[machine->sp] = entry;
 }
 
+void vm_execute_put_int(vm * machine, bytecode * code)
+{
+    if (!vm_execute_check_size(machine, machine->sp + 1, machine->tp))
+    {
+        return;
+    }
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_int(machine->collector, code->put_int.value);
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
+
+    machine->sp++;
+    machine->stack[machine->sp] = entry;
+}
+
 void vm_execute_put_struct(vm * machine, bytecode * code)
 {
     bytecode_print(code);
@@ -286,10 +308,51 @@ void vm_execute_u_atom(vm * machine, bytecode * code)
                 vm_execute_backtrack(machine);
             }
         break;
+        case OBJECT_INT:
+            vm_execute_backtrack(machine);
+        break;
         case OBJECT_REF:
         {
             /* NOTE: second version, Fig. 4.17 p. 121 */
             heap_ptr a_value = gc_alloc_atom(machine->collector, code->u_atom.idx);
+            if (a_value == 0)
+            {
+                machine->state = VM_ERROR_OUT_OF_MEMORY;
+                return;
+            }
+
+            gc_set_ref_ref(machine->collector, h_ref, a_value);
+            vm_execute_trail(machine, h_ref);
+        }
+        break;
+        case OBJECT_STRUCT:
+            vm_execute_backtrack(machine);
+        break;
+    }
+}
+
+void vm_execute_u_int(vm * machine, bytecode * code)
+{
+    heap_ptr h_ref = machine->stack[machine->sp].addr;
+    machine->sp--;
+    switch (gc_get_object_type(machine->collector, h_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknow object %u\n", h_ref);
+            assert(0);
+        break;
+        case OBJECT_ATOM:
+            vm_execute_backtrack(machine);
+        break;
+        case OBJECT_INT:
+            if (gc_get_int_value(machine->collector, h_ref) != code->u_int.value)
+            {
+                vm_execute_backtrack(machine);
+            }
+        break;
+        case OBJECT_REF:
+        {
+            heap_ptr a_value = gc_alloc_int(machine->collector, code->u_int.value);
             if (a_value == 0)
             {
                 machine->state = VM_ERROR_OUT_OF_MEMORY;
@@ -322,6 +385,9 @@ void vm_execute_u_struct_addr(vm * machine, bytecode * code)
             assert(0);
         break;
         case OBJECT_ATOM:
+            vm_execute_backtrack(machine);
+        break;
+        case OBJECT_INT:
             vm_execute_backtrack(machine);
         break;
         case OBJECT_REF:

@@ -1,0 +1,2 @@
+value(X) <= X = 123
+   <= value(X)

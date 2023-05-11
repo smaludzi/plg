@@ -30,7 +30,8 @@ typedef enum term_type {
     TERM_TYPE_VAR = 3,
     TERM_TYPE_STRUCT = 4,
     TERM_TYPE_LIST_EMPTY = 5,
-    TERM_TYPE_LIST = 6
+    TERM_TYPE_LIST = 6,
+    TERM_TYPE_INT = 7
 } term_type;
 
 typedef struct term {
@@ -46,6 +47,9 @@ typedef struct term {
         struct {
             var * value;
         } t_var;
+        struct {
+            int value;
+        } t_int;
     };
     clause * predicate_ref;
     unsigned int line_no;
@@ -61,6 +65,7 @@ typedef struct term_list {
 term * term_new_basic(term_type type, char * name);
 term * term_new_var(term_type, var * var_value);
 term * term_new_struct(term_type type, char * name, term_list * terms);
+term * term_new_int(term_type type, int int_val);
 void term_delete(term * t);
 
 unsigned int term_arity(term * t);

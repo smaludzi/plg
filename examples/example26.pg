@@ -1,0 +1,4 @@
+true(T) <= T = true
+value(X) <= X = 123
+   <= value(124), true(T)
+

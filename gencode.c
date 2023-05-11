@@ -239,6 +239,15 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             /* printf("PUT_EMPTY_LIST\n"); */
         }
         break;
+        case TERM_TYPE_INT:
+        {
+            bytecode bc = { 0 };
+            bc.type = BYTECODE_PUT_INT;
+            bc.put_int.value = value->t_int.value;
+            gencode_add_bytecode(gen, &bc);
+            /* printf("PUT_INT %d\n", value->t_int.value); */
+        }
+        break;
     }
 }
 
@@ -317,6 +326,15 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             /* printf("B:\n"); */
         }
         break;
+        case TERM_TYPE_INT:
+        {
+            bytecode bc = { 0 };
+            bc.type = BYTECODE_U_INT;
+            bc.u_int.value = value->t_int.value;
+            gencode_add_bytecode(gen, &bc);
+            /* printf("UATOM %s\n", value->name); */
+        }
+        break;
     }
 }
 
@@ -337,6 +355,8 @@ void term_get_bound_vars_gencode(gencode * gen, term * value, var_list * bound_v
         case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
             term_list_get_bound_vars_gencode(gen, value->t_struct.terms, bound_vars, result);
+        break;
+        case TERM_TYPE_INT:
         break;
     }
 }

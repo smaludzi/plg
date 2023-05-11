@@ -36,9 +36,11 @@ typedef enum bytecode_type {
     BYTECODE_CHECK = 6,
     BYTECODE_PUT_ANON,
     BYTECODE_PUT_ATOM,
+    BYTECODE_PUT_INT,
     BYTECODE_PUT_STRUCT,
     BYTECODE_PUT_STRUCT_ADDR,
     BYTECODE_U_ATOM,
+    BYTECODE_U_INT,
     BYTECODE_U_STRUCT,
     BYTECODE_U_STRUCT_ADDR,
     BYTECODE_UP,
@@ -89,6 +91,9 @@ typedef struct bytecode {
             atom_idx_t idx;
         } put_atom;
         struct {
+            int value;
+        } put_int;
+        struct {
             unsigned int n;
             union {
                 pc_ptr addr;
@@ -98,6 +103,9 @@ typedef struct bytecode {
         struct {
             atom_idx_t idx;
         } u_atom;
+        struct {
+            int value;
+        } u_int;
         struct {
             pc_offset offset;
             unsigned int n;
@@ -176,9 +184,11 @@ void bytecode_print_u_var(bytecode * value);
 void bytecode_print_check(bytecode * value);
 void bytecode_print_put_anon(bytecode * value);
 void bytecode_print_put_atom(bytecode * value);
+void bytecode_print_put_int(bytecode * value);
 void bytecode_print_put_struct(bytecode * value);
 void bytecode_print_put_struct_addr(bytecode * value);
 void bytecode_print_u_atom(bytecode * value);
+void bytecode_print_u_int(bytecode * value);
 void bytecode_print_u_struct(bytecode * value);
 void bytecode_print_u_struct_addr(bytecode * value);
 void bytecode_print_up(bytecode * value);

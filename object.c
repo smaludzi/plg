@@ -34,6 +34,16 @@ object * object_new_atom(atom_idx_t idx)
     return value;
 }
 
+object * object_new_int(int int_val)
+{
+    object * value = (object *)malloc(sizeof(object));
+
+    value->type = OBJECT_INT;
+    value->int_value.value = int_val;
+
+    return value;
+}
+
 object * object_new_anon()
 {
     object * value = (object *)malloc(sizeof(object));
@@ -91,6 +101,7 @@ void object_delete(object * value)
         break;
         case OBJECT_ATOM:
         case OBJECT_REF:
+        case OBJECT_INT:
         break;
         case OBJECT_STRUCT:
         {
@@ -130,6 +141,9 @@ void object_print_str(object * value, char ** strtab_array, unsigned int strtab_
                 printf("%s %u\n", object_type_str(value->type), value->atom_value.idx);
             }
         break;
+        case OBJECT_INT:
+            printf("%s %u\n", object_type_str(value->type), value->int_value.value);
+        break;
         case OBJECT_REF:
             printf("%s %u\n", object_type_str(value->type), value->ref_value.ref);
         break;
@@ -152,6 +166,7 @@ const char * object_type_str(object_type type)
     {
         case OBJECT_UNKNOWN: return "OBJECT_UNKNOWN";
         case OBJECT_ATOM: return "OBJECT_ATOM";
+        case OBJECT_INT: return "OBJECT_INT";
         case OBJECT_REF: return "OBJECT_REF";
         case OBJECT_STRUCT: return "OBJECT_STRUCT";
     }

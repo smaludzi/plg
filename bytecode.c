@@ -38,6 +38,7 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_PUT_STRUCT, bytecode_print_put_struct },
     { BYTECODE_PUT_STRUCT_ADDR, bytecode_print_put_struct_addr },
     { BYTECODE_U_ATOM, bytecode_print_u_atom },
+    { BYTECODE_U_INT, bytecode_print_u_int },
     { BYTECODE_U_STRUCT, bytecode_print_u_struct },
     { BYTECODE_U_STRUCT_ADDR, bytecode_print_u_struct_addr },
     { BYTECODE_UP, bytecode_print_up },
@@ -123,6 +124,11 @@ void bytecode_print_put_atom(bytecode * value)
     printf("%d: %s index %u\n", value->addr, bytecode_type_str(value->type), value->put_atom.idx);
 }
 
+void bytecode_print_put_int(bytecode * value)
+{
+    printf("%d: %s value %d\n", value->addr, bytecode_type_str(value->type), value->put_int.value);
+}
+
 void bytecode_print_put_struct(bytecode * value)
 {
     printf("%d: %s %s/%u\n", value->addr, bytecode_type_str(value->type),
@@ -138,6 +144,11 @@ void bytecode_print_put_struct_addr(bytecode * value)
 void bytecode_print_u_atom(bytecode * value)
 {
     printf("%d: %s idx %u\n", value->addr, bytecode_type_str(value->type), value->u_atom.idx);
+}
+
+void bytecode_print_u_int(bytecode * value)
+{
+    printf("%d: %s value %d\n", value->addr, bytecode_type_str(value->type), value->u_int.value);
 }
 
 void bytecode_print_u_struct(bytecode * value)
@@ -293,9 +304,11 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_CHECK: return "BYTECODE_CHECK";
         case BYTECODE_PUT_ANON: return "BYTECODE_PUT_ANON";
         case BYTECODE_PUT_ATOM: return "BYTECODE_PUT_ATOM";
+        case BYTECODE_PUT_INT: return "BYTECODE_PUT_INT";
         case BYTECODE_PUT_STRUCT: return "BYTECODE_PUT_STRUCT";
         case BYTECODE_PUT_STRUCT_ADDR: return "BYTECODE_PUT_STRUCT_ADDR";
         case BYTECODE_U_ATOM: return "BYTECODE_U_ATOM";
+        case BYTECODE_U_INT: return "BYTECODE_U_INT";
         case BYTECODE_U_STRUCT: return "BYTECODE_U_STRUCT";
         case BYTECODE_U_STRUCT_ADDR: return "BYTECODE_U_STRUCT_ADDR";
         case BYTECODE_UP: return "BYTECODE_UP";

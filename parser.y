@@ -63,6 +63,7 @@ int yylex(token * tokp)
 %token <val.string_val> TOK_QUERY
 %token <val.string_val> TOK_CUT
 %token <val.string_val> TOK_FAIL
+%token <val.int_val> TOK_INT
 
 %type <val.var_val> var
 %type <val.vars_val> vars
@@ -75,8 +76,10 @@ int yylex(token * tokp)
 %type <val.query_val> query;
 %type <val.program_val> program;
 
+%destructor { if ($$) free($$); } TOK_ANON
 %destructor { if ($$) free($$); } TOK_ATOM
 %destructor { if ($$) free($$); } TOK_VAR
+%destructor { if ($$) free($$); } TOK_FAIL
 %destructor { if ($$) var_delete($$); } var
 %destructor { if ($$) var_list_delete($$); } vars
 %destructor { if ($$) term_delete($$); } term
@@ -121,6 +124,11 @@ vars: var
 term: var
       {
           $$ = term_new_var(TERM_TYPE_VAR, $1);
+          $$->line_no = $<line_no>1;
+      }
+    | TOK_INT
+      {
+          $$ = term_new_int(TERM_TYPE_INT, $1);
           $$->line_no = $<line_no>1;
       }
     | TOK_ATOM

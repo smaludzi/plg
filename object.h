@@ -28,6 +28,7 @@ typedef enum object_type
 {
     OBJECT_UNKNOWN = 0,
     OBJECT_ATOM = 1,
+    OBJECT_INT = 2,
     OBJECT_REF = 4,
     OBJECT_STRUCT = 5,
 } object_type;
@@ -35,6 +36,10 @@ typedef enum object_type
 typedef struct obj_atom {
     atom_idx_t idx;
 } obj_atom;
+
+typedef struct obj_int {
+    int value;
+} obj_int;
 
 typedef struct obj_ref {
     heap_ptr ref;
@@ -51,12 +56,14 @@ typedef struct object
     object_type type;
     union {
         obj_atom atom_value;
+        obj_int int_value;
         obj_ref ref_value;
         obj_struct struct_value;
     };
 } object;
 
 object * object_new_atom(atom_idx_t idx);
+object * object_new_int(int int_value);
 object * object_new_anon();
 object * object_new_var();
 object * object_new_ref(heap_ptr ptr_value);

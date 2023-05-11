@@ -30,6 +30,7 @@
 
 typedef union token_value {
     char char_val;
+    int int_val;
     char * string_val;
     var * var_val;
     var_list * vars_val;
