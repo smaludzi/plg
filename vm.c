@@ -677,6 +677,7 @@ void vm_execute_halt(vm * machine, bytecode * code)
         gc_print_ref_str(machine->collector,
                          vm_execute_deref(machine, addr),
                          strtab_array, strtab_size);
+        printf("%u: ---------------\n", i);
     }
     printf("-----------------\n");
 

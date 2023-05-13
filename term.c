@@ -21,6 +21,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 #include "term.h"
 #include "var.h"
@@ -78,6 +79,38 @@ term * term_new_int(term_type type, int int_val)
 	value->next = NULL;
 
 	return value;
+}
+
+term * term_new_list_constructor(term_list * terms, term * tail)
+{
+	if (terms == NULL || terms->head == NULL)
+	{
+		return NULL;
+	}
+
+	term * node = terms->head;
+
+	term_list * t = term_list_new();
+	term_list_add_end(t, node);
+
+	term * first = term_new_struct(TERM_TYPE_LIST, strdup("[|]"), t);
+
+	node = node->next;
+	while (node != NULL)
+	{
+		term_list * ti = term_list_new();
+		term_list_add_end(ti, node);
+
+		term * next = term_new_struct(TERM_TYPE_LIST, strdup("[|]"), ti);
+		term_list_add_end(t, next);
+
+		t = ti;
+		node = node->next;
+	}
+
+	term_list_add_end(t, tail);
+
+	return first;
 }
 
 void term_delete(term * t)
@@ -199,6 +232,11 @@ void term_list_delete(term_list * list)
 		term_delete(node);
 		node = next;
 	}
+	free(list);
+}
+
+void term_list_delete_null(term_list * list)
+{
 	free(list);
 }
 

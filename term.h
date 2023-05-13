@@ -68,6 +68,7 @@ term * term_new_basic(term_type type, char * name);
 term * term_new_var(term_type, var * var_value);
 term * term_new_struct(term_type type, char * name, term_list * terms);
 term * term_new_int(term_type type, int int_val);
+term * term_new_list_constructor(term_list * terms, term * tail);
 void term_delete(term * t);
 
 unsigned int term_arity(term * t);
@@ -75,6 +76,7 @@ void term_print(term * t);
 
 term_list * term_list_new();
 void term_list_delete(term_list * list);
+void term_list_delete_null(term_list * list);
 void term_list_add_end(term_list * list, term * value);
 
 unsigned int term_list_arity(term_list * list);
