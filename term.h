@@ -31,8 +31,6 @@ typedef enum term_type {
     TERM_TYPE_ATOM = 2,
     TERM_TYPE_VAR = 3,
     TERM_TYPE_STRUCT = 4,
-    TERM_TYPE_LIST_EMPTY = 5,
-    TERM_TYPE_LIST = 6,
     TERM_TYPE_INT = 7
 } term_type;
 

@@ -217,7 +217,6 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             var_gencode(gen, value->t_var.value, result);
         }
         break;
-        case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
         {
             term_list_gencode(gen, value->t_struct.terms, result);
@@ -228,15 +227,6 @@ void term_gencode(gencode * gen, term * value, gencode_result * result)
             bc.put_struct.predicate_ref = value->predicate_ref;
             gencode_add_bytecode(gen, &bc);
             /* printf("PUT_STRUCT %s/%d\n", value->name, term_list_size(value->terms)); */
-        }
-        break;
-        case TERM_TYPE_LIST_EMPTY:
-        {
-            bytecode bc = { 0 };
-            bc.type = BYTECODE_PUT_ATOM;
-            bc.put_atom.idx = strtab_add_string(gen->strtab_value, value->t_basic.name);
-            gencode_add_bytecode(gen, &bc);
-            /* printf("PUT_EMPTY_LIST\n"); */
         }
         break;
         case TERM_TYPE_INT:
@@ -266,7 +256,6 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
             /* printf("POP\n"); */
         }
         break;
-        case TERM_TYPE_LIST_EMPTY:
         case TERM_TYPE_ATOM:
         {
             bytecode bc = { 0 };
@@ -279,7 +268,6 @@ void term_unify_gencode(gencode * gen, term * value, gencode_result * result)
         case TERM_TYPE_VAR:
             var_unify_gencode(gen, value->t_var.value, result);
         break;
-        case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
         {
             bytecode bc_u_struct = { 0 };
@@ -347,12 +335,10 @@ void term_get_bound_vars_gencode(gencode * gen, term * value, var_list * bound_v
         break;
         case TERM_TYPE_ANON:
         case TERM_TYPE_ATOM:
-        case TERM_TYPE_LIST_EMPTY:
         break;
         case TERM_TYPE_VAR:
             var_get_bound_vars_gencode(gen, value->t_var.value, bound_vars, result);
         break;
-        case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
             term_list_get_bound_vars_gencode(gen, value->t_struct.terms, bound_vars, result);
         break;

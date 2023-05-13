@@ -157,7 +157,6 @@ void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_re
         case TERM_TYPE_VAR:
             var_semcheck(stab, freevars, value->t_var.value, result);
         break;
-        case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
         {
             symtab_entry * entry = symtab_lookup_arity(stab, value->t_struct.name, term_arity(value), SYMTAB_LOOKUP_GLOBAL);
@@ -175,9 +174,6 @@ void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_re
             }
             term_list_semcheck(stab, freevars, value->t_struct.terms, result);
         }
-        break;
-        case TERM_TYPE_LIST_EMPTY:
-            /* Empty list is fine */
         break;
         case TERM_TYPE_INT:
             /* Int is fine */
@@ -244,11 +240,8 @@ void term_get_vars_semcheck(symtab * stab, term * value)
         case TERM_TYPE_VAR:
             var_get_vars_semcheck(stab, value->t_var.value);
         break;
-        case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
             term_list_get_vars_semcheck(stab, value->t_struct.terms);
-        break;
-        case TERM_TYPE_LIST_EMPTY:
         break;
         case TERM_TYPE_INT:
         break;
@@ -269,11 +262,8 @@ void term_get_local_vars_semcheck(term * value, var_list * local_vars)
         case TERM_TYPE_VAR:
             var_get_unbound_semcheck(value->t_var.value, local_vars);
         break;
-        case TERM_TYPE_LIST:
         case TERM_TYPE_STRUCT:
             term_list_get_local_vars_semcheck(value->t_struct.terms, local_vars);
-        break;
-        case TERM_TYPE_LIST_EMPTY:
         break;
         case TERM_TYPE_INT:
         break;

@@ -155,21 +155,19 @@ term: var
       }
     | '[' ']'
       {
-          $$ = term_new_basic(TERM_TYPE_LIST_EMPTY, strdup("[]"));
+          $$ = term_new_basic(TERM_TYPE_ATOM, strdup("[]"));
           $$->line_no = $<line_no>1;
       }
     | '[' terms ']'
       {
-          term * tail = term_new_basic(TERM_TYPE_LIST_EMPTY, strdup("[]"));
+          term * tail = term_new_basic(TERM_TYPE_ATOM, strdup("[]"));
           $$ = term_new_list_constructor($2, tail);
           $$->line_no = $<line_no>1;
-          term_list_delete_null($2);
       }
     | '[' terms '|' term ']'
       {
           $$ = term_new_list_constructor($2, $4);
           $$->line_no = $<line_no>1;
-          term_list_delete_null($2);
       }
 ;
 

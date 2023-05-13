@@ -93,7 +93,7 @@ term * term_new_list_constructor(term_list * terms, term * tail)
 	term_list * t = term_list_new();
 	term_list_add_end(t, node);
 
-	term * first = term_new_struct(TERM_TYPE_LIST, strdup("[|]"), t);
+	term * first = term_new_struct(TERM_TYPE_STRUCT, strdup("[|]"), t);
 
 	node = node->next;
 	while (node != NULL)
@@ -101,7 +101,7 @@ term * term_new_list_constructor(term_list * terms, term * tail)
 		term_list * ti = term_list_new();
 		term_list_add_end(ti, node);
 
-		term * next = term_new_struct(TERM_TYPE_LIST, strdup("[|]"), ti);
+		term * next = term_new_struct(TERM_TYPE_STRUCT, strdup("[|]"), ti);
 		term_list_add_end(t, next);
 
 		t = ti;
@@ -109,6 +109,7 @@ term * term_new_list_constructor(term_list * terms, term * tail)
 	}
 
 	term_list_add_end(t, tail);
+    term_list_delete_null(terms);
 
 	return first;
 }
@@ -122,7 +123,6 @@ void term_delete(term * t)
 		break;
 		case TERM_TYPE_ANON:
 		case TERM_TYPE_ATOM:
-		case TERM_TYPE_LIST_EMPTY:
 			if (t->t_basic.name)
 			{
 				free(t->t_basic.name);
@@ -134,7 +134,6 @@ void term_delete(term * t)
 				var_delete(t->t_var.value);
 			}
 		break;
-		case TERM_TYPE_LIST:
 		case TERM_TYPE_STRUCT:
 			if (t->t_struct.name)
 			{
@@ -160,8 +159,6 @@ unsigned int term_arity(term * t)
 		case TERM_TYPE_ATOM: return 0;
 		case TERM_TYPE_VAR: return 0;
 		case TERM_TYPE_STRUCT: return term_list_size(t->t_struct.terms);
-		case TERM_TYPE_LIST_EMPTY: return 0;
-		case TERM_TYPE_LIST: return 2;
 		case TERM_TYPE_INT: return 0;
 	}
 	return 0;
@@ -198,13 +195,9 @@ void term_print_rec(term * t)
 	case TERM_TYPE_VAR:
 		var_print(t->t_var.value);
 		break;
-	case TERM_TYPE_LIST:
 	case TERM_TYPE_STRUCT:
 		printf("term %s/%u\n", t->t_struct.name, term_list_size(t->t_struct.terms));
 		term_list_print_rec(t->t_struct.terms);
-		break;
-	case TERM_TYPE_LIST_EMPTY:
-		printf("term empty list\n");
 		break;
 	case TERM_TYPE_INT:
 		printf("term int %d\n", t->t_int.value);
@@ -300,8 +293,6 @@ char * term_type_to_str(term_type value)
 		case TERM_TYPE_ATOM: return "TERM_TYPE_ATOM";
 		case TERM_TYPE_VAR: return "TERM_TYPE_VAR";
 		case TERM_TYPE_STRUCT: return "TERM_TYPE_STRUCT";
-		case TERM_TYPE_LIST_EMPTY: return "TERM_TYPE_LIST_EMPTY";
-		case TERM_TYPE_LIST: return "TERM_TYPE_LIST";
 		case TERM_TYPE_INT: return "TERM_TYPE_INT";
 	}
 	return "TERM_TYPE_UNKNOWN";

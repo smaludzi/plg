@@ -532,9 +532,9 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,   100,   100,   105,   114,   119,   126,   131,   136,   141,
-     146,   151,   156,   161,   168,   176,   181,   188,   194,   199,
-     204,   209,   214,   221,   226,   233,   238,   243,   250,   255,
-     262,   269
+     146,   151,   156,   161,   167,   174,   179,   186,   192,   197,
+     202,   207,   212,   219,   224,   231,   236,   241,   248,   253,
+     260,   267
 };
 #endif
 
@@ -1548,7 +1548,7 @@ yyreduce:
   case 12:
 #line 157 "parser.y"
       {
-          (yyval.val.term_val) = term_new_basic(TERM_TYPE_LIST_EMPTY, strdup("[]"));
+          (yyval.val.term_val) = term_new_basic(TERM_TYPE_ATOM, strdup("[]"));
           (yyval.val.term_val)->line_no = (yyvsp[-1].line_no);
       }
 #line 1555 "parser.c"
@@ -1557,178 +1557,176 @@ yyreduce:
   case 13:
 #line 162 "parser.y"
       {
-          term * tail = term_new_basic(TERM_TYPE_LIST_EMPTY, strdup("[]"));
+          term * tail = term_new_basic(TERM_TYPE_ATOM, strdup("[]"));
           (yyval.val.term_val) = term_new_list_constructor((yyvsp[-1].val.terms_val), tail);
           (yyval.val.term_val)->line_no = (yyvsp[-2].line_no);
-          term_list_delete_null((yyvsp[-1].val.terms_val));
       }
-#line 1566 "parser.c"
+#line 1565 "parser.c"
     break;
 
   case 14:
-#line 169 "parser.y"
+#line 168 "parser.y"
       {
           (yyval.val.term_val) = term_new_list_constructor((yyvsp[-3].val.terms_val), (yyvsp[-1].val.term_val));
           (yyval.val.term_val)->line_no = (yyvsp[-4].line_no);
-          term_list_delete_null((yyvsp[-3].val.terms_val));
       }
-#line 1576 "parser.c"
+#line 1574 "parser.c"
     break;
 
   case 15:
-#line 177 "parser.y"
+#line 175 "parser.y"
       {
           (yyval.val.terms_val) = term_list_new();
           term_list_add_end((yyval.val.terms_val), (yyvsp[0].val.term_val));
       }
-#line 1585 "parser.c"
+#line 1583 "parser.c"
     break;
 
   case 16:
-#line 182 "parser.y"
+#line 180 "parser.y"
       {
           term_list_add_end((yyvsp[-2].val.terms_val), (yyvsp[0].val.term_val));
           (yyval.val.terms_val) = (yyvsp[-2].val.terms_val);
       }
-#line 1594 "parser.c"
+#line 1592 "parser.c"
     break;
 
   case 17:
-#line 189 "parser.y"
+#line 187 "parser.y"
       {
           (yyval.val.goal_val) = goal_new_literal((yyvsp[0].val.string_val), NULL);
           (yyval.val.goal_val)->line_no = (yyvsp[0].line_no);
       }
-#line 1603 "parser.c"
+#line 1601 "parser.c"
     break;
 
   case 18:
-#line 195 "parser.y"
+#line 193 "parser.y"
       {
           (yyval.val.goal_val) = goal_new_literal((yyvsp[-2].val.string_val), NULL);
           (yyval.val.goal_val)->line_no = (yyvsp[-2].line_no);
       }
-#line 1612 "parser.c"
+#line 1610 "parser.c"
     break;
 
   case 19:
-#line 200 "parser.y"
+#line 198 "parser.y"
       {
           (yyval.val.goal_val) = goal_new_literal((yyvsp[-3].val.string_val), (yyvsp[-1].val.terms_val));
           (yyval.val.goal_val)->line_no = (yyvsp[-3].line_no);
       }
-#line 1621 "parser.c"
+#line 1619 "parser.c"
     break;
 
   case 20:
-#line 205 "parser.y"
+#line 203 "parser.y"
       {
           (yyval.val.goal_val) = goal_new_unification((yyvsp[-2].val.var_val), (yyvsp[0].val.term_val));
           (yyval.val.goal_val)->line_no = (yyvsp[-2].line_no);
       }
-#line 1630 "parser.c"
+#line 1628 "parser.c"
     break;
 
   case 21:
-#line 210 "parser.y"
+#line 208 "parser.y"
       {
           (yyval.val.goal_val) = goal_new_cut();
           (yyval.val.goal_val)->line_no = (yyvsp[0].line_no);
       }
-#line 1639 "parser.c"
+#line 1637 "parser.c"
     break;
 
   case 22:
-#line 215 "parser.y"
+#line 213 "parser.y"
       {
           (yyval.val.goal_val) = goal_new_fail((yyvsp[0].val.string_val));
           (yyval.val.goal_val)->line_no = (yyvsp[0].line_no);
       }
-#line 1648 "parser.c"
+#line 1646 "parser.c"
     break;
 
   case 23:
-#line 222 "parser.y"
+#line 220 "parser.y"
       {
           (yyval.val.goals_val) = goal_list_new();
           goal_list_add_end((yyval.val.goals_val), (yyvsp[0].val.goal_val));
       }
-#line 1657 "parser.c"
+#line 1655 "parser.c"
     break;
 
   case 24:
-#line 227 "parser.y"
+#line 225 "parser.y"
       {
           goal_list_add_end((yyvsp[-2].val.goals_val), (yyvsp[0].val.goal_val));
           (yyval.val.goals_val) = (yyvsp[-2].val.goals_val);
       }
-#line 1666 "parser.c"
+#line 1664 "parser.c"
     break;
 
   case 25:
-#line 234 "parser.y"
+#line 232 "parser.y"
       {
           (yyval.val.clause_val) = clause_new((yyvsp[-2].val.string_val), NULL, (yyvsp[0].val.goals_val));
           (yyval.val.clause_val)->line_no = (yyvsp[-2].line_no);
       }
-#line 1675 "parser.c"
+#line 1673 "parser.c"
     break;
 
   case 26:
-#line 239 "parser.y"
+#line 237 "parser.y"
       {
           (yyval.val.clause_val) = clause_new((yyvsp[-4].val.string_val), NULL, (yyvsp[0].val.goals_val));
           (yyval.val.clause_val)->line_no = (yyvsp[-4].line_no);
       }
-#line 1684 "parser.c"
+#line 1682 "parser.c"
     break;
 
   case 27:
-#line 244 "parser.y"
+#line 242 "parser.y"
       {
           (yyval.val.clause_val) = clause_new((yyvsp[-5].val.string_val), (yyvsp[-3].val.vars_val), (yyvsp[0].val.goals_val));
           (yyval.val.clause_val)->line_no = (yyvsp[-5].line_no);
       }
-#line 1693 "parser.c"
+#line 1691 "parser.c"
     break;
 
   case 28:
-#line 251 "parser.y"
+#line 249 "parser.y"
       {
           (yyval.val.clauses_val) = clause_list_new();
           clause_list_add_end((yyval.val.clauses_val), (yyvsp[0].val.clause_val));
       }
-#line 1702 "parser.c"
+#line 1700 "parser.c"
     break;
 
   case 29:
-#line 256 "parser.y"
+#line 254 "parser.y"
       {
           clause_list_add_end((yyvsp[-1].val.clauses_val), (yyvsp[0].val.clause_val));
           (yyval.val.clauses_val) = (yyvsp[-1].val.clauses_val);
       }
-#line 1711 "parser.c"
+#line 1709 "parser.c"
     break;
 
   case 30:
-#line 263 "parser.y"
+#line 261 "parser.y"
       {
          (yyval.val.query_val) = query_new((yyvsp[0].val.goals_val));
          (yyval.val.query_val)->line_no = (yyvsp[-1].line_no);
       }
-#line 1720 "parser.c"
+#line 1718 "parser.c"
     break;
 
   case 31:
-#line 270 "parser.y"
+#line 268 "parser.y"
       {
          (yyval.val.program_val) = *plg = program_new((yyvsp[-1].val.clauses_val), (yyvsp[0].val.query_val));
       }
-#line 1728 "parser.c"
+#line 1726 "parser.c"
     break;
 
 
-#line 1732 "parser.c"
+#line 1730 "parser.c"
 
       default: break;
     }
@@ -1960,5 +1958,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 275 "parser.y"
+#line 273 "parser.y"
 
