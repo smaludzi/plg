@@ -1,3 +1,4 @@
+print(P) <= P = _
 g(X, Y) <= X = _, Y = _
-uni(X) <= X = g(Y, g(a, Z))
-       <= uni(g(a, g(a, b)))
+uni(X) <= X = g(Y, g(Z, b)), print(Y), print(Z)
+       <= uni(g(a, g(a, X)))

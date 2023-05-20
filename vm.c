@@ -194,7 +194,7 @@ void vm_execute_u_ref(vm * machine, bytecode * code)
 
 void vm_execute_u_var(vm * machine, bytecode * code)
 {
-    machine->stack[machine->fp + code->u_var.index].addr = machine->stack[machine->sp].addr;
+    machine->stack[machine->fp + code->u_var.index] = machine->stack[machine->sp];
     machine->sp--;
 }
 
@@ -888,7 +888,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
 
-        //bytecode_print(bc);
+        // bytecode_print(bc);
         vm_execute_op[bc->type].execute(machine, bc);
     }
 

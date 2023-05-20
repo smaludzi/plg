@@ -326,7 +326,7 @@ void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unificatio
     var_list_enumerate(freevars, stab->count + 1);
     var_list_add_to_symtab(stab, freevars, result);
 
-    var_list_print(freevars);
+    //var_list_print(freevars);
 
     var_list_delete_null(freevars);
 }
