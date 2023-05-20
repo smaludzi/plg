@@ -44,9 +44,6 @@ const char * token_to_str(token * tokp)
 	switch (tokp->type)
 	{
 		case TOK_ANON: return tokp->val.string_val;
-		case TOK_ARR: return tokp->val.string_val;
-		case TOK_IMPL: return tokp->val.string_val;
-		case TOK_QUERY: return tokp->val.string_val;
 		case TOK_VAR: return tokp->val.string_val;
 		case TOK_ATOM: return tokp->val.string_val;
 	}

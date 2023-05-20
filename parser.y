@@ -105,8 +105,9 @@ var: TOK_VAR
      | error
      {
          $$ = NULL;
-         yyerror(NULL, "incorrect variable, found '%s' instead", token_to_str(&yylval));
-         token_delete(&yylval);
+         yyerror(NULL, "incorrect variable");
+         //yyerror(NULL, "incorrect variable, found '%s' instead", token_to_str(&yylval));
+         //token_delete(&yylval);
          yyclearin;
      }
 ;

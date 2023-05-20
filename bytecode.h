@@ -27,13 +27,13 @@
 typedef struct clause clause;
 
 typedef enum bytecode_type {
-    BYTECODE_UNKNOWN = 0,
-    BYTECODE_POP = 1,
-    BYTECODE_PUT_REF = 2,
-    BYTECODE_PUT_VAR = 3,
-    BYTECODE_U_REF = 4,
-    BYTECODE_U_VAR = 5,
-    BYTECODE_CHECK = 6,
+    BYTECODE_UNKNOWN,
+    BYTECODE_POP,
+    BYTECODE_PUT_REF,
+    BYTECODE_PUT_VAR,
+    BYTECODE_U_REF,
+    BYTECODE_U_VAR,
+    BYTECODE_CHECK,
     BYTECODE_PUT_ANON,
     BYTECODE_PUT_ATOM,
     BYTECODE_PUT_INT,

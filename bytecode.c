@@ -451,7 +451,8 @@ void bytecode_to_array(bytecode_list * code, bytecode ** code_arr,
             fprintf(stderr, "incorrectly generated code\n");
             assert(0);
         }
-        if (node->value.type == BYTECODE_CALL)
+        if (node->value.type == BYTECODE_CALL ||
+            node->value.type == BYTECODE_LAST_CALL)
         {
             fprintf(stderr, "cannot generate bytecode array with function "
                             "pointers, use bytecode_func_addr\n");

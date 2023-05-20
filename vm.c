@@ -888,7 +888,7 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
         bc = machine->binary_value_ref->code_array + machine->pc;
         machine->pc++;
 
-        // bytecode_print(bc);
+        //bytecode_print(bc);
         vm_execute_op[bc->type].execute(machine, bc);
     }
 

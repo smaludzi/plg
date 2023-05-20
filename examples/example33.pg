@@ -1,0 +1,3 @@
+g(X, Y) <= X = _, Y = _
+uni(X) <= X = g(Y, g(a, Z))
+       <= uni(g(a, g(a, b)))

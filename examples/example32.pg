@@ -1,0 +1,4 @@
+
+list_concat(L1, L2, L3) <= L1 = [], L2 = L3
+list_concat(L1, L2, L3) <= L1 = [H1|T1], L3 = [H1|T3], list_concat(T1,L2,T3)
+    <= list_concat([a, b, c], [d, e, f], Result)
