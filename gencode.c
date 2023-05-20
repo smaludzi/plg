@@ -562,7 +562,7 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
     bc_push_env.type = BYTECODE_PUSH_ENV;
     bc_push_env.push_env.size = local_vars;
     gencode_add_bytecode(gen, &bc_push_env);
-    /* printf("PUSHENV %u\n", local_vars->size); */
+    /* printf("PUSHENV %u\n", local_vars); */
 
     goal_list_gencode(gen, value, local_vars, value->goals, result);
 

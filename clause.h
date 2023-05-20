@@ -28,7 +28,6 @@
 typedef struct clause {
     char * name;
     var_list * vars;
-    var_list * local_vars;
     goal_list * goals;
     symtab * stab;
     struct clause * predicate_ref;
