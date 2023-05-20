@@ -440,7 +440,7 @@ void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_litera
 
     bytecode bc_lc = { 0 };
     bc_lc.type = BYTECODE_LAST_CALL;
-    bc_lc.last_call.size = var_list_size(clause_value->local_vars);
+    bc_lc.last_call.size = symtab_size_type(clause_value->stab, SYMTAB_VAR);
     bc_lc.last_call.n = term_list_size(value->terms);
     bc_lc.last_call.predicate_ref = value->predicate_ref;
     gencode_add_bytecode(gen, &bc_lc);
@@ -556,7 +556,7 @@ void clause_head_get_local_vars_gencode(gencode * gen, var_list * vars, var_list
 
 void clause_gencode(gencode * gen, clause * value, gencode_result * result)
 {
-    unsigned int local_vars = var_list_size(value->local_vars);
+    unsigned int local_vars = symtab_size_type(value->stab, SYMTAB_VAR);
 
     bytecode bc_push_env = { 0 };
     bc_push_env.type = BYTECODE_PUSH_ENV;

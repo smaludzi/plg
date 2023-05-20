@@ -35,6 +35,7 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_CHECK, bytecode_print_check },
     { BYTECODE_PUT_ANON, bytecode_print_put_anon },
     { BYTECODE_PUT_ATOM, bytecode_print_put_atom },
+    { BYTECODE_PUT_INT, bytecode_print_put_int },
     { BYTECODE_PUT_STRUCT, bytecode_print_put_struct },
     { BYTECODE_PUT_STRUCT_ADDR, bytecode_print_put_struct_addr },
     { BYTECODE_U_ATOM, bytecode_print_u_atom },
