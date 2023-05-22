@@ -24,6 +24,7 @@
 #include <assert.h>
 #include "goal.h"
 #include "clause.h"
+#include "expr.h"
 
 goal * goal_new_literal(char * name, term_list * terms)
 {
@@ -46,6 +47,19 @@ goal * goal_new_unification(var * variable, term * term_value)
     value->type = GOAL_TYPE_UNIFICATION;
     value->unification.variable = variable;
     value->unification.term_value = term_value;
+    value->line_no = 0;
+    value->next = NULL;
+
+    return value;
+}
+
+goal * goal_new_is(var * var_value, expr * expr_value)
+{
+    goal * value = malloc(sizeof(goal));
+
+    value->type = GOAL_TYPE_IS;
+    value->is.var_value = var_value;
+    value->is.expr_value = expr_value;
     value->line_no = 0;
     value->next = NULL;
 
@@ -97,6 +111,16 @@ void goal_delete(goal * value)
             if (value->unification.term_value)
             {
                 term_delete(value->unification.term_value);
+            }
+        break;
+        case GOAL_TYPE_IS:
+            if (value->is.var_value)
+            {
+                var_delete(value->is.var_value);
+            }
+            if (value->is.expr_value)
+            {
+                expr_delete(value->is.expr_value);
             }
         break;
         case GOAL_TYPE_CUT:
@@ -151,6 +175,18 @@ void goal_print(goal * value)
             var_print(value->unification.variable);
             term_print(value->unification.term_value);
             printf("\n");
+        }
+        break;
+        case GOAL_TYPE_IS:
+        {
+            if (value->is.var_value)
+            {
+                var_print(value->is.var_value);
+            }
+            if (value->is.expr_value)
+            {
+                expr_print(value->is.expr_value);
+            }
         }
         break;
         case GOAL_TYPE_CUT:

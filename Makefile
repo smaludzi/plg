@@ -24,6 +24,7 @@ CFLAGS = -Wall -Wextra -Wno-unused-parameter -g
 
 OBJECTS = plg.o \
           var.o \
+          expr.o \
           term.o \
           goal.o \
           clause.o \

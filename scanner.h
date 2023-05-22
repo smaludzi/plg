@@ -24,6 +24,7 @@
 
 #include "parser.h"
 #include "var.h"
+#include "expr.h"
 #include "term.h"
 #include "goal.h"
 #include "clause.h"
@@ -36,6 +37,7 @@ typedef union token_value {
     char * string_val;
     var * var_val;
     var_list * vars_val;
+    expr * expr_val;
     term * term_val;
     term_list * terms_val;
     goal * goal_val;

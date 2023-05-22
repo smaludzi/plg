@@ -55,7 +55,7 @@ const char * token_to_str(token * tokp)
 DIGIT     [0-9]
 HEX_DIGIT [0-9a-fA-F]
 ID	      [a-zA-Z_]
-SPECIAL   [.,()=|\[\]]
+SPECIAL   [.,()=|\[\]+\-*/]
 
 %option pointer
 %option noyylineno
@@ -104,6 +104,13 @@ SPECIAL   [.,()=|\[\]]
     	tokp->val.string_val = (char *)yytext;
     	return TOK_CUT;
     }
+
+	"is" {
+		tokp->type = TOK_IS;
+    	tokp->line_no = line_no;
+    	tokp->val.string_val = (char *)yytext;
+    	return TOK_IS;
+	}
 
 	"fail" {
 		tokp->type = TOK_FAIL;

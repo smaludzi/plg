@@ -63,7 +63,9 @@ extern int yydebug;
     TOK_QUERY = 263,
     TOK_CUT = 264,
     TOK_FAIL = 265,
-    TOK_INT = 266
+    TOK_IS = 266,
+    TOK_INT = 267,
+    TOK_NOT = 268
   };
 #endif
 

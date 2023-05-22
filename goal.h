@@ -27,11 +27,13 @@
 
 typedef struct clause clause;
 typedef struct symtab symtab;
+typedef struct expr expr;
 
 typedef enum goal_type { 
     GOAL_TYPE_UNKNOW,
     GOAL_TYPE_LITERAL,
     GOAL_TYPE_UNIFICATION,
+    GOAL_TYPE_IS,
     GOAL_TYPE_CUT,
     GOAL_TYPE_FAIL
 } goal_type;
@@ -47,6 +49,11 @@ typedef struct goal_unification {
     term * term_value;
 } goal_unification;
 
+typedef struct goal_is {
+    var * var_value;
+    expr * expr_value;
+} goal_is;
+
 typedef struct goal_cut {
 } goal_cut;
 
@@ -59,6 +66,7 @@ typedef struct goal {
     union {
         goal_literal literal;
         goal_unification unification;
+        goal_is is;
         goal_cut cut;
         goal_fail fail;
     };
@@ -73,6 +81,7 @@ typedef struct goal_list {
 
 goal * goal_new_literal(char * name, term_list * terms);
 goal * goal_new_unification(var * variable, term * term_value);
+goal * goal_new_is(var * var_value, expr * expr_value);
 goal * goal_new_cut();
 goal * goal_new_fail(char * name);
 void goal_delete(goal * value);

@@ -65,10 +65,12 @@ int yylex(token * tokp)
 %token <val.string_val> TOK_QUERY
 %token <val.string_val> TOK_CUT
 %token <val.string_val> TOK_FAIL
+%token <val.string_val> TOK_IS
 %token <val.int_val> TOK_INT
 
 %type <val.var_val> var
 %type <val.vars_val> vars
+%type <val.expr_val> expr
 %type <val.term_val> term
 %type <val.terms_val> terms
 %type <val.goal_val> goal
@@ -78,12 +80,18 @@ int yylex(token * tokp)
 %type <val.query_val> query;
 %type <val.program_val> program;
 
+%left <val.string_val> '+' '-'
+%left <val.string_val> '*' '/'
+%right TOK_NOT /* %precedence NEG */
+%left <val.string_val> '(' ')'
+
 %destructor { if ($$) free($$); } TOK_ANON
 %destructor { if ($$) free($$); } TOK_ATOM
 %destructor { if ($$) free($$); } TOK_VAR
 %destructor { if ($$) free($$); } TOK_FAIL
 %destructor { if ($$) var_delete($$); } var
 %destructor { if ($$) var_list_delete($$); } vars
+%destructor { if ($$) expr_delete($$); } expr
 %destructor { if ($$) term_delete($$); } term
 %destructor { if ($$) term_list_delete($$); } terms
 %destructor { if ($$) goal_delete($$); } goal
@@ -122,6 +130,48 @@ vars: var
           var_list_add_end($1, $3);
           $$ = $1;
      }
+;
+
+expr: var
+      {
+          $$ = expr_new_var($1);
+          $$->line_no = $<line_no>1;
+      }
+     | TOK_INT
+      {
+          $$ = expr_new_int($1);
+          $$->line_no = $<line_no>1;
+      }
+     | '-' expr %prec TOK_NOT
+      {
+          $$ = expr_new_neg($2);
+          $$->line_no = $<line_no>1;
+      }
+     | expr '+' expr
+      {
+          $$ = expr_new_add($1, $3);
+          $$->line_no = $<line_no>2;
+      }
+     | expr '-' expr
+      {
+          $$ = expr_new_sub($1, $3);
+          $$->line_no = $<line_no>2;
+      }
+     | expr '*' expr
+      {
+          $$ = expr_new_mul($1, $3);
+          $$->line_no = $<line_no>2;
+      }
+     | expr '/' expr
+      {
+          $$ = expr_new_div($1, $3);
+          $$->line_no = $<line_no>2;
+      }
+     | '(' expr ')'
+      {
+          $$ = expr_new_sup($2);
+          $$->line_no = $<line_no>1;
+      }
 ;
 
 term: var
@@ -203,6 +253,11 @@ goal: TOK_ATOM
     | var '=' term
       {
           $$ = goal_new_unification($1, $3);
+          $$->line_no = $<line_no>1;
+      }
+    | var TOK_IS expr
+      {
+          $$ = goal_new_is($1, $3);
           $$->line_no = $<line_no>1;
       }
     | TOK_CUT
