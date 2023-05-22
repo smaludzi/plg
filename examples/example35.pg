@@ -1,0 +1,10 @@
+print(P) <= P = true
+
+list_concat(L1, L2, L3) <= L1 = [], L2 = L3
+list_concat(L1, L2, L3) <= L1 = [H1|T1], L3 = [H1|T3], list_concat(T1,L2,T3)
+
+list_rev(A, R) <= A = [], R = []
+list_rev(A, R) <= A = [H|T], list_rev(T, RT), list_concat(RT, [H], R)
+
+    <= list_rev([a, b, c, d, e, f], Result)
+

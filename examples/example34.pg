@@ -1,0 +1,5 @@
+print(P) <= P = true
+
+is_member(A, L) <= L = [A|_]
+is_member(A, L) <= L = [_|T], is_member(A, T)
+    <= is_member(a, [a, b, c, d]), print(P)

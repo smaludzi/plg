@@ -1,0 +1,9 @@
+print(P) <= P = true
+
+list_delete(A, B, N) <= B = [A], N = []
+list_delete(A, B, N) <= B = [A|L1], N = L1
+list_delete(A, B, N) <= B = [Y|L2], N = [Y|L1], list_delete(A, L2, L1)
+
+    <= list_delete(a, [c, b, a, d], N)
+
+
