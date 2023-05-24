@@ -63,7 +63,12 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_HALT, bytecode_print_halt },
     { BYTECODE_NO, bytecode_print_no },
     { BYTECODE_JUMP, bytecode_print_jump },
-    { BYTECODE_LABEL, bytecode_print_label }
+    { BYTECODE_LABEL, bytecode_print_label },
+    { BYTECODE_INT_NEG, bytecode_print_int_neg },
+    { BYTECODE_INT_ADD, bytecode_print_int_add },
+    { BYTECODE_INT_SUB, bytecode_print_int_sub },
+    { BYTECODE_INT_MUL, bytecode_print_int_mul },
+    { BYTECODE_INT_DIV, bytecode_print_int_div }
 };
 
 bytecode * bytecode_new()
@@ -278,6 +283,31 @@ void bytecode_print_label(bytecode * value)
     printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
 }
 
+void bytecode_print_int_neg(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_int_add(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_int_sub(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_int_mul(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_int_div(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
 void bytecode_print_test()
 {
     unsigned int i = 0;
@@ -334,6 +364,11 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_HALT: return "BYTECODE_HALT";
         case BYTECODE_NO: return "BYTECODE_NO";
         case BYTECODE_LABEL: return "BYTECODE_LABEL";
+        case BYTECODE_INT_NEG: return "BYTECODE_INT_NEG";
+        case BYTECODE_INT_ADD: return "BYTECODE_INT_ADD";
+        case BYTECODE_INT_SUB: return "BYTECODE_INT_SUB";
+        case BYTECODE_INT_MUL: return "BYTECODE_INT_MUL";
+        case BYTECODE_INT_DIV: return "BYTECODE_INT_DIV";
         case BYTECODE_END: return "BYTECODE_END";
     }
     return "BYTECODE_UNKNOWN";

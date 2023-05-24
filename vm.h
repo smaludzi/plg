@@ -31,7 +31,8 @@ typedef enum vm_state
     VM_STOP = 0,
     VM_RUNNING = 1,
     VM_ERROR = 2,
-    VM_ERROR_OUT_OF_MEMORY = 3
+    VM_ERROR_OUT_OF_MEMORY = 3,
+    VM_ERROR_DIV_BY_ZERO = 4
 } vm_state;
 
 typedef struct vm {
@@ -112,6 +113,11 @@ void vm_execute_halt(vm * machine, bytecode * code);
 void vm_execute_no(vm * machine, bytecode * code);
 void vm_execute_jump(vm * machine, bytecode * code);
 void vm_execute_label(vm * machine, bytecode * code);
+void vm_execute_int_neg(vm * machine, bytecode * code);
+void vm_execute_int_add(vm * machine, bytecode * code);
+void vm_execute_int_sub(vm * machine, bytecode * code);
+void vm_execute_int_mul(vm * machine, bytecode * code);
+void vm_execute_int_div(vm * machine, bytecode * code);
 
 const char * vm_state_to_str(vm_state state);
 

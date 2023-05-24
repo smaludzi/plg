@@ -126,6 +126,168 @@ void var_list_add_to_symtab(symtab * stab, var_list * freevars, semcheck_result 
     }
 }
 
+void expr_semcheck(symtab * stab, var_list * freevars, expr * expr_value, semcheck_result * result)
+{
+    switch (expr_value->type)
+    {
+        case EXPR_INT:
+        break;
+        case EXPR_VAR:
+        {
+            if (expr_value->var_t.value)
+            {
+                var_semcheck(stab, freevars, expr_value->var_t.value, result);
+            }
+        }
+        break;
+        case EXPR_NEG:
+        {
+            if (expr_value->neg.expr_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->neg.expr_value, result);
+            }
+        }
+        break;
+        case EXPR_ADD:
+        {
+            if (expr_value->add.left_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->add.left_value, result);
+            }
+            if (expr_value->add.right_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->add.right_value, result);
+            }
+        }
+        break;
+        case EXPR_SUB:
+        {
+            if (expr_value->sub.left_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->sub.left_value, result);
+            }
+            if (expr_value->sub.right_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->sub.right_value, result);
+            }
+        }
+        break;
+        case EXPR_MUL:
+        {
+            if (expr_value->mul.left_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->mul.left_value, result);
+            }
+            if (expr_value->mul.right_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->mul.right_value, result);
+            }
+        }
+        break;
+        case EXPR_DIV:
+        {
+            if (expr_value->div.left_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->div.left_value, result);
+            }
+            if (expr_value->div.right_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->div.right_value, result);
+            }
+        }
+        break;
+        case EXPR_SUP:
+        {
+            if (expr_value->sup.expr_value)
+            {
+                expr_semcheck(stab, freevars, expr_value->sup.expr_value, result);
+            }
+        }
+        break;
+    }
+}
+
+void expr_get_vars_semcheck(symtab * stab, expr * expr_value)
+{
+    switch (expr_value->type)
+    {
+        case EXPR_INT:
+        break;
+        case EXPR_VAR:
+        {
+            if (expr_value->var_t.value)
+            {
+                var_get_vars_semcheck(stab, expr_value->var_t.value);
+            }
+        }
+        break;
+        case EXPR_NEG:
+        {
+            if (expr_value->neg.expr_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->neg.expr_value);
+            }
+        }
+        break;
+        case EXPR_ADD:
+        {
+            if (expr_value->add.left_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->add.left_value);
+            }
+            if (expr_value->add.right_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->add.right_value);
+            }
+        }
+        break;
+        case EXPR_SUB:
+        {
+            if (expr_value->sub.left_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->sub.left_value);
+            }
+            if (expr_value->sub.right_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->sub.right_value);
+            }
+        }
+        break;
+        case EXPR_MUL:
+        {
+            if (expr_value->mul.left_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->mul.left_value);
+            }
+            if (expr_value->mul.right_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->mul.right_value);
+            }
+        }
+        break;
+        case EXPR_DIV:
+        {
+            if (expr_value->div.left_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->div.left_value);
+            }
+            if (expr_value->div.right_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->div.right_value);
+            }
+        }
+        break;
+        case EXPR_SUP:
+        {
+            if (expr_value->sup.expr_value)
+            {
+                expr_get_vars_semcheck(stab, expr_value->sup.expr_value);
+            }
+        }
+        break;
+    }
+}
+
 void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_result * result)
 {
     switch (value->type)
@@ -260,6 +422,12 @@ void goal_get_vars_semcheck(symtab * stab, goal * value)
             term_get_vars_semcheck(stab, value->unification.term_value);
         }
         break;
+        case GOAL_TYPE_IS:
+        {
+            var_get_vars_semcheck(stab, value->is.var_value);
+            expr_get_vars_semcheck(stab, value->is.expr_value);
+        }
+        break;
         case GOAL_TYPE_CUT:
         case GOAL_TYPE_FAIL:
         break;
@@ -331,6 +499,19 @@ void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unificatio
     var_list_delete_null(freevars);
 }
 
+void goal_is_semcheck(symtab * stab, goal * goal_value, goal_is * value, semcheck_result * result)
+{
+    var_list * freevars = var_list_new();
+
+    var_semcheck(stab, freevars, value->var_value, result);
+    expr_semcheck(stab, freevars, value->expr_value, result);
+
+    var_list_enumerate(freevars, stab->count + 1);
+    var_list_add_to_symtab(stab, freevars, result);
+
+    var_list_delete_null(freevars);
+}
+
 void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result)
 {
     *with_cut = 1;
@@ -343,22 +524,25 @@ void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result
         case GOAL_TYPE_LITERAL:
         {
             goal_literal_semcheck(stab, value, &value->literal, result);
-            break;
         }
+        break;
         case GOAL_TYPE_UNIFICATION:
         {
             goal_unification_semcheck(stab, value, &value->unification, result);
-            break;
         }
+        break;
+        case GOAL_TYPE_IS:
+        {
+            goal_is_semcheck(stab, value, &value->is, result);
+        }
+        break;
         case GOAL_TYPE_CUT:
         {
             goal_cut_semcheck(stab, with_cut, value, &value->cut, result);
-            break;
         }
+        break;
         case GOAL_TYPE_FAIL:
-        {
-            break;
-        }
+        break;
         case GOAL_TYPE_UNKNOW:
         {
             assert(0);

@@ -1,0 +1,6 @@
+print(X) <= X = _
+
+list_len(L, Len) <= L = [], Len = 0
+list_len(L, Len) <= L = [_|T], list_len(T, Len_T), Len is Len_T + 1
+
+    <= list_len([a, b, c, d, e], Len)

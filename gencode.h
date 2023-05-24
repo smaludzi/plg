@@ -29,6 +29,7 @@
 #include "term.h"
 #include "bytecode.h"
 #include "strtab.h"
+#include "expr.h"
 
 typedef enum gencode_result {
     GENCODE_SUCCESS = 0,
@@ -64,6 +65,7 @@ void var_unify_gencode(gencode * gen, var * value, gencode_result * result);
 void var_check_gencode(gencode * gen, var * value, gencode_result * result);
 void var_get_bound_vars_gencode(gencode * gen, var * value, var_list * bound_vars, gencode_result * result);
 void var_list_check_gencode(gencode * gen, var_list * bound_vars, gencode_result * result);
+void expr_gencode(gencode * gen, expr * expr_value, gencode_result * result);
 void term_gencode(gencode * gen, term * value, gencode_result * result);
 void term_unify_gencode(gencode * gen, term * value, gencode_result * result);
 void term_get_bound_vars_gencode(gencode * gen, term * value, var_list * bound_vars, gencode_result * result);
@@ -74,6 +76,7 @@ void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * 
 char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value);
 void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_literal * value, gencode_result * result);
 void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result);
+void goal_is_gencode(gencode * gen, goal_is * value, gencode_result * result);
 void goal_cut_gencode(gencode * gen, unsigned int local_vars, goal_cut * value, gencode_result * result);
 void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result);
 void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result);

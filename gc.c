@@ -369,6 +369,11 @@ atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx)
     return collector->heap[collector->heap_idx][addr].object_value->atom_value.idx = idx;
 }
 
+void gc_set_int_value(gc * collector, heap_ptr addr, int value)
+{
+    
+}
+
 heap_ptr gc_set_anon_ref(gc * collector, heap_ptr addr, heap_ptr ref)
 {
     assert(collector->size > addr);

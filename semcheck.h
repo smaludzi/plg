@@ -23,6 +23,7 @@
 #define __SEMCHECK_H__
 
 #include "var.h"
+#include "expr.h"
 #include "term.h"
 #include "goal.h"
 #include "clause.h"
@@ -44,6 +45,9 @@ void var_list_add_symtab_semcheck(symtab * stab, var_list * list, semcheck_resul
 void var_add_to_symtab(symtab * stab, var * var_value, semcheck_result * result);
 void var_list_add_to_symtab(symtab * stab, var_list * freevars, semcheck_result * result);
 
+void expr_semcheck(symtab * stab, var_list * freevars, expr * expr_value, semcheck_result * result);
+void expr_get_vars_semcheck(symtab * stab, expr * expr_value);
+
 void term_semcheck(symtab * stab, var_list * freevars, term * value, semcheck_result * result);
 void term_is_variable_semcheck(term * value, semcheck_result * result);
 
@@ -58,6 +62,7 @@ void goal_list_get_vars_from_semcheck(symtab * stab, goal * from_goal);
 
 void goal_literal_semcheck(symtab * stab, goal * goal_value, goal_literal * value, semcheck_result * result);
 void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unification * value, semcheck_result * result);
+void goal_is_semcheck(symtab * stab, goal * goal_value, goal_is * value, semcheck_result * result);
 void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result);
 void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result * result);
 void goal_get_vars_semcheck(symtab * stab, goal * value);

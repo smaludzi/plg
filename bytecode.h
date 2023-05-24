@@ -65,6 +65,11 @@ typedef enum bytecode_type {
     BYTECODE_NO,
     BYTECODE_JUMP,
     BYTECODE_LABEL,
+    BYTECODE_INT_NEG,
+    BYTECODE_INT_ADD,
+    BYTECODE_INT_SUB,
+    BYTECODE_INT_MUL,
+    BYTECODE_INT_DIV,
     BYTECODE_END
 } bytecode_type;
 
@@ -213,6 +218,11 @@ void bytecode_print_halt(bytecode * value);
 void bytecode_print_no(bytecode * value);
 void bytecode_print_jump(bytecode * value);
 void bytecode_print_label(bytecode * value);
+void bytecode_print_int_neg(bytecode * value);
+void bytecode_print_int_add(bytecode * value);
+void bytecode_print_int_sub(bytecode * value);
+void bytecode_print_int_mul(bytecode * value);
+void bytecode_print_int_div(bytecode * value);
 
 void bytecode_print(bytecode * value);
 void bytecode_print_test();

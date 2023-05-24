@@ -62,7 +62,12 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_HALT, vm_execute_halt },
     { BYTECODE_NO, vm_execute_no },
     { BYTECODE_JUMP, vm_execute_jump },
-    { BYTECODE_LABEL, vm_execute_label }
+    { BYTECODE_LABEL, vm_execute_label },
+    { BYTECODE_INT_NEG, vm_execute_int_neg },
+    { BYTECODE_INT_ADD, vm_execute_int_add },
+    { BYTECODE_INT_SUB, vm_execute_int_sub },
+    { BYTECODE_INT_MUL, vm_execute_int_mul },
+    { BYTECODE_INT_DIV, vm_execute_int_div }
 };
 
 vm * vm_new(
@@ -706,6 +711,261 @@ void vm_execute_label(vm * machine, bytecode * code)
     /* do nothing machine->pc will be incremented on the next bytecode */
 }
 
+void vm_execute_int_neg(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+    
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_int(machine->collector, -gc_get_int_value(machine->collector, a_ref));
+
+    machine->stack[machine->sp] = entry;
+}
+
+void vm_execute_int_add(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp - 1].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    heap_ptr b_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, b_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", b_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            b_ref = vm_execute_deref(machine, b_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_int(machine->collector, gc_get_int_value(machine->collector, a_ref) + gc_get_int_value(machine->collector, b_ref));
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
+
+    machine->sp--;
+    machine->stack[machine->sp] = entry;
+}
+
+void vm_execute_int_sub(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp - 1].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    heap_ptr b_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, b_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", b_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            b_ref = vm_execute_deref(machine, b_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_int(machine->collector, gc_get_int_value(machine->collector, a_ref) - gc_get_int_value(machine->collector, b_ref));
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
+
+    machine->sp--;
+    machine->stack[machine->sp] = entry;
+}
+
+void vm_execute_int_mul(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp - 1].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    heap_ptr b_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, b_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", b_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            b_ref = vm_execute_deref(machine, b_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_int(machine->collector, gc_get_int_value(machine->collector, a_ref) * gc_get_int_value(machine->collector, b_ref));
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
+
+    machine->sp--;
+    machine->stack[machine->sp] = entry;
+}
+
+void vm_execute_int_div(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp - 1].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    heap_ptr b_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, b_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", b_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            b_ref = vm_execute_deref(machine, b_ref);
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    if (gc_get_int_value(machine->collector, b_ref) == 0)
+    {
+        machine->state = VM_ERROR_DIV_BY_ZERO;
+        return;
+    }
+
+    gc_stack entry = { 0 };
+    entry.type = STACK_TYPE_HEAP_PTR;
+    entry.addr = gc_alloc_int(machine->collector, gc_get_int_value(machine->collector, a_ref) / gc_get_int_value(machine->collector, b_ref));
+    if (entry.addr == 0)
+    {
+        machine->state = VM_ERROR_OUT_OF_MEMORY;
+        return;
+    }
+
+    machine->sp--;
+    machine->stack[machine->sp] = entry;
+}
+
 heap_ptr vm_execute_deref(vm * machine, heap_ptr ref)
 {
     if (gc_get_object_type(machine->collector, ref) == OBJECT_REF &&
@@ -818,6 +1078,12 @@ char vm_execute_unify(vm * machine, heap_ptr ref_u, heap_ptr ref_v)
     {
         return 1;
     }
+    if (gc_get_object_type(machine->collector, ref_u) == OBJECT_INT &&
+        gc_get_object_type(machine->collector, ref_v) == OBJECT_INT &&
+        gc_get_int_value(machine->collector, ref_u) == gc_get_int_value(machine->collector, ref_v))
+    {
+        return 1;
+    }
     if (gc_get_object_type(machine->collector, ref_u) == OBJECT_STRUCT &&
         gc_get_object_type(machine->collector, ref_v) == OBJECT_STRUCT &&
         gc_get_struct_addr(machine->collector, ref_u) == gc_get_struct_addr(machine->collector, ref_v))
@@ -893,7 +1159,8 @@ int vm_execute(vm * machine, gencode_binary * binary_value)
     }
 
     if (machine->state == VM_ERROR ||
-        machine->state == VM_ERROR_OUT_OF_MEMORY)
+        machine->state == VM_ERROR_OUT_OF_MEMORY ||
+        machine->state == VM_ERROR_DIV_BY_ZERO)
     {
         // print machine error state
         vm_execute_print(machine);
@@ -915,6 +1182,7 @@ const char * vm_state_to_str(vm_state state)
         case VM_ERROR: return "VM_ERROR";
         case VM_STOP: return "VM_STOP";
         case VM_ERROR_OUT_OF_MEMORY: return "VM_ERROR_OUT_OF_MEMORY";
+        case VM_ERROR_DIV_BY_ZERO: return "VM_ERROR_DIV_BY_ZERO";
     }
     return "VM_UNKNOWN";
 }

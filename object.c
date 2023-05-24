@@ -142,7 +142,7 @@ void object_print_str(object * value, char ** strtab_array, unsigned int strtab_
             }
         break;
         case OBJECT_INT:
-            printf("%s %u\n", object_type_str(value->type), value->int_value.value);
+            printf("%s %d\n", object_type_str(value->type), value->int_value.value);
         break;
         case OBJECT_REF:
             printf("%s %u\n", object_type_str(value->type), value->ref_value.ref);
