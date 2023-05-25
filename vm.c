@@ -20,6 +20,7 @@
  * THE SOFTWARE.
  */
 #include "vm.h"
+#include "builtin.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -67,7 +68,8 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_INT_ADD, vm_execute_int_add },
     { BYTECODE_INT_SUB, vm_execute_int_sub },
     { BYTECODE_INT_MUL, vm_execute_int_mul },
-    { BYTECODE_INT_DIV, vm_execute_int_div }
+    { BYTECODE_INT_DIV, vm_execute_int_div },
+    { BYTECODE_BUILTIN, vm_execute_builtin }
 };
 
 vm * vm_new(
@@ -964,6 +966,33 @@ void vm_execute_int_div(vm * machine, bytecode * code)
 
     machine->sp--;
     machine->stack[machine->sp] = entry;
+}
+
+void vm_execute_builtin(vm * machine, bytecode * code)
+{
+    unsigned int strtab_size = 0;
+    char ** strtab_array = NULL;
+
+    if (machine->binary_value_ref)
+    {
+        strtab_size = machine->binary_value_ref->strtab_size;
+        strtab_array = machine->binary_value_ref->strtab_array;
+    }
+
+    switch (code->builtin.id)
+    {
+        case BUILT_IN_UKNOWN:
+            assert(0);
+        break;
+        case BUILT_IN_WRITE:
+        {
+            heap_ptr h_ref = machine->stack[machine->sp].addr;
+            gc_print_ref_str(machine->collector,
+                             vm_execute_deref(machine, h_ref),
+                             strtab_array, strtab_size);
+        }
+        break;
+    }
 }
 
 heap_ptr vm_execute_deref(vm * machine, heap_ptr ref)

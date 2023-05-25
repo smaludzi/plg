@@ -1,26 +1,29 @@
 plg.o: plg.c scanner.h parser.h program.h clause.h symtab.h goal.h var.h \
- term.h query.h semcheck.h gencode.h bytecode.h vm_types.h strtab.h vm.h \
- gc.h object.h
+ term.h query.h expr.h builtin.h semcheck.h gencode.h bytecode.h \
+ vm_types.h strtab.h vm.h gc.h object.h
 var.o: var.c var.h
+expr.o: expr.c expr.h var.h
 term.o: term.c term.h var.h
-goal.o: goal.c goal.h var.h term.h
+goal.o: goal.c goal.h var.h term.h clause.h symtab.h expr.h
 clause.o: clause.c clause.h symtab.h goal.h var.h term.h
 query.o: query.c query.h symtab.h goal.h var.h term.h
 program.o: program.c program.h clause.h symtab.h goal.h var.h term.h \
  query.h
 hash.o: hash.c hash.h
 symtab.o: symtab.c symtab.h var.h clause.h goal.h term.h hash.h
-semcheck.o: semcheck.c semcheck.h var.h term.h goal.h clause.h symtab.h \
- query.h program.h
+semcheck.o: semcheck.c semcheck.h var.h expr.h term.h goal.h clause.h \
+ symtab.h query.h program.h
 bytecode.o: bytecode.c bytecode.h vm_types.h clause.h symtab.h goal.h \
  var.h term.h
 gencode.o: gencode.c gencode.h program.h clause.h symtab.h goal.h var.h \
- term.h query.h bytecode.h vm_types.h strtab.h
+ term.h query.h bytecode.h vm_types.h strtab.h expr.h
 unify.o: unify.c unify.h
-unify_term.o: unify_term.c hash.h unify.h unify_term.h term.h
+unify_term.o: unify_term.c hash.h var.h unify.h unify_term.h term.h
 hash.o: hash.c hash.h
 strtab.o: strtab.c strtab.h hash.h
 object.o: object.c object.h vm_types.h
+builtin.o: builtin.c builtin.h clause.h symtab.h goal.h var.h term.h
 gc.o: gc.c gc.h object.h vm_types.h
 vm.o: vm.c vm.h bytecode.h vm_types.h gencode.h program.h clause.h \
- symtab.h goal.h var.h term.h query.h strtab.h gc.h object.h
+ symtab.h goal.h var.h term.h query.h strtab.h expr.h gc.h object.h \
+ builtin.h

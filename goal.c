@@ -89,6 +89,18 @@ goal * goal_new_fail(char * name)
     return value;
 }
 
+goal * goal_new_builtin(unsigned int id)
+{
+    goal * value = malloc(sizeof(goal));
+
+    value->type = GOAL_TYPE_BUILTIN;
+    value->builtin.id = id;
+    value->line_no = 0;
+    value->next = NULL;
+
+    return value;
+}
+
 void goal_delete(goal * value)
 {
     switch (value->type)
@@ -130,6 +142,8 @@ void goal_delete(goal * value)
             {
                 free(value->fail.name);
             }
+        break;
+        case GOAL_TYPE_BUILTIN:
         break;
         case GOAL_TYPE_UNKNOW:
             assert(0);
@@ -197,6 +211,11 @@ void goal_print(goal * value)
         case GOAL_TYPE_FAIL:
         {
             printf("goal fail\n");
+        }
+        break;
+        case GOAL_TYPE_BUILTIN:
+        {
+            printf("goal builtin %u\n", value->builtin.id);
         }
         break;
         case GOAL_TYPE_UNKNOW:

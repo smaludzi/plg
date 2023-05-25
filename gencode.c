@@ -595,6 +595,14 @@ void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result)
     gencode_add_bytecode(gen, &bc);
 }
 
+void goal_builtin_gencode(gencode * gen, goal * value, gencode_result * result)
+{
+    bytecode bc = { 0 };
+    bc.type = BYTECODE_BUILTIN;
+    bc.builtin.id = value->builtin.id;
+    gencode_add_bytecode(gen, &bc);
+}
+
 void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result)
 {
     switch (value->type)
@@ -629,6 +637,11 @@ void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars,
         case GOAL_TYPE_FAIL:
         {
             goal_fail_gencode(gen, value, result);
+        }
+        break;
+        case GOAL_TYPE_BUILTIN:
+        {
+            goal_builtin_gencode(gen, value, result);
         }
         break;
         case GOAL_TYPE_UNKNOW:

@@ -326,4 +326,10 @@ program: clauses query
       }
 ;
 
+program: query
+      {
+        $$ = *plg = program_new(clause_list_new(), $1);
+      }
+;
+
 %%

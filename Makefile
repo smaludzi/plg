@@ -40,6 +40,7 @@ OBJECTS = plg.o \
           hash.o \
           strtab.o \
           object.o \
+          builtin.o \
           gc.o \
           vm.o
 SCAN_PAR = scanner.o parser.o

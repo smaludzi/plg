@@ -26,6 +26,7 @@
 #include "scanner.h"
 #include "parser.h"
 #include "program.h"
+#include "builtin.h"
 #include "semcheck.h"
 #include "gencode.h"
 #include "bytecode.h"
@@ -59,6 +60,7 @@ int main(int argc, char * argv[])
 	if (parse_result == 0 && program_value != NULL)
 	{
 		semcheck_result sem_res = SEMCHECK_SUCCESS;
+		builtin_add_all(program_value->clausies);
 		program_semcheck(program_value, &sem_res);
 		if (sem_res == SEMCHECK_SUCCESS)
 		{

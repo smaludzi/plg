@@ -1,0 +1,6 @@
+write(A, B) <= write(A), write(B)
+    <= X is 2 + 2, write(X),
+       write(10),
+       write(20),
+       write(a, 97),
+       write([1, 2, 3])

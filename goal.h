@@ -35,7 +35,8 @@ typedef enum goal_type {
     GOAL_TYPE_UNIFICATION,
     GOAL_TYPE_IS,
     GOAL_TYPE_CUT,
-    GOAL_TYPE_FAIL
+    GOAL_TYPE_FAIL,
+    GOAL_TYPE_BUILTIN
 } goal_type;
 
 typedef struct goal_literal {
@@ -61,6 +62,10 @@ typedef struct goal_fail {
     char * name;
 } goal_fail;
 
+typedef struct goal_builtin {
+    unsigned int id;
+} goal_builtin;
+
 typedef struct goal {
     goal_type type;
     union {
@@ -69,6 +74,7 @@ typedef struct goal {
         goal_is is;
         goal_cut cut;
         goal_fail fail;
+        goal_builtin builtin;
     };
     unsigned int line_no;
     struct goal * next;
@@ -84,6 +90,7 @@ goal * goal_new_unification(var * variable, term * term_value);
 goal * goal_new_is(var * var_value, expr * expr_value);
 goal * goal_new_cut();
 goal * goal_new_fail(char * name);
+goal * goal_new_builtin(unsigned int id);
 void goal_delete(goal * value);
 char goal_is_last(goal * value);
 void goal_print(goal * value);

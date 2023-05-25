@@ -70,6 +70,7 @@ typedef enum bytecode_type {
     BYTECODE_INT_SUB,
     BYTECODE_INT_MUL,
     BYTECODE_INT_DIV,
+    BYTECODE_BUILTIN,
     BYTECODE_END
 } bytecode_type;
 
@@ -158,6 +159,9 @@ typedef struct bytecode {
         struct {
             pc_offset offset;
         } jump;
+        struct {
+            unsigned int id;
+        } builtin;
     };
 } bytecode;
 
@@ -223,6 +227,7 @@ void bytecode_print_int_add(bytecode * value);
 void bytecode_print_int_sub(bytecode * value);
 void bytecode_print_int_mul(bytecode * value);
 void bytecode_print_int_div(bytecode * value);
+void bytecode_print_builtin(bytecode * value);
 
 void bytecode_print(bytecode * value);
 void bytecode_print_test();
