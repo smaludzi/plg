@@ -81,6 +81,7 @@ void gc_reset_hp(gc * collector, heap_ptr new_hp);
 
 atom_idx_t gc_get_atom_idx(gc * collector, heap_ptr addr);
 int gc_get_int_value(gc * collector, heap_ptr addr);
+void gc_set_int_value(gc * collector, heap_ptr addr, int value);
 heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr);
 heap_ptr gc_get_var_ref(gc * collector, heap_ptr addr);
 heap_ptr gc_get_ref_ref(gc * collector, heap_ptr addr);

@@ -69,7 +69,9 @@ bytecode_print_func bytecode_print_arr[] = {
     { BYTECODE_INT_SUB, bytecode_print_int_sub },
     { BYTECODE_INT_MUL, bytecode_print_int_mul },
     { BYTECODE_INT_DIV, bytecode_print_int_div },
-    { BYTECODE_BUILTIN, bytecode_print_builtin }
+    { BYTECODE_BUILTIN, bytecode_print_builtin },
+    { BYTECODE_LT, bytecode_print_lt },
+    { BYTECODE_GT, bytecode_print_gt }
 };
 
 bytecode * bytecode_new()
@@ -314,6 +316,15 @@ void bytecode_print_builtin(bytecode * value)
     printf("%d: %s id %u\n", value->addr, bytecode_type_str(value->type), value->builtin.id);
 }
 
+void bytecode_print_lt(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
+
+void bytecode_print_gt(bytecode * value)
+{
+    printf("%d: %s\n", value->addr, bytecode_type_str(value->type));
+}
 void bytecode_print_test()
 {
     unsigned int i = 0;
@@ -376,6 +387,8 @@ const char * bytecode_type_str(bytecode_type type)
         case BYTECODE_INT_MUL: return "BYTECODE_INT_MUL";
         case BYTECODE_INT_DIV: return "BYTECODE_INT_DIV";
         case BYTECODE_BUILTIN: return "BYTECODE_BUILTIN";
+        case BYTECODE_LT: return "BYTECODE_LT";
+        case BYTECODE_GT: return "BYTECODE_GT";
         case BYTECODE_END: return "BYTECODE_END";
     }
     return "BYTECODE_UNKNOWN";

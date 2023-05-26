@@ -79,6 +79,9 @@ void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_r
 void goal_is_gencode(gencode * gen, goal_is * value, gencode_result * result);
 void goal_cut_gencode(gencode * gen, unsigned int local_vars, goal_cut * value, gencode_result * result);
 void goal_fail_gencode(gencode * gen, goal * goal, gencode_result * result);
+void goal_builtin_gencode(gencode * gen, goal * value, gencode_result * result);
+void goal_lt_gencode(gencode * gen, goal * value, gencode_result * result);
+void goal_gt_gencode(gencode * gen, goal * value, gencode_result * result);
 void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result);
 void goal_list_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal_list * list, gencode_result * result);
 void clause_gencode(gencode * gen, clause * value, gencode_result * result);

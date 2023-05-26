@@ -1,0 +1,3 @@
+more(X) <= X > 10, write(X)
+    <= X = 20, more(X)
+

@@ -432,6 +432,18 @@ void goal_get_vars_semcheck(symtab * stab, goal * value)
         case GOAL_TYPE_FAIL:
         case GOAL_TYPE_BUILTIN:
         break;
+        case GOAL_TYPE_LT:
+        {
+            expr_get_vars_semcheck(stab, value->lt.left_value);
+            expr_get_vars_semcheck(stab, value->lt.right_value);
+        }
+        break;
+        case GOAL_TYPE_GT:
+        {
+            expr_get_vars_semcheck(stab, value->gt.left_value);
+            expr_get_vars_semcheck(stab, value->gt.right_value);
+        }
+        break;
     }
 }
 
@@ -513,6 +525,32 @@ void goal_is_semcheck(symtab * stab, goal * goal_value, goal_is * value, semchec
     var_list_delete_null(freevars);
 }
 
+void goal_lt_semcheck(symtab * stab, goal * goal_value, goal_lt * value, semcheck_result * result)
+{
+    var_list * freevars = var_list_new();
+
+    expr_semcheck(stab, freevars, value->left_value, result);
+    expr_semcheck(stab, freevars, value->right_value, result);
+
+    var_list_enumerate(freevars, stab->count + 1);
+    var_list_add_to_symtab(stab, freevars, result);
+
+    var_list_delete_null(freevars);
+}
+
+void goal_gt_semcheck(symtab * stab, goal * goal_value, goal_gt * value, semcheck_result * result)
+{
+    var_list * freevars = var_list_new();
+
+    expr_semcheck(stab, freevars, value->left_value, result);
+    expr_semcheck(stab, freevars, value->right_value, result);
+
+    var_list_enumerate(freevars, stab->count + 1);
+    var_list_add_to_symtab(stab, freevars, result);
+
+    var_list_delete_null(freevars);
+}
+
 void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result)
 {
     *with_cut = 1;
@@ -545,10 +583,21 @@ void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result
         case GOAL_TYPE_FAIL:
         case GOAL_TYPE_BUILTIN:
         break;
+        case GOAL_TYPE_LT:
+        {
+            goal_lt_semcheck(stab, value, &value->lt, result);
+        }
+        break;
+        case GOAL_TYPE_GT:
+        {
+            goal_gt_semcheck(stab, value, &value->gt, result);
+        }
+        break;
         case GOAL_TYPE_UNKNOW:
         {
             assert(0);
         }
+        break;
     }
 }
 

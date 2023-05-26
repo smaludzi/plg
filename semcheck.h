@@ -64,6 +64,8 @@ void goal_literal_semcheck(symtab * stab, goal * goal_value, goal_literal * valu
 void goal_unification_semcheck(symtab * stab, goal * goal_value, goal_unification * value, semcheck_result * result);
 void goal_is_semcheck(symtab * stab, goal * goal_value, goal_is * value, semcheck_result * result);
 void goal_cut_semcheck(symtab * stab, char * with_cut, goal * goal_value, goal_cut * value, semcheck_result * result);
+void goal_lt_semcheck(symtab * stab, goal * goal_value, goal_lt * value, semcheck_result * result);
+void goal_gt_semcheck(symtab * stab, goal * goal_value, goal_gt * value, semcheck_result * result);
 void goal_semcheck(symtab * stab, char * with_cut, goal * value, semcheck_result * result);
 void goal_get_vars_semcheck(symtab * stab, goal * value);
 

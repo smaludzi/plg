@@ -71,6 +71,8 @@ typedef enum bytecode_type {
     BYTECODE_INT_MUL,
     BYTECODE_INT_DIV,
     BYTECODE_BUILTIN,
+    BYTECODE_LT,
+    BYTECODE_GT,
     BYTECODE_END
 } bytecode_type;
 
@@ -228,6 +230,8 @@ void bytecode_print_int_sub(bytecode * value);
 void bytecode_print_int_mul(bytecode * value);
 void bytecode_print_int_div(bytecode * value);
 void bytecode_print_builtin(bytecode * value);
+void bytecode_print_lt(bytecode * value);
+void bytecode_print_gt(bytecode * value);
 
 void bytecode_print(bytecode * value);
 void bytecode_print_test();

@@ -101,6 +101,32 @@ goal * goal_new_builtin(unsigned int id)
     return value;
 }
 
+goal * goal_new_lt(expr * expr_left, expr * expr_right)
+{
+    goal * value = malloc(sizeof(goal));
+
+    value->type = GOAL_TYPE_LT;
+    value->lt.left_value = expr_left;
+    value->lt.right_value = expr_right;
+    value->line_no = 0;
+    value->next = NULL;
+
+    return value;
+}
+
+goal * goal_new_gt(expr * expr_left, expr * expr_right)
+{
+    goal * value = malloc(sizeof(goal));
+
+    value->type = GOAL_TYPE_GT;
+    value->gt.left_value = expr_left;
+    value->gt.right_value = expr_right;
+    value->line_no = 0;
+    value->next = NULL;
+
+    return value;
+}
+
 void goal_delete(goal * value)
 {
     switch (value->type)
@@ -144,6 +170,26 @@ void goal_delete(goal * value)
             }
         break;
         case GOAL_TYPE_BUILTIN:
+        break;
+        case GOAL_TYPE_LT:
+            if (value->lt.left_value)
+            {
+                expr_delete(value->lt.left_value);
+            }
+            if (value->lt.right_value)
+            {
+                expr_delete(value->lt.right_value);
+            }
+        break;
+        case GOAL_TYPE_GT:
+            if (value->gt.left_value)
+            {
+                expr_delete(value->gt.left_value);
+            }
+            if (value->gt.right_value)
+            {
+                expr_delete(value->gt.right_value);
+            }
         break;
         case GOAL_TYPE_UNKNOW:
             assert(0);
@@ -216,6 +262,16 @@ void goal_print(goal * value)
         case GOAL_TYPE_BUILTIN:
         {
             printf("goal builtin %u\n", value->builtin.id);
+        }
+        break;
+        case GOAL_TYPE_LT:
+        {
+            printf("goal lt\n");
+        }
+        break;
+        case GOAL_TYPE_GT:
+        {
+            printf("goal gt\n");
         }
         break;
         case GOAL_TYPE_UNKNOW:

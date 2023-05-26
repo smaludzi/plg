@@ -69,7 +69,9 @@ vm_execute_str vm_execute_op[] = {
     { BYTECODE_INT_SUB, vm_execute_int_sub },
     { BYTECODE_INT_MUL, vm_execute_int_mul },
     { BYTECODE_INT_DIV, vm_execute_int_div },
-    { BYTECODE_BUILTIN, vm_execute_builtin }
+    { BYTECODE_BUILTIN, vm_execute_builtin },
+    { BYTECODE_LT, vm_execute_lt },
+    { BYTECODE_GT, vm_execute_gt }
 };
 
 vm * vm_new(
@@ -729,6 +731,11 @@ void vm_execute_int_neg(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -758,6 +765,11 @@ void vm_execute_int_add(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -778,6 +790,11 @@ void vm_execute_int_add(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             b_ref = vm_execute_deref(machine, b_ref);
+            if (gc_get_object_type(machine->collector, b_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -813,6 +830,11 @@ void vm_execute_int_sub(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -833,6 +855,11 @@ void vm_execute_int_sub(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             b_ref = vm_execute_deref(machine, b_ref);
+            if (gc_get_object_type(machine->collector, b_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -868,6 +895,11 @@ void vm_execute_int_mul(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -888,6 +920,11 @@ void vm_execute_int_mul(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             b_ref = vm_execute_deref(machine, b_ref);
+            if (gc_get_object_type(machine->collector, b_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -923,6 +960,11 @@ void vm_execute_int_div(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -943,6 +985,11 @@ void vm_execute_int_div(vm * machine, bytecode * code)
         break;
         case OBJECT_REF:
             b_ref = vm_execute_deref(machine, b_ref);
+            if (gc_get_object_type(machine->collector, b_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
         break;
         case OBJECT_STRUCT:
             machine->state = VM_ERROR;
@@ -992,6 +1039,129 @@ void vm_execute_builtin(vm * machine, bytecode * code)
                              strtab_array, strtab_size);
         }
         break;
+        case BUILT_IN_NL:
+        {
+            printf("\n");
+        }
+        break;
+    }
+}
+
+void vm_execute_lt(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp - 1].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    heap_ptr b_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, b_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", b_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            b_ref = vm_execute_deref(machine, b_ref);
+            if (gc_get_object_type(machine->collector, b_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    machine->sp -= 2;
+    if (gc_get_int_value(machine->collector, a_ref) >= gc_get_int_value(machine->collector, b_ref))
+    {
+        vm_execute_backtrack(machine);
+    }
+}
+
+void vm_execute_gt(vm * machine, bytecode * code)
+{
+    heap_ptr a_ref = machine->stack[machine->sp - 1].addr;
+    switch (gc_get_object_type(machine->collector, a_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", a_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            a_ref = vm_execute_deref(machine, a_ref);
+            if (gc_get_object_type(machine->collector, a_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    heap_ptr b_ref = machine->stack[machine->sp].addr;
+    switch (gc_get_object_type(machine->collector, b_ref))
+    {
+        case OBJECT_UNKNOWN:
+            printf("unknown object %u\n", b_ref);
+        break;
+        case OBJECT_ATOM:
+            machine->state = VM_ERROR;
+            return;
+        break;
+        case OBJECT_INT:
+        break;
+        case OBJECT_REF:
+            b_ref = vm_execute_deref(machine, b_ref);
+            if (gc_get_object_type(machine->collector, b_ref) != OBJECT_INT)
+            {
+                machine->state = VM_ERROR;
+                return;
+            }
+        break;
+        case OBJECT_STRUCT:
+            machine->state = VM_ERROR;
+        break;
+    }
+
+    machine->sp -= 2;
+    if (gc_get_int_value(machine->collector, a_ref) <= gc_get_int_value(machine->collector, b_ref))
+    {
+        vm_execute_backtrack(machine);
     }
 }
 

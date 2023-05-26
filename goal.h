@@ -36,7 +36,9 @@ typedef enum goal_type {
     GOAL_TYPE_IS,
     GOAL_TYPE_CUT,
     GOAL_TYPE_FAIL,
-    GOAL_TYPE_BUILTIN
+    GOAL_TYPE_BUILTIN,
+    GOAL_TYPE_LT,
+    GOAL_TYPE_GT
 } goal_type;
 
 typedef struct goal_literal {
@@ -54,6 +56,16 @@ typedef struct goal_is {
     var * var_value;
     expr * expr_value;
 } goal_is;
+
+typedef struct goal_lt {
+    expr * left_value;
+    expr * right_value;
+} goal_lt;
+
+typedef struct goal_gt {
+    expr * left_value;
+    expr * right_value;
+} goal_gt;
 
 typedef struct goal_cut {
 } goal_cut;
@@ -75,6 +87,8 @@ typedef struct goal {
         goal_cut cut;
         goal_fail fail;
         goal_builtin builtin;
+        goal_lt lt;
+        goal_gt gt;
     };
     unsigned int line_no;
     struct goal * next;
@@ -91,6 +105,8 @@ goal * goal_new_is(var * var_value, expr * expr_value);
 goal * goal_new_cut();
 goal * goal_new_fail(char * name);
 goal * goal_new_builtin(unsigned int id);
+goal * goal_new_lt(expr * expr_left, expr * expr_right);
+goal * goal_new_gt(expr * expr_left, expr * expr_right);
 void goal_delete(goal * value);
 char goal_is_last(goal * value);
 void goal_print(goal * value);

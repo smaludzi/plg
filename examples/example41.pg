@@ -1,0 +1,6 @@
+count(X) <= X = 1, write(X), nl
+count(X) <= X > 1,
+            Y is X - 1,
+            write(X),
+            count(Y)
+    <= count(130)

@@ -33,9 +33,18 @@ clause * builtin_write()
     return clause_new(strdup("write"), vars, goals);
 }
 
+clause * builtin_nl()
+{
+    goal_list * goals = goal_list_new();
+    goal_list_add_end(goals, goal_new_builtin(BUILT_IN_NL));
+
+    return clause_new(strdup("nl"), NULL, goals);
+}
+
 void builtin_add_all(clause_list * clauses)
 {
     clause_list_add_end(clauses, builtin_write());
+    clause_list_add_end(clauses, builtin_nl());
 }
 
 

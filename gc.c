@@ -312,6 +312,14 @@ int gc_get_int_value(gc * collector, heap_ptr addr)
     return collector->heap[collector->heap_idx][addr].object_value->int_value.value;
 }
 
+void gc_set_int_value(gc * collector, heap_ptr addr, int value)
+{
+    assert(collector->size > addr);
+    assert(collector->heap[collector->heap_idx][addr].object_value->type == OBJECT_INT);
+
+    collector->heap[collector->heap_idx][addr].object_value->int_value.value = value;
+}
+
 heap_ptr gc_get_anon_ref(gc * collector, heap_ptr addr)
 {
     assert(collector->size > addr);
@@ -367,11 +375,6 @@ atom_idx_t gc_set_atom_idx(gc * collector, heap_ptr addr, atom_idx_t idx)
     assert(collector->heap[collector->heap_idx][addr].object_value->type == OBJECT_ATOM);
 
     return collector->heap[collector->heap_idx][addr].object_value->atom_value.idx = idx;
-}
-
-void gc_set_int_value(gc * collector, heap_ptr addr, int value)
-{
-    
 }
 
 heap_ptr gc_set_anon_ref(gc * collector, heap_ptr addr, heap_ptr ref)

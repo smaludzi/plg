@@ -603,13 +603,35 @@ void goal_builtin_gencode(gencode * gen, goal * value, gencode_result * result)
     gencode_add_bytecode(gen, &bc);
 }
 
+void goal_lt_gencode(gencode * gen, goal * value, gencode_result * result)
+{
+    expr_gencode(gen, value->lt.left_value, result);
+    expr_gencode(gen, value->lt.right_value, result);
+
+    bytecode bc = { 0 };
+    bc.type = BYTECODE_LT;
+    gencode_add_bytecode(gen, &bc);
+    /* printf("BYTECODE_LT\n"); */
+}
+
+void goal_gt_gencode(gencode * gen, goal * value, gencode_result * result)
+{
+    expr_gencode(gen, value->gt.left_value, result);
+    expr_gencode(gen, value->gt.right_value, result);
+
+    bytecode bc = { 0 };
+    bc.type = BYTECODE_GT;
+    gencode_add_bytecode(gen, &bc);
+    /* printf("BYTECODE_GT\n"); */
+}
+
 void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result)
 {
     switch (value->type)
     {
         case GOAL_TYPE_LITERAL:
         {
-            if (goal_is_last_literal_opt_gencode(clause_value, value))
+            if (0 && goal_is_last_literal_opt_gencode(clause_value, value))
             {
                 goal_last_literal_gencode(gen, clause_value, &value->literal, result);
             }
@@ -642,6 +664,16 @@ void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars,
         case GOAL_TYPE_BUILTIN:
         {
             goal_builtin_gencode(gen, value, result);
+        }
+        break;
+        case GOAL_TYPE_LT:
+        {
+            goal_lt_gencode(gen, value, result);
+        }
+        break;
+        case GOAL_TYPE_GT:
+        {
+            goal_gt_gencode(gen, value, result);
         }
         break;
         case GOAL_TYPE_UNKNOW:

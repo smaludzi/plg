@@ -255,6 +255,16 @@ goal: TOK_ATOM
           $$ = goal_new_unification($1, $3);
           $$->line_no = $<line_no>1;
       }
+    | expr '<' expr
+      {
+          $$ = goal_new_lt($1, $3);
+          $$->line_no = $<line_no>1;
+      }
+    | expr '>' expr
+      {
+          $$ = goal_new_gt($1, $3);
+          $$->line_no = $<line_no>1;
+      }
     | var TOK_IS expr
       {
           $$ = goal_new_is($1, $3);

@@ -26,10 +26,12 @@
 
 typedef enum builtin_type {
     BUILT_IN_UKNOWN = 0,
-    BUILT_IN_WRITE = 1
+    BUILT_IN_WRITE = 1,
+    BUILT_IN_NL = 2
 } builtin_type;
 
 clause * builtin_write();
+clause * builtin_nl();
 
 void builtin_add_all(clause_list * clauses);
 

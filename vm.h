@@ -119,6 +119,8 @@ void vm_execute_int_sub(vm * machine, bytecode * code);
 void vm_execute_int_mul(vm * machine, bytecode * code);
 void vm_execute_int_div(vm * machine, bytecode * code);
 void vm_execute_builtin(vm * machine, bytecode * code);
+void vm_execute_lt(vm * machine, bytecode * code);
+void vm_execute_gt(vm * machine, bytecode * code);
 
 const char * vm_state_to_str(vm_state state);
 
