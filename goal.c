@@ -31,6 +31,7 @@ goal * goal_new_literal(char * name, term_list * terms)
     goal * value = malloc(sizeof(goal));
 
     value->type = GOAL_TYPE_LITERAL;
+    value->literal.is_last = 0;
     value->literal.name = name;
     value->literal.terms = terms;
     value->literal.predicate_ref = NULL;

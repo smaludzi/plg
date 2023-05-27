@@ -484,20 +484,6 @@ void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * 
     /* printf("B: ...\n"); */
 }
 
-char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value)
-{
-    /* TODO: check if comparing
-             (clause_value != NULL &&
-              goal_is_last(goal_value) &&
-              clause_value->predicate_ref == goal_value->literal.predicate_ref)
-             is sufficient */
-    return (clause_value != NULL &&
-            goal_value != NULL &&
-            goal_is_last(goal_value) &&
-            strcmp(clause_value->name, goal_value->literal.name) == 0 &&
-            var_list_size(clause_value->vars) == term_list_size(goal_value->literal.terms));
-}
-
 void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_literal * value, gencode_result * result)
 {
     bytecode bc_lm = { 0 };
@@ -631,7 +617,7 @@ void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars,
     {
         case GOAL_TYPE_LITERAL:
         {
-            if (0 && goal_is_last_literal_opt_gencode(clause_value, value))
+            if (value->literal.is_last)
             {
                 goal_last_literal_gencode(gen, clause_value, &value->literal, result);
             }
@@ -718,10 +704,65 @@ void clause_gencode(gencode * gen, clause * value, gencode_result * result)
 
     goal_list_gencode(gen, value, local_vars, value->goals, result);
 
-    bytecode bc_pop_env = { 0 };
-    bc_pop_env.type = BYTECODE_POP_ENV;
-    gencode_add_bytecode(gen, &bc_pop_env);
-    /* printf("POPENV\n"); */
+    if (!value->is_last)
+    {
+        bytecode bc_pop_env = { 0 };
+        bc_pop_env.type = BYTECODE_POP_ENV;
+        gencode_add_bytecode(gen, &bc_pop_env);
+        /* printf("POPENV\n"); */
+    }
+}
+
+goal_search clause_has_goal(clause * first, goal_list * list, goal ** last)
+{
+    goal * value = list->head;
+    while (value != NULL)
+    {
+        if (value->type == GOAL_TYPE_LITERAL &&
+            value->literal.predicate_ref == first)
+        {
+            if (goal_is_last(value))
+            {
+                *last = value;
+                return GOAL_SEARCH_LAST;
+            }
+            else
+            {
+                return GOAL_SEARCH_YES;
+            }
+        }
+        value = value->next;
+    }
+
+    return GOAL_SEARCH_NO;
+}
+
+char predicate_last_call_opt(clause * first, clause_list * list)
+{
+    clause_node * node = list->head;
+    while (node != NULL)
+    {
+        clause * value = node->value;
+        if (value != NULL)
+        {
+            goal * last = NULL;
+            goal_search res = clause_has_goal(first, value->goals, &last);
+            if (res == GOAL_SEARCH_LAST &&
+                node->next == NULL /* last clause */)
+            {
+                assert(last != NULL && last->type == GOAL_TYPE_LITERAL);
+                last->literal.is_last = 1;
+                value->is_last = 1;
+                return 1;
+            }
+            else if (res == GOAL_SEARCH_LAST || res == GOAL_SEARCH_YES)
+            {
+                return 0;
+            }
+        }
+        node = node->next;
+    }
+    return 0;
 }
 
 void predicate_0_gencode(gencode * gen, clause * value, gencode_result * result)
@@ -817,9 +858,13 @@ void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * res
 
 void predicate_gencode(gencode * gen, clause_list * list, gencode_result * result)
 {
+    clause_node * node = list->head;
+    if (node && node->value)
+    {
+        predicate_last_call_opt(node->value, list);
+    }
     if (list->size == 1)
     {
-        clause_node * node = list->head;
         if (node && node->value != NULL)
         {
             predicate_0_gencode(gen, node->value, result);

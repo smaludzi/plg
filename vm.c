@@ -504,6 +504,9 @@ void vm_execute_call_addr(vm * machine, bytecode * code)
 {
     machine->fp = machine->sp - code->call.n;
     machine->pc = code->call.addr;
+
+    gc_run(machine->collector,
+           machine->stack, machine->sp, machine->trail, machine->tp);
 }
 
 void vm_execute_last_call(vm * machine, bytecode * code)
@@ -546,6 +549,9 @@ void vm_execute_last_call_addr(vm * machine, bytecode * code)
         // jump q/h
         machine->pc = code->last_call.addr;
     }
+
+    gc_run(machine->collector,
+           machine->stack, machine->sp, machine->trail, machine->tp);
 }
 
 void vm_execute_push_env(vm * machine, bytecode * code)

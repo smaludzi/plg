@@ -33,6 +33,7 @@ typedef struct clause {
     struct clause * predicate_ref;
     char gencode;
     char with_cut;
+    char is_last;
     unsigned int addr;
     unsigned int line_no;
 } clause;

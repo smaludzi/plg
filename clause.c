@@ -36,6 +36,7 @@ clause * clause_new(char * name, var_list * vars, goal_list * goals)
     value->predicate_ref = NULL;
     value->gencode = 0;
     value->with_cut = 0;
+    value->is_last = 0;
     value->addr = 0;
     value->line_no = 0;
 

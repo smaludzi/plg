@@ -41,7 +41,14 @@ typedef enum goal_type {
     GOAL_TYPE_GT
 } goal_type;
 
+typedef enum goal_search {
+    GOAL_SEARCH_NO,
+    GOAL_SEARCH_YES,
+    GOAL_SEARCH_LAST
+} goal_search;
+
 typedef struct goal_literal {
+    char is_last;
     char * name;
     term_list * terms;
     clause * predicate_ref;

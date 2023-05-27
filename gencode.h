@@ -73,7 +73,6 @@ void term_list_gencode(gencode * gen, term_list * list, gencode_result * result)
 void term_list_unify_gencode(gencode * gen, term_list * list, gencode_result * result);
 void term_list_get_bound_vars_gencode(gencode * gen, term_list * list, var_list * bound_vars, gencode_result * result);
 void goal_literal_gencode(gencode * gen, goal_literal * value, gencode_result * result);
-char goal_is_last_literal_opt_gencode(clause * clause_value, goal * goal_value);
 void goal_last_literal_gencode(gencode * gen, clause * clause_value, goal_literal * value, gencode_result * result);
 void goal_unification_gencode(gencode * gen, goal_unification * value, gencode_result * result);
 void goal_is_gencode(gencode * gen, goal_is * value, gencode_result * result);
@@ -84,7 +83,9 @@ void goal_lt_gencode(gencode * gen, goal * value, gencode_result * result);
 void goal_gt_gencode(gencode * gen, goal * value, gencode_result * result);
 void goal_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal * value, gencode_result * result);
 void goal_list_gencode(gencode * gen, clause * clause_value, unsigned int local_vars, goal_list * list, gencode_result * result);
+goal_search clause_has_goal(clause * first, goal_list * list, goal ** last);
 void clause_gencode(gencode * gen, clause * value, gencode_result * result);
+char predicate_last_call_opt(clause * first, clause_list * list);
 void predicate_0_gencode(gencode * gen, clause * value, gencode_result * result);
 void predicate_N_gencode(gencode * gen, clause_list * list, gencode_result * result);
 void predicate_gencode(gencode * gen, clause_list * list, gencode_result * result);
