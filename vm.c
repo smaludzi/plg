@@ -482,14 +482,20 @@ void vm_execute_last_mark(vm * machine, bytecode * code)
 
     if (machine->fp <= machine->bp)
     {
+        gc_stack zero_entry = { 0 };
+
+        machine->stack[machine->sp + 6] = machine->stack[machine->fp];
+        assert(machine->stack[machine->sp + 6].type == STACK_TYPE_PC_OFFSET);
+
+        machine->stack[machine->sp + 5] = machine->stack[machine->fp - 1];
+        assert(machine->stack[machine->sp + 5].type == STACK_TYPE_STACK_PTR);
+
+        machine->stack[machine->sp + 4] = zero_entry;
+        machine->stack[machine->sp + 3] = zero_entry;
+        machine->stack[machine->sp + 2] = zero_entry;
+        machine->stack[machine->sp + 1] = zero_entry;
+
         machine->sp = machine->sp + 6;
-        machine->stack[machine->sp] = machine->stack[machine->fp];
-
-        gc_stack fp_entry = { 0 };
-        fp_entry.type = STACK_TYPE_STACK_PTR;
-        fp_entry.saddr= machine->fp;
-
-        machine->stack[machine->sp - 1] = fp_entry;
     }
 }
 
@@ -537,6 +543,7 @@ void vm_execute_last_call_addr(vm * machine, bytecode * code)
             {
                 unsigned int i;
                 machine->sp = machine->sp - code->last_call.size - code->last_call.n;
+                assert(machine->sp == machine->fp);
 
                 for (i = 0; i < code->last_call.n; i++)
                 {

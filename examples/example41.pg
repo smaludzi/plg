@@ -3,4 +3,4 @@ count(X) <= X > 1,
             Y is X - 1,
             write(X),
             count(Y)
-    <= count(2)
+    <= count(12)

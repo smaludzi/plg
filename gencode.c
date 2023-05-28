@@ -755,10 +755,6 @@ char predicate_last_call_opt(clause * first, clause_list * list)
                 value->is_last = 1;
                 return 1;
             }
-            else if (res == GOAL_SEARCH_LAST || res == GOAL_SEARCH_YES)
-            {
-                return 0;
-            }
         }
         node = node->next;
     }
