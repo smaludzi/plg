@@ -20,13 +20,37 @@ Implementation of Prolog ProL language and WIM virtual machine. Based on W. Rein
     move auxiliary to target
     move source to target
 
-### Ex 2. List concatenation
+### Ex 2. List Concatenation
 
     list_concat(L1, L2, L3) <= L1 = [], L2 = L3
     list_concat(L1, L2, L3) <= L1 = [H1|T1], L3 = [H1|T3], list_concat(T1,L2,T3)
         <= list_concat([a, b, c], [d, e, f], Result)
 
     [a, b, c, d, e, f]
+    -----------------
+    no
+
+### Ex 3. List Permutations
+
+    list_delete(X, P1, L1) <= P1 = [X|L1]
+    list_delete(X, P1, P2) <= P1 = [Y|L2], P2 = [Y|L1], list_delete(X, L2, L1)
+
+    list_perm(L, P2) <= L = [], P2 = []
+    list_perm(L, P2) <= P2 = [X|P], list_delete(X, L, L1), list_perm(L1, P)
+
+        <= list_perm([a, b, c], X)
+
+    [a, b, c]
+    -----------------
+    [a, c, b]
+    -----------------
+    [b, a, c]
+    -----------------
+    [b, c, a]
+    -----------------
+    [c, a, b]
+    -----------------
+    [c, b, a]
     -----------------
     no
 
