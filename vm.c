@@ -1046,7 +1046,7 @@ void vm_execute_builtin(vm * machine, bytecode * code)
         break;
         case BUILT_IN_WRITE:
         {
-            heap_ptr h_ref = machine->stack[machine->sp].addr;
+            heap_ptr h_ref = vm_execute_deref(machine, machine->stack[machine->fp + 1].addr);
             gc_print_ref_str(machine->collector,
                              vm_execute_deref(machine, h_ref),
                              strtab_array, strtab_size);
