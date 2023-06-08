@@ -54,7 +54,7 @@ Implementation of Prolog ProL language and WIM virtual machine. Based on W. Rein
     -----------------
     no
 
-### Ex 3. Cut Operator
+### Ex 4. Cut Operator
 
 Without cut.
 
@@ -98,7 +98,7 @@ With cut.
     -----------------
     no
 
-### Ex 4. Facts Database
+### Ex 5. Facts Database
 
     parent(X, Y) <= X = slawek, Y = kuba
     parent(X, Y) <= X = slawek, Y = maks
