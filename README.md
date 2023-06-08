@@ -54,7 +54,51 @@ Implementation of Prolog ProL language and WIM virtual machine. Based on W. Rein
     -----------------
     no
 
-### Ex 3. Facts Database
+### Ex 3. Cut Operator
+
+Without cut.
+
+    f(X) <= X = a
+    f(X) <= X = b
+    f(X) <= X = c
+        <= f(X), f(Y)
+
+    a a
+    -----------------
+    a b
+    -----------------
+    a c
+    -----------------
+    b a
+    -----------------
+    b b
+    -----------------
+    b c
+    -----------------
+    c a
+    -----------------
+    c b
+    -----------------
+    c c
+    -----------------
+    no
+
+With cut.
+
+    f(X) <= X = a
+    f(X) <= X = b
+    f(X) <= X = c
+     <= f(X), !, f(Y)
+
+    a a
+    -----------------
+    a b
+    -----------------
+    a c
+    -----------------
+    no
+
+### Ex 4. Facts Database
 
     parent(X, Y) <= X = slawek, Y = kuba
     parent(X, Y) <= X = slawek, Y = maks
@@ -81,7 +125,3 @@ Implementation of Prolog ProL language and WIM virtual machine. Based on W. Rein
     maks
     -----------------
     no
-
-
-
-
